@@ -1,501 +1,563 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, getDoc, addDoc, collection, getDocs, query, orderBy, onSnapshot } from 'firebase/firestore';
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atmilio Client Engagement Web</title>
+    <!-- Use a simple font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .text-gradient {
+            background-image: linear-gradient(to right, #4c51bf, #6b46c1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-primary {
+            background-image: linear-gradient(to right, #4c51bf, #6b46c1);
+            color: white;
+            border-radius: 9999px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        .atmilio-logo {
+            fill: #4c51bf;
+            width: 3rem;
+            height: 3rem;
+        }
+        /* New custom styles for enhanced design */
+        .bg-custom-gradient {
+            background: radial-gradient(at center top, #f3e8ff, #e5e7eb);
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 1px solid rgba(229, 231, 235, 0.5);
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .modal-active {
+            display: flex;
+        }
+        .modal {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased bg-custom-gradient">
 
-// Define the global Firebase variables (required for Canvas environment)
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    <!-- Modal for messages -->
+    <div id="messageModal" class="modal fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full justify-center items-center z-50">
+        <div class="relative p-8 bg-white w-full max-w-lg m-auto flex-col flex rounded-xl shadow-lg transform transition-all duration-300 scale-100">
+            <div class="text-center">
+                <h3 id="modalTitle" class="text-2xl font-bold leading-6 text-gray-900 mb-4"></h3>
+                <div class="mt-2 text-left">
+                    <p id="modalMessage" class="text-lg text-gray-500"></p>
+                </div>
+                <div class="mt-5">
+                    <button type="button" onclick="closeModal()" class="inline-flex justify-center rounded-lg border border-transparent bg-indigo-600 px-6 py-2 text-lg font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-const productOptionsData = [
-    { id: 'excel-workbook', label: 'Excel Enabled Workbook', basePrice: 500 },
-    { id: 'financial-model', label: 'Financial Model', basePrice: 1500 },
-    { id: 'fs-implementation', label: 'Financial System Process Implementation', basePrice: 3000 },
-    { id: 'data-integration', label: 'Integration of Financial Data to New System', basePrice: 2500 },
-];
+    <!-- Header Section -->
+    <header class="py-6 px-4 md:px-8 bg-white shadow-md rounded-b-xl">
+        <div class="container mx-auto flex justify-between items-center">
+            <!-- Atmilio Logo and Tagline -->
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-bold text-gray-900">Atmilio</span>
+                <span class="text-sm font-semibold text-gray-500 ml-2">AI Empowered Financial Solutions</span>
+            </div>
+            <!-- Navigation Links -->
+            <nav>
+                <a href="#about" class="text-gray-600 hover:text-gray-900 mx-2 transition-colors">About Us</a>
+                <a href="#services" class="text-gray-600 hover:text-gray-900 mx-2 transition-colors">Services</a>
+                <a href="#investment-software" class="text-gray-600 hover:text-gray-900 mx-2 transition-colors">Software</a>
+                <a href="#contact" class="text-gray-600 hover:text-gray-900 mx-2 transition-colors">Contact Us</a>
+            </nav>
+        </div>
+    </header>
 
-const employeeCountData = [
-    { value: 1, label: '1-10 Employees' },
-    { value: 2, label: '11-50 Employees' },
-    { value: 3, label: '51-200 Employees' },
-    { value: 4, label: '201-1000 Employees' },
-    { value: 5, label: '1001-2000 Employees' },
-    { value: 6, label: '2001-10000 Employees' },
-    { value: 7, label: '10001+ Employees' },
-];
+    <main class="container mx-auto px-4 py-12 md:py-24">
+        <!-- Hero Section -->
+        <section id="hero" class="text-center py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div class="md:text-left">
+                <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+                    <span class="text-gradient block">Seamless Client Engagement Solutions</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-600 mb-8">
+                    Powering modern financial services with intuitive, secure, and dynamic web platforms.
+                </p>
+                <a href="#contact" class="btn-primary">Contact Us</a>
+            </div>
+            <div class="flex justify-center md:justify-end">
+                <!-- Abstract SVG for visual appeal -->
+                <svg viewBox="0 0 500 300" class="w-full h-auto max-w-sm md:max-w-md" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#4c51bf;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6b46c1;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="250" cy="150" r="100" fill="url(#purpleGradient)" opacity="0.1" />
+                    <circle cx="250" cy="150" r="70" fill="url(#purpleGradient)" opacity="0.2" />
+                    <path d="M 250 50 L 350 150 L 250 250 L 150 150 Z" fill="url(#purpleGradient)" opacity="0.1" />
+                    <line x1="150" y1="150" x2="350" y2="150" stroke="#a78bfa" stroke-width="2" opacity="0.6" />
+                    <line x1="250" y1="50" x2="250" y2="250" stroke="#a78bfa" stroke-width="2" opacity="0.6" />
+                </svg>
+            </div>
+        </section>
 
-const App = () => {
-    // UI and State Management
-    const [step, setStep] = useState(1);
-    const [isQuoteView, setIsQuoteView] = useState(false);
-    const [quoteId, setQuoteId] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [modal, setModal] = useState({ isOpen: false, message: '' });
+        <!-- Why Choose Atmilio? Section -->
+        <section id="why-atmilio" class="py-16 md:py-24">
+            <h2 class="text-4xl font-bold text-center mb-12 text-gray-900">Why Choose Atmilio?</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Differentiator 1 -->
+                <div class="card p-8 text-center">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">AI-Powered Customization</h3>
+                    <p class="text-gray-600">
+                        Our solutions leverage the power of artificial intelligence to adapt and grow with your business, providing a truly bespoke experience.
+                    </p>
+                </div>
+                <!-- Differentiator 2 -->
+                <div class="card p-8 text-center">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">Industry Expertise</h3>
+                    <p class="text-gray-600">
+                        As a Dallas-based team, we have years of hands-on experience across multiple industries, giving us a deep understanding of your unique challenges.
+                    </p>
+                </div>
+                <!-- Differentiator 3 -->
+                <div class="card p-8 text-center">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">Seamless Integration</h3>
+                    <p class="text-gray-600">
+                        Our platforms are designed to connect effortlessly with your existing systems, ensuring a smooth and efficient transition without disrupting your workflow.
+                    </p>
+                </div>
+            </div>
+        </section>
 
-    // Quote Data State
-    const [clientName, setClientName] = useState('');
-    const [clientPhone, setClientPhone] = useState('');
-    const [clientEmail, setClientEmail] = useState('');
-    const [employeeCount, setEmployeeCount] = useState('');
-    const [taxRate, setTaxRate] = useState(8.25);
-    const [selectedProducts, setSelectedProducts] = useState([]);
+        <!-- About Us Section -->
+        <section id="about" class="py-16 md:py-24">
+            <div class="card p-8 md:p-12">
+                <h2 class="text-4xl font-bold text-center mb-6 text-gray-900">About Us</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <p class="text-lg text-gray-700 mb-4 leading-relaxed">
+                            Atmilio is a dedicated team of professionals with years of hands-on experience in financial services and technology. We believe in building trust and long-lasting relationships through transparency and innovative solutions. Our mission is to provide you with the tools you need to streamline operations and deliver exceptional client service. We are committed to helping you navigate the complexities of today's digital landscape, offering bespoke solutions that are secure, scalable, and designed for your specific needs, leveraging the power of AI to create industry-grade solutions.
+                        </p>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            We are committed to helping you navigate the complexities of today's digital landscape, offering bespoke solutions that are secure, scalable, and designed for your specific needs.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    // Calculated totals
-    const [subtotal, setSubtotal] = useState(0);
-    const [grandTotal, setGrandTotal] = useState(0);
+        <!-- Services Section -->
+        <section id="services" class="py-16 md:py-24">
+            <h2 class="text-4xl font-bold text-center mb-12 text-gray-900">Our Services</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Service Card 1 -->
+                <div class="card p-8">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
+                        <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.83-8.75l-2.91 2.91c-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0l2.91-2.91c.39-.39.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0zM12 6.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
+                        </svg>
+                        <span>Financial System Integration</span>
+                    </h3>
+                    <p class="text-gray-600">
+                        We build robust and reliable connections between your financial systems to ensure data consistency and automate workflows.
+                    </p>
+                </div>
+                <!-- Service Card 2 -->
+                <div class="card p-8">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
+                        <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                        <span>Macro Enabled Financial Workbooks</span>
+                    </h3>
+                    <p class="text-gray-600">
+                        We create custom Excel workbooks with advanced macros to automate complex calculations and reporting, saving you time and reducing manual errors.
+                    </p>
+                </div>
+                <!-- Service Card 3 -->
+                <div class="card p-8">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
+                        <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+                        </svg>
+                        <span>Financial Model Creation & Maintaining</span>
+                    </h3>
+                    <p class="text-gray-600">
+                        We develop detailed financial models for forecasting, valuation, and analysis, and provide ongoing maintenance to ensure accuracy and relevance.
+                    </p>
+                </div>
+            </div>
+        </section>
 
-    // Firebase state
-    const [db, setDb] = useState(null);
-    const [auth, setAuth] = useState(null);
-    const [userId, setUserId] = useState(null);
+        <!-- Client Investment Accounting Software Section with Pricing Calculator -->
+        <section id="investment-software" class="py-16 md:py-24">
+            <div class="card p-8 md:p-12 text-center">
+                <h2 class="text-4xl font-bold mb-6 text-gray-900">Client Investment Accounting Software</h2>
+                <h3 class="text-3xl font-bold mb-6 text-gray-900">Instant Pricing & Purchase</h3>
+                <p class="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+                    Get an instant, customized quote for our investment accounting software based on your specific needs.
+                </p>
+                
+                <form id="pricingForm" onchange="calculatePrice()" class="space-y-6 max-w-3xl mx-auto text-left">
+                    <!-- AUM Selection -->
+                    <div>
+                        <label for="aum" class="block text-lg font-medium text-gray-700 mb-2">Assets Under Management (AUM)</label>
+                        <select id="aum" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+                            <option value="10m">Under $10 Million</option>
+                            <option value="100m">$10 Million - $100 Million</option>
+                            <option value="1b" selected>$100 Million - $1 Billion</option>
+                            <option value="5b">$1 Billion - $5 Billion</option>
+                            <option value="10b">$5 Billion - $10 Billion</option>
+                            <option value="25b">$10 Billion - $25 Billion</option>
+                            <option value="50b">$25 Billion - $50 Billion</option>
+                            <option value="50b_plus">$50 Billion+</option>
+                        </select>
+                    </div>
 
-    // Initialize Firebase and Auth
-    useEffect(() => {
-        try {
-            const app = initializeApp(firebaseConfig);
-            const authInstance = getAuth(app);
-            const dbInstance = getFirestore(app);
+                    <!-- Number of Users -->
+                    <div>
+                        <label for="users" class="block text-lg font-medium text-gray-700 mb-2">Number of Users</label>
+                        <input type="number" id="users" value="1" min="1" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+                    </div>
 
-            const unsubscribe = onAuthStateChanged(authInstance, (user) => {
-                if (user) {
-                    setUserId(user.uid);
-                }
-                setLoading(false);
+                    <!-- Required Modules -->
+                    <div>
+                        <label class="block text-lg font-medium text-gray-700 mb-2">Required Modules</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="core-accounting" value="10000" checked class="rounded-full text-indigo-600 focus:ring-indigo-500">
+                                <label for="core-accounting" class="text-lg text-gray-700">Core Fund Accounting</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="investor-portal" value="15000" class="rounded-full text-indigo-600 focus:ring-indigo-500">
+                                <label for="investor-portal" class="text-lg text-gray-700">Investor Portal & Reporting</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="waterfall-calc" value="20000" class="rounded-full text-indigo-600 focus:ring-indigo-500">
+                                <label for="waterfall-calc" class="text-lg text-gray-700">Complex Waterfall Calculations</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="checkbox" id="advanced-analytics" value="12000" class="rounded-full text-indigo-600 focus:ring-indigo-500">
+                                <label for="advanced-analytics" class="text-lg text-gray-700">Advanced Analytics & BI</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Implementation & Support Services -->
+                    <div>
+                        <label class="block text-lg font-medium text-gray-700 mb-2">Implementation & Support</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex items-center space-x-2">
+                                <input type="radio" name="support" id="self-service" value="0" checked class="text-indigo-600 focus:ring-indigo-500">
+                                <label for="self-service" class="text-lg text-gray-700">Self-Service</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="radio" name="support" id="standard-support" value="10000" class="text-indigo-600 focus:ring-indigo-500">
+                                <label for="standard-support" class="text-lg text-gray-700">Standard Support</label>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="radio" name="support" id="premium-on-site" value="25000" class="text-indigo-600 focus:ring-indigo-500">
+                                <label for="premium-on-site" class="text-lg text-gray-700">Premium On-Site Training</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Billing Frequency -->
+                    <div>
+                        <label for="billing-frequency" class="block text-lg font-medium text-gray-700 mb-2">Billing Frequency</label>
+                        <select id="billing-frequency" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+                            <option value="annual">Annual</option>
+                            <option value="monthly">Monthly</option>
+                        </select>
+                    </div>
+                </form>
+
+                <!-- Dynamic Pricing Display -->
+                <div class="mt-10 p-6 bg-indigo-50 rounded-lg shadow-inner">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2" id="priceTitle">Annual Subscription Cost:</h3>
+                    <p class="text-5xl font-extrabold text-gradient" id="currentPrice">$150,000</p>
+                    <p class="text-sm text-gray-600 mt-2">Annual cost, billed monthly or annually. Implementation cost not included. A representative will be in touch to finalize pricing and implementation.</p>
+                </div>
+                
+                <div class="mt-8">
+                    <button onclick="showPaymentSection()" class="btn-primary w-full md:w-auto">Proceed to Purchase</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Details Section -->
+        <section id="payment-details" class="py-16 md:py-24 hidden">
+            <div class="card p-8 md:p-12 text-center">
+                <h2 class="text-4xl font-bold mb-6 text-gray-900">Payment Details</h2>
+                <div class="w-full max-w-lg mx-auto text-left">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-900">Order Summary</h3>
+                    <ul id="orderSummaryList" class="space-y-2 mb-6 text-lg text-gray-700">
+                        <!-- Order summary will be populated here by JavaScript -->
+                    </ul>
+                    <div class="border-t border-gray-300 pt-4">
+                        <p class="flex justify-between items-center text-2xl font-bold text-gray-900">
+                            <span>Total Due:</span>
+                            <span id="totalDue" class="text-gradient"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="w-full max-w-lg mx-auto mt-8">
+                    <form onsubmit="submitPayment(event)" class="space-y-6">
+                        <!-- Personal Information -->
+                        <div>
+                            <label for="fullName" class="block text-left text-lg font-medium text-gray-700">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label for="address" class="block text-left text-lg font-medium text-gray-700">Address</label>
+                            <input type="text" id="address" name="address" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="123 Main St">
+                        </div>
+                        <div>
+                            <label for="phoneNumber" class="block text-left text-lg font-medium text-gray-700">Phone Number</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="(123) 456-7890">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-left text-lg font-medium text-gray-700">Email Address</label>
+                            <input type="email" id="email" name="email" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="john.doe@example.com">
+                        </div>
+
+                        <!-- Payment Information -->
+                        <div>
+                            <label for="card-number" class="block text-left text-lg font-medium text-gray-700">Card Number</label>
+                            <input type="text" id="card-number" name="card-number" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="XXXX XXXX XXXX XXXX">
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div>
+                                <label for="exp-date" class="block text-left text-lg font-medium text-gray-700">Expiration Date</label>
+                                <input type="text" id="exp-date" name="exp-date" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="MM/YY">
+                            </div>
+                            <div>
+                                <label for="cvc" class="block text-left text-lg font-medium text-gray-700">CVC</label>
+                                <input type="text" id="cvc" name="cvc" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="XXX">
+                            </div>
+                            <div class="col-span-1">
+                                <label for="zip-code" class="block text-left text-lg font-medium text-gray-700">Zip Code</label>
+                                <input type="text" id="zip-code" name="zip-code" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3" placeholder="XXXXX">
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn-primary w-full md:w-auto">Submit Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-16 md:py-24">
+            <div class="card p-8 md:p-12 text-center">
+                <h2 class="text-4xl font-bold mb-6 text-gray-900">Contact Us</h2>
+                <p class="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+                    Have questions about our services or need to speak with a specialist? We are here to help.
+                </p>
+                <a href="mailto:contact@atmilio.com" class="btn-primary">Email Us</a>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="py-8 px-4 md:px-8 bg-gray-900 text-gray-300 text-center rounded-t-xl">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p>&copy; 2025 <a href="http://Atmilio.com" class="hover:text-white transition-colors">Atmilio.com</a>. All rights reserved.</p>
+            <p class="text-sm">
+                <a href="client_portal.html" class="hover:text-white transition-colors">Client Login</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // JavaScript for handling the modal
+        function showModal(title, message) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerHTML = message;
+            document.getElementById('messageModal').classList.add('modal-active');
+        }
+
+        function closeModal() {
+            document.getElementById('messageModal').classList.remove('modal-active');
+        }
+
+        // --- Pricing Calculator Logic ---
+        function calculatePrice() {
+            // Base annual price
+            let totalAnnualPrice = 0;
+
+            // 1. AUM pricing
+            const aumTier = document.getElementById('aum').value;
+            const aumPrices = {
+                '10m': 25000,
+                '100m': 75000,
+                '1b': 150000,
+                '5b': 300000,
+                '10b': 750000,
+                '25b': 1200000,
+                '50b_plus': 2000000
+            };
+            const basePrice = aumPrices[aumTier];
+
+            // 2. Per-user pricing, now a multiplier
+            const numUsers = parseInt(document.getElementById('users').value) || 1;
+            // Apply a tiered multiplier based on user count
+            let userMultiplier = 1.0;
+            if (numUsers > 10) {
+                userMultiplier = 1.5;
+            } else if (numUsers > 5) {
+                userMultiplier = 1.2;
+            }
+            let coreAnnualPrice = basePrice * userMultiplier;
+            
+
+            // 3. Module pricing
+            const moduleCheckboxes = document.querySelectorAll('#pricingForm input[type="checkbox"]:checked');
+            moduleCheckboxes.forEach(checkbox => {
+                coreAnnualPrice += parseInt(checkbox.value);
             });
 
-            if (!initialAuthToken) {
-                signInAnonymously(authInstance);
-            } else {
-                signInWithCustomToken(authInstance, initialAuthToken);
+            // 4. Support pricing
+            const supportRadio = document.querySelector('#pricingForm input[name="support"]:checked');
+            if (supportRadio) {
+                coreAnnualPrice += parseInt(supportRadio.value);
             }
 
-            setDb(dbInstance);
-            setAuth(authInstance);
+            // 5. Billing frequency
+            const billingFrequency = document.getElementById('billing-frequency').value;
+            const priceTitleElement = document.getElementById('priceTitle');
+            const priceElement = document.getElementById('currentPrice');
+
+            if (billingFrequency === 'monthly') {
+                // Apply a 12% surcharge for monthly billing, then divide by 12
+                const totalMonthlyPrice = (coreAnnualPrice * 1.12) / 12;
+                priceElement.innerText = `$${totalMonthlyPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                priceTitleElement.innerText = `Monthly Subscription Cost:`;
+            } else { // annual
+                priceElement.innerText = `$${coreAnnualPrice.toLocaleString()}`;
+                priceTitleElement.innerText = `Annual Subscription Cost:`;
+            }
+        }
+
+        // --- Purchase Flow Logic ---
+        function showPaymentSection() {
+            const paymentSection = document.getElementById('payment-details');
+            paymentSection.classList.remove('hidden');
+            paymentSection.scrollIntoView({ behavior: 'smooth' });
+            populateOrderSummary();
+        }
+
+        function populateOrderSummary() {
+            const orderList = document.getElementById('orderSummaryList');
+            orderList.innerHTML = '';
+            let totalCost = 0;
+
+            // AUM Cost
+            const aumSelect = document.getElementById('aum');
+            const aumText = aumSelect.options[aumSelect.selectedIndex].text;
+            const aumValue = parseFloat(document.getElementById('currentPrice').innerText.replace(/[^0-9.]/g, ''));
+            const aumItem = document.createElement('li');
+            aumItem.innerHTML = `<span class="font-semibold">${aumText} (${document.getElementById('priceTitle').innerText}):</span> <span>$${aumValue.toLocaleString()}</span>`;
+            orderList.appendChild(aumItem);
+            totalCost += aumValue;
+
+            // Users Cost (flat rate per user)
+            const numUsers = parseInt(document.getElementById('users').value) || 1;
+            const userPrice = 1000; // Example flat price per user
+            if (numUsers > 1) {
+                const userItem = document.createElement('li');
+                const userCost = (numUsers - 1) * userPrice;
+                userItem.innerHTML = `<span class="font-semibold">Additional Users (${numUsers - 1}):</span> <span>$${userCost.toLocaleString()}</span>`;
+                orderList.appendChild(userItem);
+                totalCost += userCost;
+            }
+
+            // Modules Cost
+            const moduleCheckboxes = document.querySelectorAll('#pricingForm input[type="checkbox"]:checked');
+            moduleCheckboxes.forEach(checkbox => {
+                const moduleItem = document.createElement('li');
+                const moduleLabel = document.querySelector(`label[for="${checkbox.id}"]`).innerText;
+                const moduleValue = parseInt(checkbox.value);
+                moduleItem.innerHTML = `<span class="font-semibold">${moduleLabel}:</span> <span>$${moduleValue.toLocaleString()}</span>`;
+                orderList.appendChild(moduleItem);
+                totalCost += moduleValue;
+            });
+
+            // Support Cost
+            const supportRadio = document.querySelector('#pricingForm input[name="support"]:checked');
+            if (supportRadio && parseInt(supportRadio.value) > 0) {
+                const supportItem = document.createElement('li');
+                const supportLabel = document.querySelector(`label[for="${supportRadio.id}"]`).innerText;
+                const supportValue = parseInt(supportRadio.value);
+                supportItem.innerHTML = `<span class="font-semibold">${supportLabel}:</span> <span>$${supportValue.toLocaleString()}</span>`;
+                orderList.appendChild(supportItem);
+                totalCost += supportValue;
+            }
+
+            // Display total due
+            document.getElementById('totalDue').innerText = `$${totalCost.toLocaleString()}`;
+        }
+
+        // Simulates a payment submission and shows a confirmation modal.
+        function submitPayment(event) {
+            event.preventDefault();
             
-            return () => unsubscribe();
-        } catch (error) {
-            console.error("Firebase initialization failed:", error);
-            setLoading(false);
-        }
-    }, []);
+            const fullName = document.getElementById('fullName').value;
+            const address = document.getElementById('address').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const email = document.getElementById('email').value;
+            const totalDue = document.getElementById('totalDue').innerText;
 
-    // Load quote from URL on initial load if quoteId is present
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get('id');
-        if (id && db) {
-            const fetchQuote = async () => {
-                setLoading(true);
-                try {
-                    const quoteRef = doc(db, `artifacts/${appId}/public/data/quotes`, id);
-                    const quoteSnap = await getDoc(quoteRef);
-                    if (quoteSnap.exists()) {
-                        const data = quoteSnap.data();
-                        setClientName(data.clientName);
-                        setClientPhone(data.clientPhone);
-                        setClientEmail(data.clientEmail);
-                        setEmployeeCount(data.employeeCount);
-                        setTaxRate(data.taxRate);
-                        setSelectedProducts(data.selectedProducts);
-                        setQuoteId(id);
-                        setIsQuoteView(true);
-                        setStep(3); // Go directly to summary
-                    } else {
-                        showModal('Quote not found.');
-                        setIsQuoteView(false);
-                    }
-                } catch (e) {
-                    console.error("Error loading quote:", e);
-                    showModal('Error loading quote.');
-                } finally {
-                    setLoading(false);
-                }
-            };
-            fetchQuote();
-        } else {
-            setLoading(false);
-        }
-    }, [db]);
-
-    // Update totals whenever selectedProducts, employeeCount, or taxRate changes
-    useEffect(() => {
-        const selectedMultiplier = employeeCountData.find(e => e.label === employeeCount)?.value || 0;
-        const newSubtotal = selectedProducts.reduce((sum, product) => {
-            const basePrice = productOptionsData.find(opt => opt.id === product.id)?.basePrice || 0;
-            return sum + (basePrice * selectedMultiplier);
-        }, 0);
-        const newGrandTotal = newSubtotal + (newSubtotal * (taxRate / 100));
-        setSubtotal(newSubtotal);
-        setGrandTotal(newGrandTotal);
-    }, [selectedProducts, employeeCount, taxRate]);
-
-    const showModal = (message) => {
-        setModal({ isOpen: true, message });
-    };
-
-    const handleProductChange = (e) => {
-        const { id, checked } = e.target;
-        if (checked) {
-            setSelectedProducts(prev => [...prev, { id, specificNeeds: '' }]);
-        } else {
-            setSelectedProducts(prev => prev.filter(p => p.id !== id));
-        }
-    };
-
-    const handleNeedsChange = (e, id) => {
-        const { value } = e.target;
-        setSelectedProducts(prev => prev.map(p => p.id === id ? { ...p, specificNeeds: value } : p));
-    };
-
-    const saveQuoteToFirestore = async () => {
-        if (!db) {
-            showModal('Database not available. Please try again.');
-            return;
+            const confirmationMessage = `
+                <p>Thank you, <strong>${fullName}</strong>, for your purchase! A confirmation email will be sent to <strong>${email}</strong> shortly.</p>
+                <p class="mt-4"><strong>Your Order Summary:</strong></p>
+                <ul class="list-disc list-inside space-y-1">
+                    <li><strong>Total Cost:</strong> ${totalDue}</li>
+                </ul>
+                <p class="mt-4">Our representative will be in touch with you at <strong>${phoneNumber}</strong> to finalize your account setup.</p>
+            `;
+            
+            showModal('Purchase Confirmed', confirmationMessage);
+            event.target.reset(); // Clear the form
+            document.getElementById('payment-details').classList.add('hidden'); // Hide the section
         }
 
-        const clientData = { clientName, clientPhone, clientEmail };
-        const quoteData = {
-            ...clientData,
-            employeeCount,
-            selectedProducts,
-            taxRate,
-            createdAt: new Date(),
+        // Initial price calculation on page load
+        window.onload = function() {
+            calculatePrice();
         };
-
-        try {
-            setLoading(true);
-            const quotesCollectionRef = collection(db, `artifacts/${appId}/public/data/quotes`);
-            const docRef = await addDoc(quotesCollectionRef, quoteData);
-            setQuoteId(docRef.id);
-            setStep(4);
-        } catch (e) {
-            console.error("Error adding document: ", e);
-            showModal('Error saving quote. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const validateStep1 = () => {
-        if (!clientName || !clientPhone || !clientEmail) {
-            showModal('Please fill in all client details.');
-            return false;
-        }
-        setStep(2);
-    };
-
-    const validateStep2 = () => {
-        if (!employeeCount) {
-            showModal('Please select the number of employees.');
-            return false;
-        }
-        if (selectedProducts.length === 0) {
-            showModal('Please select at least one product option.');
-            return false;
-        }
-        if (selectedProducts.some(p => !p.specificNeeds)) {
-            showModal('Please describe your specific needs for all selected products.');
-            return false;
-        }
-        setStep(3);
-    };
-
-    const handleDownload = () => {
-        const summaryText = `
-        Quote Summary
-
-        Client: ${clientName}
-        Phone: ${clientPhone}
-        Email: ${clientEmail}
-        Employees: ${employeeCount}
-
-        Selected Products:
-        ${selectedProducts.map(p => {
-            const product = productOptionsData.find(opt => opt.id === p.id);
-            const finalPrice = product.basePrice * (employeeCountData.find(e => e.label === employeeCount)?.value || 0);
-            return `- ${product.label}: $${finalPrice.toFixed(2)}\n  Specific Needs: ${p.specificNeeds}`;
-        }).join('\n\n')}
-
-        Subtotal: $${subtotal.toFixed(2)}
-        Tax (${taxRate}%): $${(subtotal * (taxRate / 100)).toFixed(2)}
-        Grand Total: $${grandTotal.toFixed(2)}
-        `;
-
-        const blob = new Blob([summaryText], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${clientName}_Quote.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
-    const copyToClipboard = () => {
-        const link = `${window.location.origin}?id=${quoteId}`;
-        const tempInput = document.createElement('textarea');
-        tempInput.value = link;
-        document.body.appendChild(tempInput);
-        tempInput.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempInput);
-        showModal('Link copied to clipboard!');
-    };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <div className="text-xl text-gray-600 font-semibold">Loading...</div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="min-h-screen bg-gray-100 text-gray-800 p-6 flex flex-col items-center">
-            {/* Header */}
-            <header className="bg-white shadow-md w-full py-4 px-6 md:px-12 fixed top-0 z-10">
-                <nav className="flex justify-between items-center max-w-7xl mx-auto">
-                    <a href="#" className="text-2xl font-extrabold text-blue-600">Atmilio</a>
-                    <div className="space-x-4 hidden md:flex">
-                        <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Home</a>
-                        <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Services</a>
-                        <a href="#" className="text-blue-600 font-semibold transition-colors">Estimator</a>
-                        <a href="#" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Contact</a>
-                    </div>
-                </nav>
-            </header>
-
-            <main className="flex flex-col items-center justify-center p-6 mt-28 mb-12 w-full">
-                <div className="bg-white rounded-3xl shadow-xl p-8 max-w-2xl w-full">
-                    <h1 className="text-4xl font-extrabold text-gray-800 mb-8 text-center">{isQuoteView ? 'Client Quote' : 'Instant Quote Estimator'}</h1>
-
-                    {/* Step 1: Client Information */}
-                    {step === 1 && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-semibold text-gray-700">Client Information</h2>
-                            <input
-                                type="text"
-                                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                placeholder="Client Name"
-                                value={clientName}
-                                onChange={(e) => setClientName(e.target.value)}
-                            />
-                            <input
-                                type="tel"
-                                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                placeholder="Client Phone Number"
-                                value={clientPhone}
-                                onChange={(e) => setClientPhone(e.target.value)}
-                            />
-                            <input
-                                type="email"
-                                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                placeholder="Client Email"
-                                value={clientEmail}
-                                onChange={(e) => setClientEmail(e.target.value)}
-                            />
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={validateStep1}
-                                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 2: Product Selection */}
-                    {step === 2 && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-semibold text-gray-700">Product Selection</h2>
-                            <div>
-                                <label className="block text-gray-700 font-medium mb-2">Number of Employees</label>
-                                <select
-                                    className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                    value={employeeCount}
-                                    onChange={(e) => setEmployeeCount(e.target.value)}
-                                >
-                                    <option value="">Select an employee range</option>
-                                    {employeeCountData.map((option) => (
-                                        <option key={option.value} value={option.label}>{option.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="space-y-4">
-                                {productOptionsData.map((product) => (
-                                    <div key={product.id} className="bg-gray-50 rounded-lg p-4 shadow-sm transition-shadow hover:shadow-md">
-                                        <label className="flex items-center justify-between cursor-pointer">
-                                            <div className="flex-1">
-                                                <div className="text-lg font-medium text-gray-800">{product.label}</div>
-                                                <div className="text-sm text-gray-600">Base Price: ${product.basePrice.toFixed(2)}</div>
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                id={product.id}
-                                                className="h-6 w-6 rounded text-blue-600 focus:ring-blue-500 transition-colors"
-                                                checked={selectedProducts.some(p => p.id === product.id)}
-                                                onChange={handleProductChange}
-                                            />
-                                        </label>
-                                        {selectedProducts.some(p => p.id === product.id) && (
-                                            <textarea
-                                                className="w-full mt-3 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                                rows="3"
-                                                placeholder="Describe your specific needs for this product..."
-                                                value={selectedProducts.find(p => p.id === product.id)?.specificNeeds}
-                                                onChange={(e) => handleNeedsChange(e, product.id)}
-                                            />
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex justify-between">
-                                <button
-                                    onClick={() => setStep(1)}
-                                    className="px-6 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
-                                >
-                                    Back
-                                </button>
-                                <button
-                                    onClick={validateStep2}
-                                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    View Summary
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 3: Quote Summary */}
-                    {step === 3 && (
-                        <div className="space-y-6">
-                            <h2 className="text-2xl font-semibold text-gray-700">Quote Summary</h2>
-                            <div className="p-4 bg-gray-50 rounded-lg">
-                                <p className="text-lg font-semibold text-gray-800">Client: {clientName}</p>
-                                <p className="text-gray-600">Employees: {employeeCount}</p>
-                            </div>
-                            <div className="space-y-4">
-                                {selectedProducts.length > 0 ? (
-                                    selectedProducts.map((product) => {
-                                        const productData = productOptionsData.find(opt => opt.id === product.id);
-                                        const multiplier = employeeCountData.find(e => e.label === employeeCount)?.value || 0;
-                                        const finalPrice = productData.basePrice * multiplier;
-                                        return (
-                                            <div key={product.id} className="p-4 bg-white rounded-lg border border-gray-200">
-                                                <div className="flex justify-between items-center">
-                                                    <span className="font-semibold text-gray-800">{productData.label}</span>
-                                                    <span className="font-bold text-gray-800">${finalPrice.toFixed(2)}</span>
-                                                </div>
-                                                <p className="mt-2 text-sm text-gray-600 italic">{product.specificNeeds}</p>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <p className="text-center text-gray-500">No products selected.</p>
-                                )}
-                            </div>
-                            <div className="p-4 bg-gray-50 rounded-lg">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-gray-600">Subtotal</span>
-                                    <span className="font-semibold text-gray-800">${subtotal.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="text-gray-600">Tax Rate (%)</label>
-                                    <input
-                                        type="number"
-                                        className="w-24 text-right p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={taxRate}
-                                        onChange={(e) => setTaxRate(e.target.value)}
-                                        readOnly={isQuoteView}
-                                    />
-                                </div>
-                                <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
-                                    <span className="text-xl font-bold text-gray-800">Grand Total</span>
-                                    <span className="text-2xl font-extrabold text-blue-600">${grandTotal.toFixed(2)}</span>
-                                </div>
-                            </div>
-                            <div className="flex justify-between mt-6">
-                                <button
-                                    onClick={() => setStep(2)}
-                                    className="px-6 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
-                                >
-                                    Back
-                                </button>
-                                {!isQuoteView && (
-                                    <button
-                                        onClick={saveQuoteToFirestore}
-                                        className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                        Generate Shareable Link
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 4: Shareable Link */}
-                    {step === 4 && (
-                        <div className="space-y-6 text-center">
-                            <h2 className="text-2xl font-semibold text-gray-700">Quote Saved!</h2>
-                            <p className="text-gray-600">Share this link with your client.</p>
-                            <div className="relative p-4 bg-gray-100 rounded-lg break-words shadow-inner">
-                                <span className="text-blue-600 font-mono select-all">
-                                    {window.location.origin}?id={quoteId}
-                                </span>
-                            </div>
-                            <div className="flex justify-center space-x-4">
-                                <button
-                                    onClick={copyToClipboard}
-                                    className="px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg hover:bg-gray-900 transition-colors"
-                                >
-                                    Copy Link
-                                </button>
-                                <button
-                                    onClick={handleDownload}
-                                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    Download Summary
-                                </button>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setStep(1);
-                                    setQuoteId(null);
-                                    setClientName('');
-                                    setClientPhone('');
-                                    setClientEmail('');
-                                    setEmployeeCount('');
-                                    setSelectedProducts([]);
-                                }}
-                                className="mt-4 px-6 py-3 bg-gray-300 text-gray-800 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
-                            >
-                                Create New Quote
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </main>
-
-            {/* Modal */}
-            {modal.isOpen && (
-                <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-                    <div className="bg-white p-8 rounded-lg shadow-lg max-w-sm w-full text-center">
-                        <p className="text-lg mb-6 text-gray-800">{modal.message}</p>
-                        <button
-                            onClick={() => setModal({ isOpen: false, message: '' })}
-                            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            OK
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-export default App;
+    </script>
+</body>
+</html>
 
