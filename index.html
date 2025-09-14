@@ -238,7 +238,6 @@
                             <option value="5b">$1 Billion - $5 Billion</option>
                             <option value="10b">$5 Billion - $10 Billion</option>
                             <option value="25b">$10 Billion - $25 Billion</option>
-                            <option value="50b">$25 Billion - $50 Billion</option>
                             <option value="50b_plus">$50 Billion+</option>
                         </select>
                     </div>
@@ -525,23 +524,62 @@
             
             const fullName = document.getElementById('fullName').value;
             const organizationName = document.getElementById('organizationName').value;
-            const address = document.getElementById('address').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
             const email = document.getElementById('email').value;
-            const totalDue = document.getElementById('totalDue').innerText;
+            const cardNumber = document.getElementById('card-number').value.replace(/\s/g, '');
+            const expDate = document.getElementById('exp-date').value;
+            const cvc = document.getElementById('cvc').value;
+            const zipCode = document.getElementById('zip-code').value;
 
-            const confirmationMessage = `
-                <p>Thank you, <strong>${fullName}</strong> from <strong>${organizationName}</strong>, for your purchase! A confirmation email will be sent to <strong>${email}</strong> shortly.</p>
-                <p class="mt-4"><strong>Your Order Summary:</strong></p>
-                <ul class="list-disc list-inside space-y-1">
-                    <li><strong>Total Cost:</strong> ${totalDue}</li>
-                </ul>
-                <p class="mt-4">Our representative will be in touch with you at <strong>${phoneNumber}</strong> to finalize your account setup.</p>
-            `;
-            
-            showModal('Purchase Confirmed', confirmationMessage);
-            event.target.reset(); // Clear the form
-            document.getElementById('payment-details').classList.add('hidden'); // Hide the section
+            const errors = [];
+            const today = new Date();
+            const currentYear = today.getFullYear() % 100;
+            const currentMonth = today.getMonth() + 1;
+
+            // Simple validation rules
+            if (!/^\d{16}$/.test(cardNumber)) {
+                errors.push('Card Number must be 16 digits.');
+            }
+
+            if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expDate)) {
+                errors.push('Expiration Date must be in MM/YY format.');
+            } else {
+                const [expMonth, expYear] = expDate.split('/').map(Number);
+                if (expYear < currentYear || (expYear === currentYear && expMonth < currentMonth)) {
+                    errors.push('Expiration Date is in the past.');
+                }
+            }
+
+            if (!/^\d{3,4}$/.test(cvc)) {
+                errors.push('CVC must be 3 or 4 digits.');
+            }
+
+            if (!/^\d{5}$/.test(zipCode)) {
+                errors.push('Zip Code must be 5 digits.');
+            }
+
+            if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+                errors.push('Please enter a valid email address.');
+            }
+
+            if (errors.length > 0) {
+                const errorList = '<ul>' + errors.map(err => `<li>${err}</li>`).join('') + '</ul>';
+                showModal('Validation Error', 'Please correct the following issues:<br>' + errorList);
+            } else {
+                const totalDue = document.getElementById('totalDue').innerText;
+                const confirmationMessage = `
+                    <p>Thank you for your purchase!</p>
+                    <p><strong>${fullName}</strong> from <strong>${organizationName}</strong>, your purchase has been successfully processed.</p>
+                    <p class="mt-4"><strong>Your Order Summary:</strong></p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li><strong>Total Cost:</strong> ${totalDue}</li>
+                    </ul>
+                    <p class="mt-4">A confirmation email will be sent to <strong>${email}</strong> shortly.</p>
+                `;
+                
+                showModal('Purchase Confirmed', confirmationMessage);
+                event.target.reset(); // Clear the form
+                document.getElementById('payment-details').classList.add('hidden'); // Hide the section
+            }
         }
 
         // Initial price calculation on page load
