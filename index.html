@@ -1,238 +1,475 @@
 <!DOCTYPE html>
+
 <html lang="en" class="scroll-smooth">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Atmilio Client Engagement Web</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
+
         body {
+
             font-family: 'Inter', sans-serif;
+
             background-color: #f7fafc;
+
         }
+
         .container {
+
             max-width: 1200px;
+
         }
+
         .text-gradient {
+
             background-image: linear-gradient(to right, #4c51bf, #6b46c1);
+
             -webkit-background-clip: text;
+
             -webkit-text-fill-color: transparent;
+
         }
+
         .btn-primary {
+
             background-image: linear-gradient(to right, #4c51bf, #6b46c1);
+
             color: white;
+
             border-radius: 9999px;
+
             padding: 12px 24px;
+
             font-weight: 600;
+
             transition: all 0.3s ease-in-out;
+
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
         }
+
         .btn-primary:hover {
+
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+
             transform: translateY(-2px);
+
         }
+
         .atmilio-logo {
+
             fill: #4c51bf;
+
             width: 3rem;
+
             height: 3rem;
+
         }
+
         /* New custom styles for enhanced design */
+
         .bg-custom-gradient {
+
             background: radial-gradient(at center top, #f3e8ff, #e5e7eb);
+
         }
+
         .card {
+
             background-color: rgba(255, 255, 255, 0.8);
+
             backdrop-filter: blur(10px);
+
             border-radius: 12px;
+
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
             border: 1px solid rgba(229, 231, 235, 0.5);
+
         }
+
         .card:hover {
+
             transform: translateY(-8px);
+
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
         }
+
         .modal-active {
+
             display: flex;
+
         }
+
         .modal {
+
             display: none;
+
         }
+
     </style>
+
 </head>
+
 <body class="bg-gray-100 text-gray-800 antialiased bg-custom-gradient">
 
+
+
     <header class="py-6 px-4 md:px-8 bg-white shadow-md rounded-b-xl">
+
         <div class="container mx-auto flex justify-between items-center">
+
             <div class="flex items-center space-x-2">
+
                 <span class="text-2xl font-bold text-gray-900">Atmilio</span>
+
                 <span class="text-sm font-semibold text-gray-500 ml-2">AI Empowered Financial Solutions</span>
+
             </div>
+
             <nav>
+
                 <a href="#about" class="text-gray-600 hover:text-gray-900 mx-2 md:mx-4 transition-colors">About Us</a>
+
                 <a href="#services" class="text-gray-600 hover:text-gray-900 mx-2 md:mx-4 transition-colors">Services</a>
+
                 <a href="#contact" class="text-gray-600 hover:text-gray-900 mx-2 md:mx-4 transition-colors">Get a Quote</a>
+
             </nav>
+
         </div>
+
     </header>
 
+
+
     <main class="container mx-auto px-4 py-12 md:py-24">
+
         <section id="hero" class="text-center py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
             <div class="md:text-left">
+
                 <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+
                     <span class="text-gradient block">Seamless Client Engagement Solutions</span>
-                </span>
+
+                </h1>
+
                 <p class="text-xl md:text-2xl text-gray-600 mb-8">
+
                     Powering modern financial services with intuitive, secure, and dynamic web platforms.
+
                 </p>
+
                 <a href="#contact" class="btn-primary">Get a Quote</a>
+
             </div>
+
             <div class="flex justify-center md:justify-end">
+
                 <svg viewBox="0 0 500 300" class="w-full h-auto max-w-sm md:max-w-md" xmlns="http://www.w3.org/2000/svg">
+
                     <defs>
+
                         <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+
                             <stop offset="0%" style="stop-color:#4c51bf;stop-opacity:1" />
+
                             <stop offset="100%" style="stop-color:#6b46c1;stop-opacity:1" />
+
                         </linearGradient>
+
                     </defs>
+
                     <circle cx="250" cy="150" r="100" fill="url(#purpleGradient)" opacity="0.1" />
+
                     <circle cx="250" cy="150" r="70" fill="url(#purpleGradient)" opacity="0.2" />
+
                     <path d="M 250 50 L 350 150 L 250 250 L 150 150 Z" fill="url(#purpleGradient)" opacity="0.1" />
+
                     <line x1="150" y1="150" x2="350" y2="150" stroke="#a78bfa" stroke-width="2" opacity="0.6" />
+
                     <line x1="250" y1="50" x2="250" y2="250" stroke="#a78bfa" stroke-width="2" opacity="0.6" />
+
                 </svg>
+
             </div>
+
         </section>
+
+
 
         <section id="why-atmilio" class="py-16 md:py-24">
+
             <h2 class="text-4xl font-bold text-center mb-12 text-gray-900">Why Choose Atmilio?</h2>
+
             <div class="grid md:grid-cols-3 gap-8">
+
                 <div class="card p-8 text-center">
+
                     <h3 class="text-2xl font-bold mb-4 text-gray-900">AI-Powered Customization</h3>
+
                     <p class="text-gray-600">
+
                         Our solutions leverage the power of artificial intelligence to adapt and grow with your business, providing a truly bespoke experience.
+
                     </p>
+
                 </div>
+
                 <div class="card p-8 text-center">
+
                     <h3 class="text-2xl font-bold mb-4 text-gray-900">Industry Expertise</h3>
+
                     <p class="text-gray-600">
+
                         As a Dallas-based team, we have years of hands-on experience across multiple industries, giving us a deep understanding of your unique challenges.
+
                     </p>
+
                 </div>
+
                 <div class="card p-8 text-center">
+
                     <h3 class="text-2xl font-bold mb-4 text-gray-900">Seamless Integration</h3>
+
                     <p class="text-gray-600">
+
                         Our platforms are designed to connect effortlessly with your existing systems, ensuring a smooth and efficient transition without disrupting your workflow.
+
                     </p>
+
                 </div>
+
             </div>
+
         </section>
+
+
 
         <section id="about" class="py-16 md:py-24">
+
             <div class="card p-8 md:p-12">
+
                 <h2 class="text-4xl font-bold text-center mb-6 text-gray-900">About Us</h2>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
                     <div class="md:col-span-2">
+
                         <p class="text-lg text-gray-700 mb-4 leading-relaxed">
+
                             Atmilio is a dedicated team of professionals with years of hands-on experience in financial services and technology. We believe in building trust and long-lasting relationships through transparency and innovative solutions. Our mission is to provide you with the tools you need to streamline operations and deliver exceptional client service. We are committed to helping you navigate the complexities of today's digital landscape, offering bespoke solutions that are secure, scalable, and designed for your specific needs, leveraging the power of AI to create industry-grade solutions.
+
                         </p>
+
                         <p class="text-lg text-gray-700 leading-relaxed">
+
                             We are committed to helping you navigate the complexities of today's digital landscape, offering bespoke solutions that are secure, scalable, and designed for your specific needs.
+
                         </p>
+
                     </div>
+
                 </div>
+
             </div>
+
         </section>
+
+
 
         <section id="services" class="py-16 md:py-24">
+
             <h2 class="text-4xl font-bold text-center mb-12 text-gray-900">Our Services</h2>
+
             <div class="grid md:grid-cols-3 gap-8">
+
                 <div class="card p-8">
+
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
+
                         <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
                             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2.83-8.75l-2.91 2.91c-.39.39-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0l2.91-2.91c.39-.39.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0zM12 6.5c-2.48 0-4.5 2.02-4.5 4.5s2.02 4.5 4.5 4.5 4.5-2.02 4.5-4.5-2.02-4.5-4.5-4.5z"/>
+
                         </svg>
+
                         <span>Financial System Integration</span>
+
                     </h3>
+
                     <p class="text-gray-600">
+
                         We build robust and reliable connections between your financial systems to ensure data consistency and automate workflows.
+
                     </p>
+
                 </div>
+
                 <div class="card p-8">
+
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
+
                         <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+
                         </svg>
+
                         <span>Macro Enabled Financial Workbooks</span>
+
                     </h3>
+
                     <p class="text-gray-600">
+
                         We create custom Excel workbooks with advanced macros to automate complex calculations and reporting, saving you time and reducing manual errors.
+
                     </p>
+
                 </div>
+
                 <div class="card p-8">
+
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
+
                         <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
                             <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/>
+
                         </svg>
+
                         <span>Financial Model Creation & Maintaining</span>
+
                     </h3>
+
                     <p class="text-gray-600">
+
                         We develop detailed financial models for forecasting, valuation, and analysis, and provide ongoing maintenance to ensure accuracy and relevance.
+
                     </p>
+
                 </div>
+
             </div>
+
         </section>
+
+
 
         <section id="contact" class="py-16 md:py-24">
+
             <div class="card p-8 md:p-12 text-center">
+
                 <h2 class="text-4xl font-bold mb-6 text-gray-900">Get A Quote</h2>
+
                 <p class="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
+
                     Ready to transform your client engagement? Contact us today to schedule a consultation and see how Atmilio can help your business thrive.
+
                 </p>
+
                 <div class="w-full max-w-lg mx-auto mt-8">
+
                     <form action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSfOIdKh8-Lr6I916hpcFsdknPCnfRFWKbk6Bkq-mWTAr5McBw/formResponse" method="POST" class="space-y-6">
+
                         <div>
+
                             <label for="name" class="block text-left text-lg font-medium text-gray-700">Name</label>
-                            <input type="text" id="name" name="entry.152383421" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
+                            <input type="text" id="name" name="entry.1449079549" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
                         </div>
+
                         <div>
+
                             <label for="email" class="block text-left text-lg font-medium text-gray-700">Email</label>
-                            <input type="email" id="email" name="entry.222222222" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
+                            <input type="email" id="email" name="entry.1114421297" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
                         </div>
+
                         <div>
+
                             <label for="organizationName" class="block text-left text-lg font-medium text-gray-700">Organization Name</label>
-                            <input type="text" id="organizationName" name="entry.333333333" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
+                            <input type="text" id="organizationName" name="entry.1508216301" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
                         </div>
+
                         <div>
+
                             <label for="numberOfEmployees" class="block text-left text-lg font-medium text-gray-700">Number of Employees</label>
-                            <input type="number" id="numberOfEmployees" name="entry.444444444" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
+                            <input type="number" id="numberOfEmployees" name="entry.758957827" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
                         </div>
+
                         <div>
+
                             <label for="projectBudget" class="block text-left text-lg font-medium text-gray-700">Project Budget</label>
-                            <input type="text" id="projectBudget" name="entry.555555555" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
+                            <input type="text" id="projectBudget" name="entry.1352726760" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3">
+
                         </div>
+
                         <div>
+
                             <label for="projectDetails" class="block text-left text-lg font-medium text-gray-700">Project Details</label>
-                            <textarea id="projectDetails" name="entry.666666666" rows="4" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3"></textarea>
+
+                            <textarea id="projectDetails" name="entry.1017415442" rows="4" required class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg p-3"></textarea>
+
                         </div>
+
                         <div class="text-center">
+
                             <button type="submit" class="btn-primary w-full md:w-auto">Submit Request</button>
+
                         </div>
+
                     </form>
+
                 </div>
+
             </div>
+
         </section>
+
     </main>
 
+
+
     <footer class="py-8 px-4 md:px-8 bg-gray-900 text-gray-300 text-center rounded-t-xl">
+
         <div class="container mx-auto">
+
             <p>&copy; 2025 <a href="http://Atmilio.com" class="hover:text-white transition-colors">Atmilio.com</a>. All rights reserved.</p>
+
             <p class="mt-2 text-sm">
+
                 <a href="#" class="hover:text-white transition-colors">Privacy Policy</a> |
+
                 <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+
             </p>
+
         </div>
+
     </footer>
+
 </body>
+
 </html>
