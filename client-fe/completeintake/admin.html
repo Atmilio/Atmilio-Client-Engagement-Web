@@ -40,6 +40,16 @@
                     <input type="text" id="docTitle" placeholder="Title" class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3">
                 </div>
             </div>
+            <div>
+                <label class="block font-semibold mb-2">Upcoming Meetings</label>
+                <div id="meetingsList" class="space-y-2 mb-2"></div>
+                <div class="flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0">
+                    <input type="date" id="meetingDate" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" placeholder="Date">
+                    <input type="text" id="meetingFirm" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" placeholder="Firm">
+                    <input type="text" id="meetingIndividual" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" placeholder="Individual">
+                    <button type="button" id="addMeetingBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Add Meeting</button>
+                </div>
+            </div>
             <button type="submit" class="w-full py-3 rounded-lg text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-md hover:from-purple-700 hover:to-indigo-600 transition-all">Save Updates</button>
         </form>
         <div id="statusMsg" class="mt-6 text-center text-green-700 font-semibold hidden">Saved! Refresh the client portal to see changes.</div>
@@ -53,7 +63,32 @@
             .then(data => {
                 portalData = data;
                 document.getElementById('raised').value = data.client.raised;
+                renderMeetings();
             });
+
+        function renderMeetings() {
+            const meetings = portalData.client.upcoming_meetings || [];
+            document.getElementById('meetingsList').innerHTML = meetings.length === 0 ? '<div class="text-gray-500">No meetings listed.</div>' : meetings.map((m, i) => `<div class="flex items-center space-x-2"><span class="text-gray-700">${m.date} – <span class="font-semibold">${m.firm}</span> (<span class="text-indigo-700">${m.individual || ''}</span>)</span><button type="button" class="text-red-600 hover:underline text-xs" onclick="removeMeeting(${i})">Remove</button></div>`).join('');
+        }
+
+        window.removeMeeting = function(idx) {
+            portalData.client.upcoming_meetings.splice(idx, 1);
+            renderMeetings();
+        }
+
+        document.getElementById('addMeetingBtn').addEventListener('click', function() {
+            const date = document.getElementById('meetingDate').value;
+            const firm = document.getElementById('meetingFirm').value.trim();
+            const individual = document.getElementById('meetingIndividual').value.trim();
+            if(date && firm && individual) {
+                portalData.client.upcoming_meetings = portalData.client.upcoming_meetings || [];
+                portalData.client.upcoming_meetings.push({ date, firm, individual });
+                renderMeetings();
+                document.getElementById('meetingDate').value = '';
+                document.getElementById('meetingFirm').value = '';
+                document.getElementById('meetingIndividual').value = '';
+            }
+        });
         document.getElementById('adminForm').addEventListener('submit', function(e) {
             e.preventDefault();
             // Update raised
