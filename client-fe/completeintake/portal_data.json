@@ -8,10 +8,9 @@
     "round": "Seed Round",
     "contacted_firms": ["Firm A", "Firm B", "Firm C"],
     "upcoming_meetings": [
-      {"date": "2026-02-10", "firm": "Firm A"},
-      {"date": "2026-02-15", "firm": "Firm B"}
+      {"date": "2026-02-10", "firm": "Firm A", "individual": "John Smith"},
+      {"date": "2026-02-15", "firm": "Firm B", "individual": "Jane Lee"}
     ],
-    "fulfilled_commitment": true,
     "documents": [],
     "updates": []
   }
