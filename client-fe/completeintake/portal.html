@@ -28,28 +28,29 @@
             <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
             <p class="text-lg text-gray-600">Track your capital raise progress and access important documents and updates from Atmilio.</p>
         </div>
-        <div class="mb-10">
-            <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
-            <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
-                <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
-            </div>
-            <div class="flex justify-between text-sm text-gray-700">
-                <span>Raised: <span id="raisedAmount">$0</span></span>
-                <span>Goal: $5,000,000</span>
-            </div>
-        </div>
-        <div class="grid md:grid-cols-2 gap-10">
+        <div class="mb-10 grid md:grid-cols-2 gap-8">
             <div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2">Round</h2>
+                <div id="roundInfo" class="text-lg text-gray-800 mb-4">Seed Round</div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2">Contacted Firms</h2>
+                <ul id="contactedFirms" class="mb-4 list-disc list-inside text-gray-700"></ul>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2">Upcoming Meetings</h2>
+                <ul id="upcomingMeetings" class="mb-4 text-gray-700"></ul>
+                <div id="fulfilledCommitment" class="mt-4 text-green-700 font-bold text-lg"></div>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
+                <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-700 mb-8">
+                    <span>Raised: <span id="raisedAmount">$0</span></span>
+                    <span>Goal: $5,000,000</span>
+                </div>
                 <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
-                <ul id="documentsList" class="space-y-3">
-                    <!-- Documents will be loaded here -->
-                </ul>
-            </div>
-            <div>
+                <ul id="documentsList" class="space-y-3 mb-8"></ul>
                 <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
-                <ul id="updatesList" class="space-y-3">
-                    <!-- Updates will be loaded here -->
-                </ul>
+                <ul id="updatesList" class="space-y-3"></ul>
             </div>
         </div>
     </main>
@@ -59,6 +60,14 @@
             .then(res => res.json())
             .then(data => {
                 const c = data.client;
+                // Round
+                document.getElementById('roundInfo').textContent = c.round || 'N/A';
+                // Contacted Firms
+                document.getElementById('contactedFirms').innerHTML = (c.contacted_firms || []).map(firm => `<li>${firm}</li>`).join('') || '<li class="text-gray-500">None listed.</li>';
+                // Upcoming Meetings
+                document.getElementById('upcomingMeetings').innerHTML = (c.upcoming_meetings || []).map(m => `<li>${m.date} – ${m.firm}</li>`).join('') || '<li class="text-gray-500">No upcoming meetings.</li>';
+                // Fulfilled Capital Commitment
+                document.getElementById('fulfilledCommitment').textContent = c.fulfilled_commitment ? 'Fulfilled Capital Commitment' : '';
                 // Progress
                 const percent = c.goal > 0 ? Math.round((c.raised / c.goal) * 100) : 0;
                 document.getElementById('progressBar').style.width = percent + '%';
