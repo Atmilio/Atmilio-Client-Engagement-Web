@@ -21,111 +21,56 @@
             </svg>
             <span class="text-2xl font-bold text-purple-700">CompleteIntake Portal</span>
         </div>
-        <div class="flex items-center space-x-4">
-            <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
-            <button onclick="logout()" class="ml-4 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">Logout</button>
-        </div>
+        <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
     </header>
-        <script>
-            function logout() {
-                // For demo: redirect to login page. In production, clear session/cookies as needed.
-                window.location.href = '../portal.html';
-            }
     <main class="flex-1 w-full max-w-4xl mx-auto py-12 px-4 md:px-8">
         <div class="mb-10">
             <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
             <p class="text-lg text-gray-600">Track your capital raise progress and access important documents and updates from Atmilio.</p>
         </div>
-        <div class="mb-10 grid md:grid-cols-2 gap-8">
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
+            <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
+                <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-700">
+                <span>Raised: <span id="raisedAmount">$0</span></span>
+                <span>Goal: $5,000,000</span>
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-10">
             <div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Round</h2>
-                <div id="roundInfo" class="text-lg text-gray-800 mb-4">Seed Round</div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Contacted Firms</h2>
-                <ul id="contactedFirms" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Upcoming Meetings</h2>
-                <ul id="upcomingMeetings" class="mb-4 text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2 mt-8">Meetings Calendar</h2>
-                <div id="calendar" class="bg-white border border-purple-100 rounded-lg p-4 shadow-sm"></div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
+                <ul id="documentsList" class="space-y-3">
+                    <!-- Documents will be loaded here -->
+                </ul>
             </div>
             <div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
-                <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
-                    <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
-                </div>
-                <div class="flex justify-between text-sm text-gray-700 mb-8">
-                    <span>Raised: <span id="raisedAmount">$0</span></span>
-                    <span>Goal: $5,000,000</span>
-                </div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
-                <form id="uploadForm" class="mb-4 flex flex-col md:flex-row md:space-x-2 items-start md:items-end">
-                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt" class="mb-2 md:mb-0 border rounded p-2" required>
-                    <input type="text" id="fileTitle" placeholder="Title (e.g. Pitch Deck)" class="mb-2 md:mb-0 border rounded p-2" required>
-                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Upload</button>
-                </form>
-                <ul id="documentsList" class="space-y-3 mb-8"></ul>
                 <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
-                <ul id="updatesList" class="space-y-3"></ul>
+                <ul id="updatesList" class="space-y-3">
+                    <!-- Updates will be loaded here -->
+                </ul>
             </div>
         </div>
     </main>
     <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
     <script>
-        let portalData;
         fetch('portal_data.json')
             .then(res => res.json())
             .then(data => {
-                portalData = data;
                 const c = data.client;
-                // Round
-                document.getElementById('roundInfo').textContent = c.round || 'N/A';
-                // Contacted Firms
-                document.getElementById('contactedFirms').innerHTML = (c.contacted_firms || []).map(firm => `<li>${firm}</li>`).join('') || '<li class="text-gray-500">None listed.</li>';
-                // Upcoming Meetings
-                document.getElementById('upcomingMeetings').innerHTML = (c.upcoming_meetings || []).map(m => `<li>${m.date} – <span class='font-semibold'>${m.firm}</span> (<span class='text-indigo-700'>${m.individual || ''}</span>)</li>`).join('') || '<li class="text-gray-500">No upcoming meetings.</li>';
-                // Calendar
-                const meetings = c.upcoming_meetings || [];
-                if (meetings.length === 0) {
-                    document.getElementById('calendar').innerHTML = '<div class="text-gray-500">No meetings scheduled.</div>';
-                } else {
-                    let cal = '<table class="w-full text-left"><thead><tr><th class="pb-2">Date</th><th class="pb-2">Firm</th><th class="pb-2">Individual</th></tr></thead><tbody>';
-                    meetings.forEach(m => {
-                        cal += `<tr><td class="py-1 pr-4">${m.date}</td><td class="py-1 pr-4">${m.firm}</td><td class="py-1">${m.individual || ''}</td></tr>`;
-                    });
-                    cal += '</tbody></table>';
-                    document.getElementById('calendar').innerHTML = cal;
-                }
                 // Progress
                 const percent = c.goal > 0 ? Math.round((c.raised / c.goal) * 100) : 0;
                 document.getElementById('progressBar').style.width = percent + '%';
                 document.getElementById('progressBar').textContent = percent + '%';
                 document.getElementById('raisedAmount').textContent = c.raised.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
                 // Documents
-                renderDocuments();
+                const docs = (c.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
+                document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
                 // Updates
                 const updates = (c.updates || []).map(u => `<li class="border border-purple-100 rounded-lg p-3 bg-purple-50/50"><span class="font-semibold text-gray-800">${u.date}</span><br><span class="text-gray-700">${u.text}</span></li>`).join('');
                 document.getElementById('updatesList').innerHTML = updates || '<li class="text-gray-500">No updates yet.</li>';
             });
-
-        function renderDocuments() {
-            const docs = (portalData.client.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
-            document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
-        }
-
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('fileInput');
-            const fileTitle = document.getElementById('fileTitle').value.trim();
-            const file = fileInput.files[0];
-            if(file && fileTitle) {
-                // For demo: just add file name (in production, upload to server and store URL)
-                const url = URL.createObjectURL(file);
-                portalData.client.documents = portalData.client.documents || [];
-                portalData.client.documents.push({ url, title: fileTitle + ' (' + file.name + ')' });
-                renderDocuments();
-                fileInput.value = '';
-                document.getElementById('fileTitle').value = '';
-            }
-        });
     </script>
 </body>
 </html>
