@@ -37,11 +37,12 @@
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            // Simple demo: username: client, password: atmilio2026
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             if(username === 'client' && password === 'atmilio2026') {
                 window.location.href = 'client_portal.html';
+            } else if(username.toLowerCase() === 'dinesh.selvakumar@completeintake.com' && password === 'globalsalad838') {
+                window.location.href = 'completeintake/portal.html';
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }

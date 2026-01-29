@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompleteIntake Portal | Atmilio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-purple-100 via-white to-purple-200">
+    <header class="w-full bg-white/90 shadow-md py-6 px-8 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <svg class="w-10 h-10" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+                <title id="logoTitle">Atmilio Logo</title>
+                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
+                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
+                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
+            </svg>
+            <span class="text-2xl font-bold text-purple-700">CompleteIntake Portal</span>
+        </div>
+        <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
+    </header>
+    <main class="flex-1 w-full max-w-4xl mx-auto py-12 px-4 md:px-8">
+        <div class="mb-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
+            <p class="text-lg text-gray-600">Track your capital raise progress and access important documents and updates from Atmilio.</p>
+        </div>
+        <div class="mb-10">
+            <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
+            <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
+                <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-700">
+                <span>Raised: <span id="raisedAmount">$0</span></span>
+                <span>Goal: $5,000,000</span>
+            </div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-10">
+            <div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
+                <ul id="documentsList" class="space-y-3">
+                    <!-- Documents will be loaded here -->
+                </ul>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
+                <ul id="updatesList" class="space-y-3">
+                    <!-- Updates will be loaded here -->
+                </ul>
+            </div>
+        </div>
+    </main>
+    <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
+    <script>
+        fetch('portal_data.json')
+            .then(res => res.json())
+            .then(data => {
+                const c = data.client;
+                // Progress
+                const percent = c.goal > 0 ? Math.round((c.raised / c.goal) * 100) : 0;
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('progressBar').textContent = percent + '%';
+                document.getElementById('raisedAmount').textContent = c.raised.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+                // Documents
+                const docs = (c.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
+                document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
+                // Updates
+                const updates = (c.updates || []).map(u => `<li class="border border-purple-100 rounded-lg p-3 bg-purple-50/50"><span class="font-semibold text-gray-800">${u.date}</span><br><span class="text-gray-700">${u.text}</span></li>`).join('');
+                document.getElementById('updatesList').innerHTML = updates || '<li class="text-gray-500">No updates yet.</li>';
+            });
+    </script>
+</body>
+</html>

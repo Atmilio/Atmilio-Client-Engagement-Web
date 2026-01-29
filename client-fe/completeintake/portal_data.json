@@ -1,0 +1,11 @@
+{
+  "client": {
+    "username": "completeintake",
+    "name": "CompleteIntake",
+    "goal": 5000000,
+    "raised": 0,
+    "completion": 0,
+    "documents": [],
+    "updates": []
+  }
+}
