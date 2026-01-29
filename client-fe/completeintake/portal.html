@@ -57,6 +57,11 @@
                     <span>Goal: $5,000,000</span>
                 </div>
                 <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
+                <form id="uploadForm" class="mb-4 flex flex-col md:flex-row md:space-x-2 items-start md:items-end">
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt" class="mb-2 md:mb-0 border rounded p-2" required>
+                    <input type="text" id="fileTitle" placeholder="Title (e.g. Pitch Deck)" class="mb-2 md:mb-0 border rounded p-2" required>
+                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Upload</button>
+                </form>
                 <ul id="documentsList" class="space-y-3 mb-8"></ul>
                 <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
                 <ul id="updatesList" class="space-y-3"></ul>
@@ -65,9 +70,11 @@
     </main>
     <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
     <script>
+        let portalData;
         fetch('portal_data.json')
             .then(res => res.json())
             .then(data => {
+                portalData = data;
                 const c = data.client;
                 // Round
                 document.getElementById('roundInfo').textContent = c.round || 'N/A';
@@ -93,12 +100,32 @@
                 document.getElementById('progressBar').textContent = percent + '%';
                 document.getElementById('raisedAmount').textContent = c.raised.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
                 // Documents
-                const docs = (c.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
-                document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
+                renderDocuments();
                 // Updates
                 const updates = (c.updates || []).map(u => `<li class="border border-purple-100 rounded-lg p-3 bg-purple-50/50"><span class="font-semibold text-gray-800">${u.date}</span><br><span class="text-gray-700">${u.text}</span></li>`).join('');
                 document.getElementById('updatesList').innerHTML = updates || '<li class="text-gray-500">No updates yet.</li>';
             });
+
+        function renderDocuments() {
+            const docs = (portalData.client.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
+            document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const fileTitle = document.getElementById('fileTitle').value.trim();
+            const file = fileInput.files[0];
+            if(file && fileTitle) {
+                // For demo: just add file name (in production, upload to server and store URL)
+                const url = URL.createObjectURL(file);
+                portalData.client.documents = portalData.client.documents || [];
+                portalData.client.documents.push({ url, title: fileTitle + ' (' + file.name + ')' });
+                renderDocuments();
+                fileInput.value = '';
+                document.getElementById('fileTitle').value = '';
+            }
+        });
     </script>
 </body>
 </html>

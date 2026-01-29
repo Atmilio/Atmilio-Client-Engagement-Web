@@ -34,6 +34,8 @@
                 <textarea id="updateText" name="updateText" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3"></textarea>
             </div>
             <div>
+                <label class="block font-semibold mb-2">Uploaded Documents</label>
+                <ul id="adminDocumentsList" class="mb-4 space-y-2"></ul>
                 <label class="block font-semibold mb-2">Add Document (URL and Title)</label>
                 <div class="flex space-x-2">
                     <input type="url" id="docUrl" placeholder="Document URL" class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3">
@@ -64,7 +66,13 @@
                 portalData = data;
                 document.getElementById('raised').value = data.client.raised;
                 renderMeetings();
+                renderAdminDocuments();
             });
+
+        function renderAdminDocuments() {
+            const docs = (portalData.client.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
+            document.getElementById('adminDocumentsList').innerHTML = docs || '<li class="text-gray-500">No documents uploaded.</li>';
+        }
 
         function renderMeetings() {
             const meetings = portalData.client.upcoming_meetings || [];
@@ -105,6 +113,7 @@
             if(docUrl && docTitle) {
                 portalData.client.documents = portalData.client.documents || [];
                 portalData.client.documents.push({ url: docUrl, title: docTitle });
+                renderAdminDocuments();
             }
             // Save (for demo, just show message)
             document.getElementById('statusMsg').classList.remove('hidden');
