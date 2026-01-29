@@ -21,8 +21,16 @@
             </svg>
             <span class="text-2xl font-bold text-purple-700">CompleteIntake Portal</span>
         </div>
-        <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
+        <div class="flex items-center space-x-4">
+            <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
+            <button onclick="logout()" class="ml-4 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">Logout</button>
+        </div>
     </header>
+        <script>
+            function logout() {
+                // For demo: redirect to login page. In production, clear session/cookies as needed.
+                window.location.href = '../portal.html';
+            }
     <main class="flex-1 w-full max-w-4xl mx-auto py-12 px-4 md:px-8">
         <div class="mb-10">
             <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
