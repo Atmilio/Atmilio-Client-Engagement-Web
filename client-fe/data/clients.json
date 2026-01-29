@@ -1,0 +1,14 @@
+[
+  {
+    "username": "client",
+    "name": "Jane Doe",
+    "documents": [
+      {"title": "Q4 Statement.pdf", "url": "documents/q4-statement.pdf"},
+      {"title": "Investment Summary.xlsx", "url": "documents/investment-summary.xlsx"}
+    ],
+    "upcoming_payments": [
+      {"date": "2026-02-15", "amount": "$1,200.00", "description": "Quarterly Management Fee"},
+      {"date": "2026-03-01", "amount": "$500.00", "description": "Consulting Retainer"}
+    ]
+  }
+]
