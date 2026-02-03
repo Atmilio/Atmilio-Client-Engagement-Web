@@ -1,1 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Atmilio Admin | Client Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .card { background:#fff; border:1px solid rgb(226,232,240); box-shadow:0 10px 24px rgba(15,23,42,0.06); }
+    .chip { font-size:12px; padding:4px 10px; border-radius:999px; }
+    .thin::-webkit-scrollbar { width:8px; height:8px; }
+    .thin::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.25); border-radius:999px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    @media print {
+      body { background:#fff !important; }
+      .no-print { display:none !important; }
+      .print-card { box-shadow:none !important; border:none !important; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <!-- Header -->
+  <header class="sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-slate-200 no-print">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-slate-900 flex items-center justify-center">
+          <span class="text-white font-black">A</span>
+        </div>
+        <div>
+          <div class="text-xs text-slate-500">Atmilio</div>
+          <div class="text-lg font-extrabold leading-tight">Admin Management</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btnSeedDemo" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">
+          Seed Demo Data
+        </button>
+        <button id="btnExportData" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">
+          Export JSON
+        </button>
+        <button id="btnReset" class="px-4 py-2 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700">
+          Reset
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Top KPIs -->
+    <div class="grid md:grid-cols-4 gap-3 no-print">
+      <div class="card rounded-2xl p-4">
+        <div class="text-xs text-slate-500">Clients</div>
+        <div id="kpiClients" class="text-2xl font-extrabold mt-1">0</div>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <div class="text-xs text-slate-500">Monthly Retainers</div>
+        <div id="kpiMRR" class="text-2xl font-extrabold mt-1">$0</div>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <div class="text-xs text-slate-500">Open Invoices</div>
+        <div id="kpiOpenInv" class="text-2xl font-extrabold mt-1">0</div>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <div class="text-xs text-slate-500">Lifetime Billed</div>
+        <div id="kpiLifetime" class="text-2xl font-extrabold mt-1">$0</div>
+      </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="mt-5 grid lg:grid-cols-12 gap-4">
+      <!-- Left: Clients list -->
+      <section class="lg:col-span-5 no-print">
+        <div class="card rounded-2xl p-4">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-lg font-extrabold">Clients</div>
+              <div class="text-sm text-slate-600">Select a client to view metrics & invoices.</div>
+            </div>
+            <button id="btnAddClient" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">
+              + New
+            </button>
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <input id="clientSearch" type="text" placeholder="Search clients..."
+              class="w-full px-4 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" />
+            <select id="clientFilter" class="px-3 py-2 rounded-xl border border-slate-200 font-bold">
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div id="clientsList" class="mt-4 space-y-2 max-h-[560px] overflow-auto thin pr-1"></div>
+        </div>
+      </section>
+
+      <!-- Right: Client detail + invoices -->
+      <section class="lg:col-span-7">
+        <!-- Client Overview -->
+        <div class="card rounded-2xl p-5">
+          <div class="flex items-start justify-between gap-3 no-print">
+            <div>
+              <div class="text-xs text-slate-500">Client</div>
+              <div id="clientTitle" class="text-2xl font-extrabold">No client selected</div>
+              <div id="clientSubtitle" class="text-sm text-slate-600 mt-1"></div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="btnEditClient" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
+                Edit
+              </button>
+              <button id="btnCreateInvoice" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700" disabled>
+                Create Invoice
+              </button>
+            </div>
+          </div>
+
+          <!-- Metrics -->
+          <div class="mt-4 grid md:grid-cols-4 gap-3 no-print">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="text-xs text-slate-500">Primary Contact</div>
+              <div id="mContact" class="font-extrabold mt-1">—</div>
+              <div id="mEmail" class="text-xs text-slate-500 mt-1">—</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="text-xs text-slate-500">Start Date</div>
+              <div id="mStart" class="font-extrabold mt-1">—</div>
+              <div id="mStatus" class="text-xs mt-1"></div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="text-xs text-slate-500">Total Charged</div>
+              <div id="mCharged" class="font-extrabold mt-1">$0</div>
+              <div class="text-xs text-slate-500 mt-1">Lifetime billed</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="text-xs text-slate-500">Open Balance</div>
+              <div id="mOpen" class="font-extrabold mt-1">$0</div>
+              <div id="mLastInv" class="text-xs text-slate-500 mt-1">Last invoice: —</div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="mt-4 flex flex-wrap gap-2 no-print">
+            <button id="btnMarkPaid" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
+              Mark Selected Invoice Paid
+            </button>
+            <button id="btnDeleteInvoice" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
+              Delete Selected Invoice
+            </button>
+            <button id="btnPrintInvoice" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800" disabled>
+              Print / Save PDF
+            </button>
+          </div>
+
+          <!-- Invoice List -->
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white no-print">
+            <div class="grid grid-cols-12 gap-2 px-4 py-3 text-xs font-bold text-slate-500 border-b border-slate-200">
+              <div class="col-span-2">Invoice #</div>
+              <div class="col-span-3">Issued</div>
+              <div class="col-span-3">Due</div>
+              <div class="col-span-2">Total</div>
+              <div class="col-span-2 text-right">Status</div>
+            </div>
+            <div id="invoiceList" class="divide-y divide-slate-200"></div>
+          </div>
+        </div>
+
+        <!-- Printable Invoice Preview -->
+        <div id="printArea" class="mt-4 card rounded-2xl p-6 print-card hidden">
+          <div class="flex items-start justify-between gap-6">
+            <div>
+              <div class="text-2xl font-extrabold">INVOICE</div>
+              <div class="text-sm text-slate-600 mt-1">Atmilio</div>
+              <div class="text-sm text-slate-600">216 Timber Lake Dr, Southlake, TX 76092</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-slate-600">Invoice #</div>
+              <div id="pInvNum" class="text-lg font-extrabold mono">—</div>
+              <div class="mt-2 text-sm text-slate-600">Issued</div>
+              <div id="pIssued" class="font-bold">—</div>
+              <div class="mt-2 text-sm text-slate-600">Due</div>
+              <div id="pDue" class="font-bold">—</div>
+            </div>
+          </div>
+
+          <div class="mt-6 grid md:grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-slate-200 p-4">
+              <div class="text-xs text-slate-500">Bill To</div>
+              <div id="pBillTo" class="font-extrabold mt-1">—</div>
+              <div id="pBillEmail" class="text-sm text-slate-600">—</div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 p-4">
+              <div class="text-xs text-slate-500">Summary</div>
+              <div class="mt-2 flex items-center justify-between text-sm">
+                <span>Subtotal</span><span id="pSubtotal" class="font-bold">$0</span>
+              </div>
+              <div class="mt-2 flex items-center justify-between text-sm">
+                <span>Tax</span><span id="pTax" class="font-bold">$0</span>
+              </div>
+              <div class="mt-2 flex items-center justify-between text-sm">
+                <span>Discount</span><span id="pDiscount" class="font-bold">$0</span>
+              </div>
+              <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
+                <span class="font-extrabold">Total</span><span id="pTotal" class="text-lg font-extrabold">$0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-12 gap-2 px-4 py-3 text-xs font-bold text-slate-500 bg-slate-50 border-b border-slate-200">
+              <div class="col-span-7">Description</div>
+              <div class="col-span-2 text-right">Qty</div>
+              <div class="col-span-3 text-right">Amount</div>
+            </div>
+            <div id="pLines" class="divide-y divide-slate-200 bg-white"></div>
+          </div>
+
+          <div class="mt-6">
+            <div class="text-xs text-slate-500 font-bold">Notes</div>
+            <div id="pNotes" class="text-sm text-slate-700 mt-1">—</div>
+          </div>
+
+          <div class="mt-8 text-xs text-slate-500">
+            Make payments to Atmilio. Thank you.
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Modal: Client -->
+  <div id="clientModal" class="fixed inset-0 bg-black/30 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white w-full max-w-2xl rounded-2xl border border-slate-200 shadow-xl p-5">
+      <div class="flex items-center justify-between">
+        <div id="clientModalTitle" class="text-lg font-extrabold">New Client</div>
+        <button class="closeClient px-3 py-1 rounded-xl border border-slate-200 font-bold">✕</button>
+      </div>
+
+      <div class="mt-4 grid md:grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold text-slate-600">Client Name</label>
+          <input id="cName" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" placeholder="CompleteIntake" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Status</label>
+          <select id="cStatus" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-600">Primary Contact</label>
+          <input id="cContact" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" placeholder="Denish (CEO)" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Contact Email</label>
+          <input id="cEmail" type="email" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" placeholder="ceo@company.com" />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-600">Start Date</label>
+          <input id="cStart" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Monthly Retainer (optional)</label>
+          <input id="cRetainer" type="number" min="0" step="0.01" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" placeholder="3000" />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-600">Seed Goal</label>
+          <input id="cGoal" type="number" min="0" step="1" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" placeholder="5000000" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Raised</label>
+          <input id="cRaised" type="number" min="0" step="1" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200" placeholder="0" />
+        </div>
+      </div>
+
+      <div class="mt-4 flex justify-end gap-2">
+        <button class="closeClient px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Cancel</button>
+        <button id="saveClient" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Invoice -->
+  <div id="invoiceModal" class="fixed inset-0 bg-black/30 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white w-full max-w-3xl rounded-2xl border border-slate-200 shadow-xl p-5">
+      <div class="flex items-center justify-between">
+        <div class="text-lg font-extrabold">Create Invoice</div>
+        <button class="closeInvoice px-3 py-1 rounded-xl border border-slate-200 font-bold">✕</button>
+      </div>
+
+      <div class="mt-4 grid md:grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-bold text-slate-600">Invoice #</label>
+          <input id="iNumber" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 mono font-bold" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Issued Date</label>
+          <input id="iIssued" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Due Date</label>
+          <input id="iDue" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold" />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-600">Tax (flat $)</label>
+          <input id="iTax" type="number" min="0" step="0.01" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200" value="0" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Discount (flat $)</label>
+          <input id="iDiscount" type="number" min="0" step="0.01" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200" value="0" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">Status</label>
+          <select id="iStatus" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <option value="open">Open</option>
+            <option value="paid">Paid</option>
+            <option value="void">Void</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="text-xs font-bold text-slate-600">Line Items</label>
+          <div class="mt-2 overflow-hidden rounded-2xl border border-slate-200">
+            <div class="grid grid-cols-12 gap-2 px-3 py-2 text-xs font-bold text-slate-500 bg-slate-50 border-b border-slate-200">
+              <div class="col-span-7">Description</div>
+              <div class="col-span-2 text-right">Qty</div>
+              <div class="col-span-2 text-right">Rate</div>
+              <div class="col-span-1 text-right">—</div>
+            </div>
+            <div id="lineItems" class="bg-white"></div>
+          </div>
+          <button id="addLine" class="mt-3 px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">+ Add line</button>
+        </div>
+
+        <div class="md:col-span-3">
+          <label class="text-xs font-bold text-slate-600">Notes</label>
+          <textarea id="iNotes" rows="3" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200"
+            placeholder="Payment terms, deliverables, etc."></textarea>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-between">
+        <div class="text-sm text-slate-600">
+          Subtotal: <span id="iSubtotal" class="font-bold">$0</span> • Total: <span id="iTotal" class="font-extrabold">$0</span>
+        </div>
+        <div class="flex gap-2">
+          <button class="closeInvoice px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Cancel</button>
+          <button id="saveInvoice" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">Save Invoice</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // Atmilio Admin Management (front-end demo)
+    // - Clients + invoices stored in localStorage
+    // - Print invoice preview + browser print -> Save as PDF
+    // =========================================================
+    const LS_KEY = "atmilio_admin_store_v1";
+    const $ = (id) => document.getElementById(id);
+
+    const DEFAULT = {
+      clients: [
+        // example shape:
+        // {
+        //  id, name, status, primaryContact, email, startDate, retainer, goal, raised,
+        //  createdAt, updatedAt
+        // }
+      ],
+      invoices: [
+        // {
+        //  id, clientId, number, issuedDate, dueDate, status,
+        //  lines:[{desc, qty, rate}], tax, discount, notes,
+        //  subtotal, total, createdAt, updatedAt, paidAt
+        // }
+      ],
+      selectedClientId: null,
+      selectedInvoiceId: null
+    };
+
+    function clone(x){ return JSON.parse(JSON.stringify(x)); }
+    function load(){
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw) return clone(DEFAULT);
+      try { return JSON.parse(raw); } catch { return clone(DEFAULT); }
+    }
+    function save(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+    function money(n){
+      return (Number(n)||0).toLocaleString("en-US",{style:"currency",currency:"USD"});
+    }
+    function safeText(s){
+      return String(s||"").replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]));
+    }
+    function fmtDate(d){
+      if(!d) return "—";
+      const dt = new Date(d);
+      if(isNaN(dt.getTime())) return "—";
+      return dt.toLocaleDateString();
+    }
+    function nowISO(){ return new Date().toISOString(); }
+
+    function genInvoiceNumber(state){
+      // simple sequence: ATM-00001
+      const nums = (state.invoices||[])
+        .map(i => i.number || "")
+        .filter(n => /^ATM-\d{5}$/.test(n))
+        .map(n => parseInt(n.split("-")[1], 10));
+      const next = (nums.length ? Math.max(...nums) : 0) + 1;
+      return `ATM-${String(next).padStart(5,"0")}`;
+    }
+
+    function calcInvoice(lines, tax, discount){
+      const subtotal = (lines||[]).reduce((sum, l) => {
+        const qty = Number(l.qty||0);
+        const rate = Number(l.rate||0);
+        return sum + (qty * rate);
+      }, 0);
+
+      const t = Number(tax||0);
+      const disc = Number(discount||0);
+      const total = Math.max(0, subtotal + t - disc);
+      return { subtotal, total };
+    }
+
+    function getSelectedClient(state){
+      return (state.clients||[]).find(c => c.id === state.selectedClientId) || null;
+    }
+    function getClientInvoices(state, clientId){
+      return (state.invoices||[]).filter(i => i.clientId === clientId).sort((a,b) => (b.createdAt||"").localeCompare(a.createdAt||""));
+    }
+    function getSelectedInvoice(state){
+      return (state.invoices||[]).find(i => i.id === state.selectedInvoiceId) || null;
+    }
+
+    function clientTotals(state, clientId){
+      const invs = getClientInvoices(state, clientId);
+      const billed = invs.filter(i => i.status !== "void").reduce((s,i)=>s + Number(i.total||0), 0);
+      const paid = invs.filter(i => i.status === "paid").reduce((s,i)=>s + Number(i.total||0), 0);
+      const open = invs.filter(i => i.status === "open").reduce((s,i)=>s + Number(i.total||0), 0);
+      const last = invs.length ? invs[0] : null;
+      const openCount = invs.filter(i => i.status === "open").length;
+      return { billed, paid, open, last, openCount };
+    }
+
+    function statusChip(status){
+      if(status === "active") return `<span class="chip bg-emerald-100 text-emerald-800 font-bold">Active</span>`;
+      if(status === "paused") return `<span class="chip bg-amber-100 text-amber-800 font-bold">Paused</span>`;
+      if(status === "closed") return `<span class="chip bg-slate-100 text-slate-700 font-bold">Closed</span>`;
+      return `<span class="chip bg-slate-100 text-slate-700 font-bold">${safeText(status||"—")}</span>`;
+    }
+    function invoiceChip(status){
+      if(status === "open") return `<span class="chip bg-amber-100 text-amber-800 font-bold">Open</span>`;
+      if(status === "paid") return `<span class="chip bg-emerald-100 text-emerald-800 font-bold">Paid</span>`;
+      if(status === "void") return `<span class="chip bg-slate-100 text-slate-700 font-bold">Void</span>`;
+      return `<span class="chip bg-slate-100 text-slate-700 font-bold">${safeText(status||"—")}</span>`;
+    }
+
+    // =========================================================
+    // Render
+    // =========================================================
+    function renderAll(){
+      const state = load();
+      renderKPIs(state);
+      renderClients(state);
+      renderClientDetail(state);
+      return state;
+    }
+
+    function renderKPIs(state){
+      const clients = state.clients || [];
+      $("kpiClients").textContent = String(clients.length);
+
+      const mrr = clients
+        .filter(c => c.status === "active")
+        .reduce((s,c)=> s + Number(c.retainer||0), 0);
+      $("kpiMRR").textContent = money(mrr);
+
+      const openInv = (state.invoices||[]).filter(i => i.status === "open").length;
+      $("kpiOpenInv").textContent = String(openInv);
+
+      const lifetime = (state.invoices||[])
+        .filter(i => i.status !== "void")
+        .reduce((s,i)=> s + Number(i.total||0), 0);
+      $("kpiLifetime").textContent = money(lifetime);
+    }
+
+    function renderClients(state){
+      const q = ($("clientSearch").value||"").toLowerCase().trim();
+      const f = $("clientFilter").value || "all";
+
+      const clients = (state.clients||[])
+        .filter(c => !q || String(c.name||"").toLowerCase().includes(q))
+        .filter(c => f === "all" ? true : (c.status === f))
+        .sort((a,b)=> (b.updatedAt||"").localeCompare(a.updatedAt||""));
+
+      const wrap = $("clientsList");
+      if(!clients.length){
+        wrap.innerHTML = `<div class="text-sm text-slate-500 p-3">No clients found.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = clients.map(c=>{
+        const sel = (c.id === state.selectedClientId);
+        const totals = clientTotals(state, c.id);
+
+        return `
+          <button data-client="${c.id}" class="w-full text-left p-3 rounded-2xl border ${sel ? "border-indigo-300 bg-indigo-50" : "border-slate-200 bg-white hover:bg-slate-50"}">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-extrabold">${safeText(c.name||"Client")}</div>
+                <div class="text-xs text-slate-500 mt-1">Primary: ${safeText(c.primaryContact||"—")} • Start: ${fmtDate(c.startDate)}</div>
+              </div>
+              <div class="text-right">
+                ${statusChip(c.status)}
+                <div class="text-xs text-slate-500 mt-2">Open: <span class="font-bold">${money(totals.open)}</span></div>
+              </div>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      wrap.querySelectorAll("[data-client]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const state = load();
+          state.selectedClientId = btn.getAttribute("data-client");
+          state.selectedInvoiceId = null;
+          save(state);
+          renderAll();
+        });
+      });
+    }
+
+    function renderClientDetail(state){
+      const client = getSelectedClient(state);
+
+      const btnEdit = $("btnEditClient");
+      const btnCreateInv = $("btnCreateInvoice");
+      const btnPaid = $("btnMarkPaid");
+      const btnDelInv = $("btnDeleteInvoice");
+      const btnPrint = $("btnPrintInvoice");
+
+      if(!client){
+        $("clientTitle").textContent = "No client selected";
+        $("clientSubtitle").textContent = "Select a client to manage invoices and metrics.";
+        $("mContact").textContent = "—";
+        $("mEmail").textContent = "—";
+        $("mStart").textContent = "—";
+        $("mStatus").innerHTML = "";
+        $("mCharged").textContent = "$0";
+        $("mOpen").textContent = "$0";
+        $("mLastInv").textContent = "Last invoice: —";
+        $("invoiceList").innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No client selected.</div>`;
+        $("printArea").classList.add("hidden");
+
+        [btnEdit, btnCreateInv, btnPaid, btnDelInv, btnPrint].forEach(b => b.disabled = true);
+        return;
+      }
+
+      btnEdit.disabled = false;
+      btnCreateInv.disabled = false;
+
+      $("clientTitle").textContent = client.name || "Client";
+      $("clientSubtitle").textContent = `Goal: ${money(client.goal||0)} • Raised: ${money(client.raised||0)} • Retainer: ${money(client.retainer||0)}`;
+
+      $("mContact").textContent = client.primaryContact || "—";
+      $("mEmail").textContent = client.email || "—";
+      $("mStart").textContent = fmtDate(client.startDate);
+      $("mStatus").innerHTML = statusChip(client.status);
+
+      const totals = clientTotals(state, client.id);
+      $("mCharged").textContent = money(totals.billed);
+      $("mOpen").textContent = money(totals.open);
+      $("mLastInv").textContent = `Last invoice: ${totals.last ? (totals.last.number + " • " + fmtDate(totals.last.issuedDate)) : "—"}`;
+
+      // Invoice list
+      const invs = getClientInvoices(state, client.id);
+      const list = $("invoiceList");
+
+      if(!invs.length){
+        list.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No invoices yet. Click “Create Invoice”.</div>`;
+        state.selectedInvoiceId = null;
+        save(state);
+        [btnPaid, btnDelInv, btnPrint].forEach(b => b.disabled = true);
+        $("printArea").classList.add("hidden");
+        return;
+      }
+
+      list.innerHTML = invs.map(inv=>{
+        const selected = inv.id === state.selectedInvoiceId;
+        return `
+          <button data-inv="${inv.id}" class="w-full text-left grid grid-cols-12 gap-2 px-4 py-3 items-center ${selected ? "bg-indigo-50" : "bg-white hover:bg-slate-50"}">
+            <div class="col-span-2 font-extrabold mono">${safeText(inv.number||"—")}</div>
+            <div class="col-span-3 text-sm">${fmtDate(inv.issuedDate)}</div>
+            <div class="col-span-3 text-sm">${fmtDate(inv.dueDate)}</div>
+            <div class="col-span-2 text-sm font-bold">${money(inv.total||0)}</div>
+            <div class="col-span-2 flex justify-end">${invoiceChip(inv.status)}</div>
+          </button>
+        `;
+      }).join("");
+
+      list.querySelectorAll("[data-inv]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const state = load();
+          state.selectedInvoiceId = btn.getAttribute("data-inv");
+          save(state);
+          renderAll();
+          // show print preview immediately
+          renderPrintPreview(load());
+        });
+      });
+
+      // Enable actions if invoice selected
+      const selectedInv = getSelectedInvoice(state);
+      const hasSelected = !!selectedInv;
+      btnPaid.disabled = !hasSelected;
+      btnDelInv.disabled = !hasSelected;
+      btnPrint.disabled = !hasSelected;
+
+      renderPrintPreview(state);
+    }
+
+    function renderPrintPreview(state){
+      const inv = getSelectedInvoice(state);
+      const client = getSelectedClient(state);
+
+      if(!inv || !client){
+        $("printArea").classList.add("hidden");
+        return;
+      }
+
+      $("printArea").classList.remove("hidden");
+
+      $("pInvNum").textContent = inv.number || "—";
+      $("pIssued").textContent = fmtDate(inv.issuedDate);
+      $("pDue").textContent = fmtDate(inv.dueDate);
+
+      $("pBillTo").textContent = client.name || "Client";
+      $("pBillEmail").textContent = client.email || "—";
+
+      $("pSubtotal").textContent = money(inv.subtotal||0);
+      $("pTax").textContent = money(inv.tax||0);
+      $("pDiscount").textContent = money(inv.discount||0);
+      $("pTotal").textContent = money(inv.total||0);
+
+      const lines = inv.lines || [];
+      $("pLines").innerHTML = lines.length ? lines.map(l => {
+        const amt = Number(l.qty||0) * Number(l.rate||0);
+        return `
+          <div class="grid grid-cols-12 gap-2 px-4 py-3 items-center">
+            <div class="col-span-7">${safeText(l.desc||"—")}</div>
+            <div class="col-span-2 text-right mono">${Number(l.qty||0)}</div>
+            <div class="col-span-3 text-right mono">${money(amt)}</div>
+          </div>
+        `;
+      }).join("") : `<div class="px-4 py-6 text-sm text-slate-500">No line items.</div>`;
+
+      $("pNotes").textContent = inv.notes || "—";
+    }
+
+    // =========================================================
+    // Client Modal
+    // =========================================================
+    const clientModal = $("clientModal");
+    let editingClientId = null;
+
+    function openClientModal(mode){
+      clientModal.classList.remove("hidden");
+      clientModal.classList.add("flex");
+
+      const state = load();
+      const client = (mode === "edit") ? getSelectedClient(state) : null;
+
+      editingClientId = client ? client.id : null;
+      $("clientModalTitle").textContent = client ? "Edit Client" : "New Client";
+
+      $("cName").value = client?.name || "";
+      $("cStatus").value = client?.status || "active";
+      $("cContact").value = client?.primaryContact || "";
+      $("cEmail").value = client?.email || "";
+      $("cStart").value = client?.startDate ? client.startDate.slice(0,10) : "";
+      $("cRetainer").value = (client?.retainer ?? "");
+      $("cGoal").value = (client?.goal ?? 5000000);
+      $("cRaised").value = (client?.raised ?? 0);
+    }
+
+    function closeClientModal(){
+      clientModal.classList.add("hidden");
+      clientModal.classList.remove("flex");
+    }
+
+    document.querySelectorAll(".closeClient").forEach(b => b.addEventListener("click", closeClientModal));
+    clientModal.addEventListener("click", (e)=>{ if(e.target === clientModal) closeClientModal(); });
+
+    $("btnAddClient").addEventListener("click", ()=>openClientModal("new"));
+    $("btnEditClient").addEventListener("click", ()=>openClientModal("edit"));
+
+    $("saveClient").addEventListener("click", ()=>{
+      const name = $("cName").value.trim();
+      if(!name){ alert("Client name is required."); return; }
+
+      const state = load();
+      const payload = {
+        name,
+        status: $("cStatus").value,
+        primaryContact: $("cContact").value.trim(),
+        email: $("cEmail").value.trim(),
+        startDate: $("cStart").value ? new Date($("cStart").value).toISOString() : "",
+        retainer: Number($("cRetainer").value || 0),
+        goal: Number($("cGoal").value || 0),
+        raised: Number($("cRaised").value || 0),
+        updatedAt: nowISO()
+      };
+
+      if(editingClientId){
+        const idx = (state.clients||[]).findIndex(c => c.id === editingClientId);
+        if(idx >= 0){
+          state.clients[idx] = { ...state.clients[idx], ...payload };
+        }
+      } else {
+        const id = "cli_" + Math.random().toString(16).slice(2);
+        state.clients = state.clients || [];
+        state.clients.unshift({
+          id,
+          createdAt: nowISO(),
+          ...payload
+        });
+        state.selectedClientId = id;
+        state.selectedInvoiceId = null;
+      }
+
+      save(state);
+      closeClientModal();
+      renderAll();
+    });
+
+    // =========================================================
+    // Invoice Modal
+    // =========================================================
+    const invoiceModal = $("invoiceModal");
+
+    function openInvoiceModal(){
+      const state = load();
+      const client = getSelectedClient(state);
+      if(!client) return;
+
+      invoiceModal.classList.remove("hidden");
+      invoiceModal.classList.add("flex");
+
+      // Prefill
+      $("iNumber").value = genInvoiceNumber(state);
+      const today = new Date();
+      const due = new Date(today.getTime() + 14*24*3600*1000);
+      $("iIssued").value = today.toISOString().slice(0,10);
+      $("iDue").value = due.toISOString().slice(0,10);
+      $("iTax").value = "0";
+      $("iDiscount").value = "0";
+      $("iStatus").value = "open";
+      $("iNotes").value = "";
+
+      // Start with one line: retainer if present
+      $("lineItems").innerHTML = "";
+      const baseLines = [];
+      if(Number(client.retainer||0) > 0){
+        baseLines.push({ desc: "Monthly retainer", qty: 1, rate: Number(client.retainer||0) });
+      } else {
+        baseLines.push({ desc: "Consulting services", qty: 1, rate: 0 });
+      }
+      baseLines.forEach(addLineRow);
+
+      recomputeInvoiceTotals();
+    }
+
+    function closeInvoiceModal(){
+      invoiceModal.classList.add("hidden");
+      invoiceModal.classList.remove("flex");
+    }
+
+    document.querySelectorAll(".closeInvoice").forEach(b => b.addEventListener("click", closeInvoiceModal));
+    invoiceModal.addEventListener("click", (e)=>{ if(e.target === invoiceModal) closeInvoiceModal(); });
+
+    $("btnCreateInvoice").addEventListener("click", openInvoiceModal);
+
+    function addLineRow(initial){
+      const row = document.createElement("div");
+      row.className = "grid grid-cols-12 gap-2 px-3 py-2 border-b border-slate-200";
+      row.innerHTML = `
+        <div class="col-span-7">
+          <input class="li-desc w-full px-3 py-2 rounded-xl border border-slate-200" placeholder="Description" value="${safeText(initial?.desc||"")}" />
+        </div>
+        <div class="col-span-2">
+          <input class="li-qty w-full px-3 py-2 rounded-xl border border-slate-200 text-right mono" type="number" min="0" step="1" value="${Number(initial?.qty||1)}" />
+        </div>
+        <div class="col-span-2">
+          <input class="li-rate w-full px-3 py-2 rounded-xl border border-slate-200 text-right mono" type="number" min="0" step="0.01" value="${Number(initial?.rate||0)}" />
+        </div>
+        <div class="col-span-1 flex justify-end">
+          <button class="li-del px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">✕</button>
+        </div>
+      `;
+      $("lineItems").appendChild(row);
+
+      row.querySelectorAll("input").forEach(inp => inp.addEventListener("input", recomputeInvoiceTotals));
+      row.querySelector(".li-del").addEventListener("click", ()=>{
+        row.remove();
+        recomputeInvoiceTotals();
+      });
+    }
+
+    $("addLine").addEventListener("click", ()=>addLineRow({desc:"", qty:1, rate:0}));
+
+    ["iTax","iDiscount"].forEach(id => $(id).addEventListener("input", recomputeInvoiceTotals));
+
+    function getLineItemsFromUI(){
+      const rows = Array.from($("lineItems").children);
+      return rows.map(r => {
+        const desc = r.querySelector(".li-desc").value.trim();
+        const qty = Number(r.querySelector(".li-qty").value || 0);
+        const rate = Number(r.querySelector(".li-rate").value || 0);
+        return { desc, qty, rate };
+      }).filter(l => l.desc || l.qty || l.rate);
+    }
+
+    function recomputeInvoiceTotals(){
+      const lines = getLineItemsFromUI();
+      const tax = Number($("iTax").value || 0);
+      const discount = Number($("iDiscount").value || 0);
+      const { subtotal, total } = calcInvoice(lines, tax, discount);
+      $("iSubtotal").textContent = money(subtotal);
+      $("iTotal").textContent = money(total);
+    }
+
+    $("saveInvoice").addEventListener("click", ()=>{
+      const state = load();
+      const client = getSelectedClient(state);
+      if(!client){ alert("Select a client first."); return; }
+
+      const number = $("iNumber").value.trim();
+      const issuedDate = $("iIssued").value ? new Date($("iIssued").value).toISOString() : "";
+      const dueDate = $("iDue").value ? new Date($("iDue").value).toISOString() : "";
+      const status = $("iStatus").value;
+
+      const lines = getLineItemsFromUI();
+      if(!lines.length){ alert("Add at least one line item."); return; }
+
+      const tax = Number($("iTax").value || 0);
+      const discount = Number($("iDiscount").value || 0);
+      const notes = $("iNotes").value.trim();
+      const { subtotal, total } = calcInvoice(lines, tax, discount);
+
+      const inv = {
+        id: "inv_" + Math.random().toString(16).slice(2),
+        clientId: client.id,
+        number,
+        issuedDate,
+        dueDate,
+        status,
+        lines,
+        tax,
+        discount,
+        notes,
+        subtotal,
+        total,
+        createdAt: nowISO(),
+        updatedAt: nowISO(),
+        paidAt: status === "paid" ? nowISO() : ""
+      };
+
+      state.invoices = state.invoices || [];
+      state.invoices.unshift(inv);
+      state.selectedInvoiceId = inv.id;
+
+      save(state);
+      closeInvoiceModal();
+      renderAll();
+      renderPrintPreview(load());
+    });
+
+    // =========================================================
+    // Invoice actions
+    // =========================================================
+    $("btnMarkPaid").addEventListener("click", ()=>{
+      const state = load();
+      const inv = getSelectedInvoice(state);
+      if(!inv) return;
+      const idx = state.invoices.findIndex(i => i.id === inv.id);
+      if(idx >= 0){
+        state.invoices[idx].status = "paid";
+        state.invoices[idx].paidAt = nowISO();
+        state.invoices[idx].updatedAt = nowISO();
+      }
+      save(state);
+      renderAll();
+    });
+
+    $("btnDeleteInvoice").addEventListener("click", ()=>{
+      const state = load();
+      const inv = getSelectedInvoice(state);
+      if(!inv) return;
+      if(!confirm("Delete this invoice?")) return;
+      state.invoices = (state.invoices||[]).filter(i => i.id !== inv.id);
+      state.selectedInvoiceId = null;
+      save(state);
+      renderAll();
+    });
+
+    $("btnPrintInvoice").addEventListener("click", ()=>{
+      // Make sure preview is visible, then print
+      const state = load();
+      renderPrintPreview(state);
+      window.print();
+    });
+
+    // =========================================================
+    // Search / Filter
+    // =========================================================
+    $("clientSearch").addEventListener("input", ()=>renderClients(load()));
+    $("clientFilter").addEventListener("change", ()=>renderClients(load()));
+
+    // =========================================================
+    // Header utilities
+    // =========================================================
+    $("btnReset").addEventListener("click", ()=>{
+      if(!confirm("Reset all admin data (clients + invoices)?")) return;
+      localStorage.removeItem(LS_KEY);
+      renderAll();
+    });
+
+    $("btnExportData").addEventListener("click", ()=>{
+      const state = load();
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type:"application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "atmilio_admin_export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    $("btnSeedDemo").addEventListener("click", ()=>{
+      const state = load();
+      if((state.clients||[]).length && !confirm("Demo data will be added/merged. Continue?")) return;
+
+      const demoClient = {
+        id: "cli_demo_completeintake",
+        name: "CompleteIntake",
+        status: "active",
+        primaryContact: "Denish (CEO)",
+        email: "denish@completeintake.com",
+        startDate: new Date().toISOString(),
+        retainer: 3000,
+        goal: 5000000,
+        raised: 0,
+        createdAt: nowISO(),
+        updatedAt: nowISO()
+      };
+
+      state.clients = state.clients || [];
+      if(!state.clients.find(c => c.id === demoClient.id)){
+        state.clients.unshift(demoClient);
+      }
+
+      // One demo invoice
+      state.invoices = state.invoices || [];
+      if(!state.invoices.find(i => i.number === "ATM-00001")){
+        const inv = {
+          id: "inv_demo_1",
+          clientId: demoClient.id,
+          number: "ATM-00001",
+          issuedDate: new Date().toISOString(),
+          dueDate: new Date(Date.now() + 14*24*3600*1000).toISOString(),
+          status: "open",
+          lines: [{ desc: "Monthly retainer", qty: 1, rate: 3000 }],
+          tax: 0,
+          discount: 0,
+          notes: "Retainer for fundraising support & portal access.",
+          subtotal: 3000,
+          total: 3000,
+          createdAt: nowISO(),
+          updatedAt: nowISO(),
+          paidAt: ""
+        };
+        state.invoices.unshift(inv);
+      }
+
+      state.selectedClientId = demoClient.id;
+      state.selectedInvoiceId = state.invoices.find(i => i.clientId === demoClient.id)?.id || null;
+
+      save(state);
+      renderAll();
+    });
+
+    // =========================================================
+    // Boot
+    // =========================================================
+    renderAll();
+  </script>
+</body>
+</html>
 
