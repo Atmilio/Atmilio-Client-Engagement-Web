@@ -152,8 +152,13 @@
             <button id="btnDeleteInvoice" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
               Delete Selected Invoice
             </button>
+
+            <!-- Split buttons as requested -->
             <button id="btnPrintInvoice" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800" disabled>
-              Print / Save PDF
+              Print
+            </button>
+            <button id="btnSaveInvoice" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
+              Save
             </button>
           </div>
 
@@ -298,17 +303,37 @@
         <button class="closeInvoice px-3 py-1 rounded-xl border border-slate-200 font-bold">✕</button>
       </div>
 
-      <div class="mt-4 grid md:grid-cols-3 gap-3">
+      <div class="mt-4 grid md:grid-cols-4 gap-3">
         <div>
           <label class="text-xs font-bold text-slate-600">Invoice #</label>
           <input id="iNumber" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 mono font-bold" />
         </div>
+
         <div>
           <label class="text-xs font-bold text-slate-600">Issued Date</label>
           <input id="iIssued" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold" />
         </div>
+
+        <!-- Pay Period / Terms -->
         <div>
-          <label class="text-xs font-bold text-slate-600">Due Date</label>
+          <label class="text-xs font-bold text-slate-600">Pay Period (Terms)</label>
+          <select id="iTerms" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
+            <option value="7">Net 7</option>
+            <option value="14" selected>Net 14</option>
+            <option value="30">Net 30</option>
+            <option value="45">Net 45</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+
+        <div id="termsCustomWrap" class="hidden">
+          <label class="text-xs font-bold text-slate-600">Custom days</label>
+          <input id="iCustomDays" type="number" min="0" step="1"
+            class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold" value="14" />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-600">Due Date (auto)</label>
           <input id="iDue" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold" />
         </div>
 
@@ -329,7 +354,7 @@
           </select>
         </div>
 
-        <div class="md:col-span-3">
+        <div class="md:col-span-4">
           <label class="text-xs font-bold text-slate-600">Line Items</label>
           <div class="mt-2 overflow-hidden rounded-2xl border border-slate-200">
             <div class="grid grid-cols-12 gap-2 px-3 py-2 text-xs font-bold text-slate-500 bg-slate-50 border-b border-slate-200">
@@ -343,7 +368,7 @@
           <button id="addLine" class="mt-3 px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">+ Add line</button>
         </div>
 
-        <div class="md:col-span-3">
+        <div class="md:col-span-4">
           <label class="text-xs font-bold text-slate-600">Notes</label>
           <textarea id="iNotes" rows="3" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-slate-200"
             placeholder="Payment terms, deliverables, etc."></textarea>
@@ -365,30 +390,11 @@
   <script>
     // =========================================================
     // Atmilio Admin Management (front-end demo)
-    // - Clients + invoices stored in localStorage
-    // - Print invoice preview + browser print -> Save as PDF
     // =========================================================
-    const LS_KEY = "atmilio_admin_store_v1";
+    const LS_KEY = "atmilio_admin_store_v2_terms_saveprint";
     const $ = (id) => document.getElementById(id);
 
-    const DEFAULT = {
-      clients: [
-        // example shape:
-        // {
-        //  id, name, status, primaryContact, email, startDate, retainer, goal, raised,
-        //  createdAt, updatedAt
-        // }
-      ],
-      invoices: [
-        // {
-        //  id, clientId, number, issuedDate, dueDate, status,
-        //  lines:[{desc, qty, rate}], tax, discount, notes,
-        //  subtotal, total, createdAt, updatedAt, paidAt
-        // }
-      ],
-      selectedClientId: null,
-      selectedInvoiceId: null
-    };
+    const DEFAULT = { clients: [], invoices: [], selectedClientId: null, selectedInvoiceId: null };
 
     function clone(x){ return JSON.parse(JSON.stringify(x)); }
     function load(){
@@ -398,12 +404,8 @@
     }
     function save(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
 
-    function money(n){
-      return (Number(n)||0).toLocaleString("en-US",{style:"currency",currency:"USD"});
-    }
-    function safeText(s){
-      return String(s||"").replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]));
-    }
+    function money(n){ return (Number(n)||0).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
+    function safeText(s){ return String(s||"").replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c])); }
     function fmtDate(d){
       if(!d) return "—";
       const dt = new Date(d);
@@ -413,7 +415,6 @@
     function nowISO(){ return new Date().toISOString(); }
 
     function genInvoiceNumber(state){
-      // simple sequence: ATM-00001
       const nums = (state.invoices||[])
         .map(i => i.number || "")
         .filter(n => /^ATM-\d{5}$/.test(n))
@@ -423,36 +424,25 @@
     }
 
     function calcInvoice(lines, tax, discount){
-      const subtotal = (lines||[]).reduce((sum, l) => {
-        const qty = Number(l.qty||0);
-        const rate = Number(l.rate||0);
-        return sum + (qty * rate);
-      }, 0);
-
+      const subtotal = (lines||[]).reduce((sum, l) => sum + (Number(l.qty||0) * Number(l.rate||0)), 0);
       const t = Number(tax||0);
       const disc = Number(discount||0);
       const total = Math.max(0, subtotal + t - disc);
       return { subtotal, total };
     }
 
-    function getSelectedClient(state){
-      return (state.clients||[]).find(c => c.id === state.selectedClientId) || null;
-    }
+    function getSelectedClient(state){ return (state.clients||[]).find(c => c.id === state.selectedClientId) || null; }
     function getClientInvoices(state, clientId){
       return (state.invoices||[]).filter(i => i.clientId === clientId).sort((a,b) => (b.createdAt||"").localeCompare(a.createdAt||""));
     }
-    function getSelectedInvoice(state){
-      return (state.invoices||[]).find(i => i.id === state.selectedInvoiceId) || null;
-    }
+    function getSelectedInvoice(state){ return (state.invoices||[]).find(i => i.id === state.selectedInvoiceId) || null; }
 
     function clientTotals(state, clientId){
       const invs = getClientInvoices(state, clientId);
       const billed = invs.filter(i => i.status !== "void").reduce((s,i)=>s + Number(i.total||0), 0);
-      const paid = invs.filter(i => i.status === "paid").reduce((s,i)=>s + Number(i.total||0), 0);
       const open = invs.filter(i => i.status === "open").reduce((s,i)=>s + Number(i.total||0), 0);
       const last = invs.length ? invs[0] : null;
-      const openCount = invs.filter(i => i.status === "open").length;
-      return { billed, paid, open, last, openCount };
+      return { billed, open, last };
     }
 
     function statusChip(status){
@@ -469,6 +459,36 @@
     }
 
     // =========================================================
+    // NEW: Pay period -> due date generator
+    // =========================================================
+    function addDaysToDateInput(dateStr, days){
+      if(!dateStr) return "";
+      const base = new Date(dateStr + "T00:00:00");
+      if(isNaN(base.getTime())) return "";
+      base.setDate(base.getDate() + Number(days||0));
+      return base.toISOString().slice(0,10);
+    }
+
+    function getTermsDays(){
+      const terms = $("iTerms").value;
+      if(terms === "custom") return Math.max(0, Number($("iCustomDays").value || 0));
+      return Math.max(0, Number(terms || 0));
+    }
+
+    function syncDueDate(){
+      const issued = $("iIssued").value;
+      const days = getTermsDays();
+      const due = addDaysToDateInput(issued, days);
+      if(due) $("iDue").value = due;
+    }
+
+    function toggleCustomTerms(){
+      const isCustom = $("iTerms").value === "custom";
+      $("termsCustomWrap").classList.toggle("hidden", !isCustom);
+      syncDueDate();
+    }
+
+    // =========================================================
     // Render
     // =========================================================
     function renderAll(){
@@ -480,27 +500,17 @@
     }
 
     function renderKPIs(state){
-      const clients = state.clients || [];
-      $("kpiClients").textContent = String(clients.length);
-
-      const mrr = clients
-        .filter(c => c.status === "active")
-        .reduce((s,c)=> s + Number(c.retainer||0), 0);
+      $("kpiClients").textContent = String((state.clients||[]).length);
+      const mrr = (state.clients||[]).filter(c => c.status === "active").reduce((s,c)=> s + Number(c.retainer||0), 0);
       $("kpiMRR").textContent = money(mrr);
-
-      const openInv = (state.invoices||[]).filter(i => i.status === "open").length;
-      $("kpiOpenInv").textContent = String(openInv);
-
-      const lifetime = (state.invoices||[])
-        .filter(i => i.status !== "void")
-        .reduce((s,i)=> s + Number(i.total||0), 0);
+      $("kpiOpenInv").textContent = String((state.invoices||[]).filter(i => i.status === "open").length);
+      const lifetime = (state.invoices||[]).filter(i => i.status !== "void").reduce((s,i)=> s + Number(i.total||0), 0);
       $("kpiLifetime").textContent = money(lifetime);
     }
 
     function renderClients(state){
       const q = ($("clientSearch").value||"").toLowerCase().trim();
       const f = $("clientFilter").value || "all";
-
       const clients = (state.clients||[])
         .filter(c => !q || String(c.name||"").toLowerCase().includes(q))
         .filter(c => f === "all" ? true : (c.status === f))
@@ -515,7 +525,6 @@
       wrap.innerHTML = clients.map(c=>{
         const sel = (c.id === state.selectedClientId);
         const totals = clientTotals(state, c.id);
-
         return `
           <button data-client="${c.id}" class="w-full text-left p-3 rounded-2xl border ${sel ? "border-indigo-300 bg-indigo-50" : "border-slate-200 bg-white hover:bg-slate-50"}">
             <div class="flex items-start justify-between gap-3">
@@ -534,10 +543,10 @@
 
       wrap.querySelectorAll("[data-client]").forEach(btn=>{
         btn.addEventListener("click", ()=>{
-          const state = load();
-          state.selectedClientId = btn.getAttribute("data-client");
-          state.selectedInvoiceId = null;
-          save(state);
+          const st = load();
+          st.selectedClientId = btn.getAttribute("data-client");
+          st.selectedInvoiceId = null;
+          save(st);
           renderAll();
         });
       });
@@ -551,6 +560,7 @@
       const btnPaid = $("btnMarkPaid");
       const btnDelInv = $("btnDeleteInvoice");
       const btnPrint = $("btnPrintInvoice");
+      const btnSave = $("btnSaveInvoice");
 
       if(!client){
         $("clientTitle").textContent = "No client selected";
@@ -564,8 +574,7 @@
         $("mLastInv").textContent = "Last invoice: —";
         $("invoiceList").innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No client selected.</div>`;
         $("printArea").classList.add("hidden");
-
-        [btnEdit, btnCreateInv, btnPaid, btnDelInv, btnPrint].forEach(b => b.disabled = true);
+        [btnEdit, btnCreateInv, btnPaid, btnDelInv, btnPrint, btnSave].forEach(b => b.disabled = true);
         return;
       }
 
@@ -585,7 +594,6 @@
       $("mOpen").textContent = money(totals.open);
       $("mLastInv").textContent = `Last invoice: ${totals.last ? (totals.last.number + " • " + fmtDate(totals.last.issuedDate)) : "—"}`;
 
-      // Invoice list
       const invs = getClientInvoices(state, client.id);
       const list = $("invoiceList");
 
@@ -593,7 +601,7 @@
         list.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No invoices yet. Click “Create Invoice”.</div>`;
         state.selectedInvoiceId = null;
         save(state);
-        [btnPaid, btnDelInv, btnPrint].forEach(b => b.disabled = true);
+        [btnPaid, btnDelInv, btnPrint, btnSave].forEach(b => b.disabled = true);
         $("printArea").classList.add("hidden");
         return;
       }
@@ -613,21 +621,20 @@
 
       list.querySelectorAll("[data-inv]").forEach(btn=>{
         btn.addEventListener("click", ()=>{
-          const state = load();
-          state.selectedInvoiceId = btn.getAttribute("data-inv");
-          save(state);
+          const st = load();
+          st.selectedInvoiceId = btn.getAttribute("data-inv");
+          save(st);
           renderAll();
-          // show print preview immediately
           renderPrintPreview(load());
         });
       });
 
-      // Enable actions if invoice selected
       const selectedInv = getSelectedInvoice(state);
       const hasSelected = !!selectedInv;
       btnPaid.disabled = !hasSelected;
       btnDelInv.disabled = !hasSelected;
       btnPrint.disabled = !hasSelected;
+      btnSave.disabled = !hasSelected;
 
       renderPrintPreview(state);
     }
@@ -635,18 +642,12 @@
     function renderPrintPreview(state){
       const inv = getSelectedInvoice(state);
       const client = getSelectedClient(state);
-
-      if(!inv || !client){
-        $("printArea").classList.add("hidden");
-        return;
-      }
+      if(!inv || !client){ $("printArea").classList.add("hidden"); return; }
 
       $("printArea").classList.remove("hidden");
-
       $("pInvNum").textContent = inv.number || "—";
       $("pIssued").textContent = fmtDate(inv.issuedDate);
       $("pDue").textContent = fmtDate(inv.dueDate);
-
       $("pBillTo").textContent = client.name || "Client";
       $("pBillEmail").textContent = client.email || "—";
 
@@ -680,8 +681,8 @@
       clientModal.classList.remove("hidden");
       clientModal.classList.add("flex");
 
-      const state = load();
-      const client = (mode === "edit") ? getSelectedClient(state) : null;
+      const st = load();
+      const client = (mode === "edit") ? getSelectedClient(st) : null;
 
       editingClientId = client ? client.id : null;
       $("clientModalTitle").textContent = client ? "Edit Client" : "New Client";
@@ -711,7 +712,7 @@
       const name = $("cName").value.trim();
       if(!name){ alert("Client name is required."); return; }
 
-      const state = load();
+      const st = load();
       const payload = {
         name,
         status: $("cStatus").value,
@@ -725,23 +726,17 @@
       };
 
       if(editingClientId){
-        const idx = (state.clients||[]).findIndex(c => c.id === editingClientId);
-        if(idx >= 0){
-          state.clients[idx] = { ...state.clients[idx], ...payload };
-        }
+        const idx = (st.clients||[]).findIndex(c => c.id === editingClientId);
+        if(idx >= 0) st.clients[idx] = { ...st.clients[idx], ...payload };
       } else {
         const id = "cli_" + Math.random().toString(16).slice(2);
-        state.clients = state.clients || [];
-        state.clients.unshift({
-          id,
-          createdAt: nowISO(),
-          ...payload
-        });
-        state.selectedClientId = id;
-        state.selectedInvoiceId = null;
+        st.clients = st.clients || [];
+        st.clients.unshift({ id, createdAt: nowISO(), ...payload });
+        st.selectedClientId = id;
+        st.selectedInvoiceId = null;
       }
 
-      save(state);
+      save(st);
       closeClientModal();
       renderAll();
     });
@@ -752,35 +747,35 @@
     const invoiceModal = $("invoiceModal");
 
     function openInvoiceModal(){
-      const state = load();
-      const client = getSelectedClient(state);
+      const st = load();
+      const client = getSelectedClient(st);
       if(!client) return;
 
       invoiceModal.classList.remove("hidden");
       invoiceModal.classList.add("flex");
 
-      // Prefill
-      $("iNumber").value = genInvoiceNumber(state);
+      $("iNumber").value = genInvoiceNumber(st);
       const today = new Date();
-      const due = new Date(today.getTime() + 14*24*3600*1000);
       $("iIssued").value = today.toISOString().slice(0,10);
-      $("iDue").value = due.toISOString().slice(0,10);
+
+      // Default terms
+      $("iTerms").value = "14";
+      $("iCustomDays").value = "14";
+      toggleCustomTerms(); // also sets due
+
       $("iTax").value = "0";
       $("iDiscount").value = "0";
       $("iStatus").value = "open";
       $("iNotes").value = "";
 
-      // Start with one line: retainer if present
       $("lineItems").innerHTML = "";
       const baseLines = [];
-      if(Number(client.retainer||0) > 0){
-        baseLines.push({ desc: "Monthly retainer", qty: 1, rate: Number(client.retainer||0) });
-      } else {
-        baseLines.push({ desc: "Consulting services", qty: 1, rate: 0 });
-      }
+      if(Number(client.retainer||0) > 0) baseLines.push({ desc: "Monthly retainer", qty: 1, rate: Number(client.retainer||0) });
+      else baseLines.push({ desc: "Consulting services", qty: 1, rate: 0 });
       baseLines.forEach(addLineRow);
 
       recomputeInvoiceTotals();
+      syncDueDate();
     }
 
     function closeInvoiceModal(){
@@ -820,7 +815,6 @@
     }
 
     $("addLine").addEventListener("click", ()=>addLineRow({desc:"", qty:1, rate:0}));
-
     ["iTax","iDiscount"].forEach(id => $(id).addEventListener("input", recomputeInvoiceTotals));
 
     function getLineItemsFromUI(){
@@ -842,9 +836,14 @@
       $("iTotal").textContent = money(total);
     }
 
+    // Hook terms and issued changes -> due update
+    $("iTerms").addEventListener("change", toggleCustomTerms);
+    $("iCustomDays").addEventListener("input", syncDueDate);
+    $("iIssued").addEventListener("change", syncDueDate);
+
     $("saveInvoice").addEventListener("click", ()=>{
-      const state = load();
-      const client = getSelectedClient(state);
+      const st = load();
+      const client = getSelectedClient(st);
       if(!client){ alert("Select a client first."); return; }
 
       const number = $("iNumber").value.trim();
@@ -866,6 +865,7 @@
         number,
         issuedDate,
         dueDate,
+        termsDays: getTermsDays(),
         status,
         lines,
         tax,
@@ -878,11 +878,11 @@
         paidAt: status === "paid" ? nowISO() : ""
       };
 
-      state.invoices = state.invoices || [];
-      state.invoices.unshift(inv);
-      state.selectedInvoiceId = inv.id;
+      st.invoices = st.invoices || [];
+      st.invoices.unshift(inv);
+      st.selectedInvoiceId = inv.id;
 
-      save(state);
+      save(st);
       closeInvoiceModal();
       renderAll();
       renderPrintPreview(load());
@@ -892,35 +892,75 @@
     // Invoice actions
     // =========================================================
     $("btnMarkPaid").addEventListener("click", ()=>{
-      const state = load();
-      const inv = getSelectedInvoice(state);
+      const st = load();
+      const inv = getSelectedInvoice(st);
       if(!inv) return;
-      const idx = state.invoices.findIndex(i => i.id === inv.id);
+      const idx = st.invoices.findIndex(i => i.id === inv.id);
       if(idx >= 0){
-        state.invoices[idx].status = "paid";
-        state.invoices[idx].paidAt = nowISO();
-        state.invoices[idx].updatedAt = nowISO();
+        st.invoices[idx].status = "paid";
+        st.invoices[idx].paidAt = nowISO();
+        st.invoices[idx].updatedAt = nowISO();
       }
-      save(state);
+      save(st);
       renderAll();
     });
 
     $("btnDeleteInvoice").addEventListener("click", ()=>{
-      const state = load();
-      const inv = getSelectedInvoice(state);
+      const st = load();
+      const inv = getSelectedInvoice(st);
       if(!inv) return;
       if(!confirm("Delete this invoice?")) return;
-      state.invoices = (state.invoices||[]).filter(i => i.id !== inv.id);
-      state.selectedInvoiceId = null;
-      save(state);
+      st.invoices = (st.invoices||[]).filter(i => i.id !== inv.id);
+      st.selectedInvoiceId = null;
+      save(st);
       renderAll();
     });
 
+    // Print is separate
     $("btnPrintInvoice").addEventListener("click", ()=>{
-      // Make sure preview is visible, then print
-      const state = load();
-      renderPrintPreview(state);
+      const st = load();
+      renderPrintPreview(st);
       window.print();
+    });
+
+    // Save is separate: downloads invoice HTML (clean + printable)
+    $("btnSaveInvoice").addEventListener("click", ()=>{
+      const st = load();
+      const inv = getSelectedInvoice(st);
+      const client = getSelectedClient(st);
+      if(!inv || !client) return;
+
+      // Use the current printArea HTML as the exported invoice body
+      renderPrintPreview(st);
+      const content = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Invoice ${safeText(inv.number||"")}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#0f172a;}
+  .card{border:1px solid #e2e8f0;border-radius:16px;padding:20px;}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
+  @media print{ body{margin:0} .card{border:none} }
+</style>
+</head>
+<body>
+  <div class="card">
+    ${document.getElementById("printArea").innerHTML}
+  </div>
+</body>
+</html>`.trim();
+
+      const blob = new Blob([content], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoice_${(inv.number||"ATM").replace(/[^A-Za-z0-9-_]/g,"")}_${(client.name||"client").replace(/[^A-Za-z0-9-_]/g,"")}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
     });
 
     // =========================================================
@@ -939,8 +979,8 @@
     });
 
     $("btnExportData").addEventListener("click", ()=>{
-      const state = load();
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type:"application/json" });
+      const st = load();
+      const blob = new Blob([JSON.stringify(st, null, 2)], { type:"application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -950,8 +990,8 @@
     });
 
     $("btnSeedDemo").addEventListener("click", ()=>{
-      const state = load();
-      if((state.clients||[]).length && !confirm("Demo data will be added/merged. Continue?")) return;
+      const st = load();
+      if((st.clients||[]).length && !confirm("Demo data will be added/merged. Continue?")) return;
 
       const demoClient = {
         id: "cli_demo_completeintake",
@@ -967,20 +1007,20 @@
         updatedAt: nowISO()
       };
 
-      state.clients = state.clients || [];
-      if(!state.clients.find(c => c.id === demoClient.id)){
-        state.clients.unshift(demoClient);
+      st.clients = st.clients || [];
+      if(!st.clients.find(c => c.id === demoClient.id)){
+        st.clients.unshift(demoClient);
       }
 
-      // One demo invoice
-      state.invoices = state.invoices || [];
-      if(!state.invoices.find(i => i.number === "ATM-00001")){
+      st.invoices = st.invoices || [];
+      if(!st.invoices.find(i => i.number === "ATM-00001")){
         const inv = {
           id: "inv_demo_1",
           clientId: demoClient.id,
           number: "ATM-00001",
           issuedDate: new Date().toISOString(),
           dueDate: new Date(Date.now() + 14*24*3600*1000).toISOString(),
+          termsDays: 14,
           status: "open",
           lines: [{ desc: "Monthly retainer", qty: 1, rate: 3000 }],
           tax: 0,
@@ -992,13 +1032,13 @@
           updatedAt: nowISO(),
           paidAt: ""
         };
-        state.invoices.unshift(inv);
+        st.invoices.unshift(inv);
       }
 
-      state.selectedClientId = demoClient.id;
-      state.selectedInvoiceId = state.invoices.find(i => i.clientId === demoClient.id)?.id || null;
+      st.selectedClientId = demoClient.id;
+      st.selectedInvoiceId = st.invoices.find(i => i.clientId === demoClient.id)?.id || null;
 
-      save(state);
+      save(st);
       renderAll();
     });
 
@@ -1009,4 +1049,3 @@
   </script>
 </body>
 </html>
-
