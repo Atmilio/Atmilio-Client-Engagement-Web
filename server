@@ -368,6 +368,16 @@ app.get('/api/reports/:type', authenticateToken, async (req, res) => {
   }
 });
 
+
+
+// --- Document Upload API ---
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/api/documents', require('./src/documentUpload'));
+
+// --- Meetings API ---
+app.use('/api/meetings', require('./src/meetings'));
+
 // Start the server
 app.listen(port, () => {
   console.log(`Backend server listening at http://localhost:${port}`);

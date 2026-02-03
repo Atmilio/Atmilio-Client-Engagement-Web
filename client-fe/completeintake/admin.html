@@ -23,102 +23,33 @@
         </div>
     </header>
     <main class="flex-1 w-full max-w-3xl mx-auto py-12 px-4 md:px-8">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-8">Update Portal Data</h1>
-        <form id="adminForm" class="space-y-8">
-            <div>
-                <label class="block font-semibold mb-2">Amount Raised ($)</label>
-                <input type="number" id="raised" name="raised" min="0" step="1000" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" required>
-            </div>
-            <div>
-                <label class="block font-semibold mb-2">Add Update</label>
-                <textarea id="updateText" name="updateText" rows="3" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3"></textarea>
-            </div>
-            <div>
-                <label class="block font-semibold mb-2">Uploaded Documents</label>
-                <ul id="adminDocumentsList" class="mb-4 space-y-2"></ul>
-                <label class="block font-semibold mb-2">Add Document (URL and Title)</label>
-                <div class="flex space-x-2">
-                    <input type="url" id="docUrl" placeholder="Document URL" class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3">
-                    <input type="text" id="docTitle" placeholder="Title" class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3">
-                </div>
-            </div>
-            <div>
-                <label class="block font-semibold mb-2">Upcoming Meetings</label>
-                <div id="meetingsList" class="space-y-2 mb-2"></div>
-                <div class="flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0">
-                    <input type="date" id="meetingDate" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" placeholder="Date">
-                    <input type="text" id="meetingFirm" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" placeholder="Firm">
-                    <input type="text" id="meetingIndividual" class="rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3" placeholder="Individual">
-                    <button type="button" id="addMeetingBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Add Meeting</button>
-                </div>
-            </div>
-            <button type="submit" class="w-full py-3 rounded-lg text-lg font-bold bg-gradient-to-r from-purple-600 to-indigo-500 text-white shadow-md hover:from-purple-700 hover:to-indigo-600 transition-all">Save Updates</button>
-        </form>
-        <div id="statusMsg" class="mt-6 text-center text-green-700 font-semibold hidden">Saved! Refresh the client portal to see changes.</div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-8">Admin Portal</h1>
+        <section class="mb-8">
+            <label class="block font-semibold mb-2">Select Client</label>
+            <select id="clientSelect" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3 mb-4"></select>
+            <div class="text-gray-700 mb-2">Current Cost Tracking: <span id="clientCost" class="font-semibold text-indigo-700"></span></div>
+        </section>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-purple-600 mb-4">Generate Invoice</h2>
+            <div class="mb-2">Client: <span id="invoiceClientName" class="font-semibold"></span></div>
+            <button id="generateInvoiceBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 mb-4">Generate Invoice</button>
+            <section id="invoiceSection" class="hidden bg-white rounded-lg shadow-md p-6 mt-4">
+                <h3 class="text-xl font-bold mb-2">Invoice</h3>
+                <table class="w-full mb-4 border">
+                    <thead>
+                        <tr class="bg-purple-100">
+                            <th class="p-2 text-left">Date</th>
+                            <th class="p-2 text-left">Description</th>
+                            <th class="p-2 text-left">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceTableBody"></tbody>
+                </table>
+                <button id="printInvoiceBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Print to PDF</button>
+            </section>
+        </section>
     </main>
     <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
-    <script>
-        // Load current data
-        let portalData;
-        fetch('portal_data.json')
-            .then(res => res.json())
-            .then(data => {
-                portalData = data;
-                document.getElementById('raised').value = data.client.raised;
-                renderMeetings();
-                renderAdminDocuments();
-            });
-
-        function renderAdminDocuments() {
-            const docs = (portalData.client.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
-            document.getElementById('adminDocumentsList').innerHTML = docs || '<li class="text-gray-500">No documents uploaded.</li>';
-        }
-
-        function renderMeetings() {
-            const meetings = portalData.client.upcoming_meetings || [];
-            document.getElementById('meetingsList').innerHTML = meetings.length === 0 ? '<div class="text-gray-500">No meetings listed.</div>' : meetings.map((m, i) => `<div class="flex items-center space-x-2"><span class="text-gray-700">${m.date} – <span class="font-semibold">${m.firm}</span> (<span class="text-indigo-700">${m.individual || ''}</span>)</span><button type="button" class="text-red-600 hover:underline text-xs" onclick="removeMeeting(${i})">Remove</button></div>`).join('');
-        }
-
-        window.removeMeeting = function(idx) {
-            portalData.client.upcoming_meetings.splice(idx, 1);
-            renderMeetings();
-        }
-
-        document.getElementById('addMeetingBtn').addEventListener('click', function() {
-            const date = document.getElementById('meetingDate').value;
-            const firm = document.getElementById('meetingFirm').value.trim();
-            const individual = document.getElementById('meetingIndividual').value.trim();
-            if(date && firm && individual) {
-                portalData.client.upcoming_meetings = portalData.client.upcoming_meetings || [];
-                portalData.client.upcoming_meetings.push({ date, firm, individual });
-                renderMeetings();
-                document.getElementById('meetingDate').value = '';
-                document.getElementById('meetingFirm').value = '';
-                document.getElementById('meetingIndividual').value = '';
-            }
-        });
-        document.getElementById('adminForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Update raised
-            portalData.client.raised = parseInt(document.getElementById('raised').value, 10) || 0;
-            // Add update
-            const updateText = document.getElementById('updateText').value.trim();
-            if(updateText) {
-                portalData.client.updates = portalData.client.updates || [];
-                portalData.client.updates.unshift({ date: new Date().toISOString().slice(0,10), text: updateText });
-            }
-            // Add document
-            const docUrl = document.getElementById('docUrl').value.trim();
-            const docTitle = document.getElementById('docTitle').value.trim();
-            if(docUrl && docTitle) {
-                portalData.client.documents = portalData.client.documents || [];
-                portalData.client.documents.push({ url: docUrl, title: docTitle });
-                renderAdminDocuments();
-            }
-            // Save (for demo, just show message)
-            document.getElementById('statusMsg').classList.remove('hidden');
-            // In production, send portalData to a backend API to persist changes
-        });
-    </script>
+    <script src="atmilio-admin.js"></script>
 </body>
 </html>

@@ -6,12 +6,41 @@
     "raised": 0,
     "completion": 0,
     "round": "Seed Round",
-    "contacted_firms": ["Firm A", "Firm B", "Firm C"],
-    "upcoming_meetings": [
-      {"date": "2026-02-10", "firm": "Firm A", "individual": "John Smith"},
-      {"date": "2026-02-15", "firm": "Firm B", "individual": "Jane Lee"}
-    ],
-    "documents": [],
-    "updates": []
-  }
-}
+        "goal": 5000000,
+        "raised": 0,
+        "completion": 0,
+        "round": "Seed Round",
+        "start_date": "2026-01-01",
+        "timeline": [
+          {"date": "2026-01-01", "event": "Fundraise started"},
+          {"date": "2026-01-15", "event": "First investor meeting"},
+          {"date": "2026-01-28", "event": "Investor deck uploaded"}
+        ],
+        "committed_investors": [
+          {"name": "Alpha Ventures", "amount": 1000000, "contact": "alice@alphaventures.com"},
+          {"name": "Beta Capital", "amount": 500000, "contact": "bob@betacap.com"}
+        ],
+        "contacted_firms": ["Firm A", "Firm B", "Firm C"],
+        "upcoming_meetings": [
+          {"date": "2026-02-10", "firm": "Firm A", "individual": "John Smith"},
+          {"date": "2026-02-15", "firm": "Firm B", "individual": "Jane Lee"}
+        ],
+        "documents": [
+          {"url": "#", "title": "Pitch Deck (demo).pdf"},
+          {"url": "#", "title": "Financials (demo).xlsx"}
+        ],
+        "team_members": [
+          {"name": "Jane Doe", "role": "CEO", "email": "jane@completeintake.com"},
+          {"name": "Mike Lee", "role": "COO", "email": "mike@completeintake.com"}
+        ],
+        "board_members": [
+          {"name": "Sarah Smith", "role": "Chair", "email": "sarah@board.com"}
+        ],
+        "investor_contact_settings": {
+          "primary_contact": "Jane Doe",
+          "cc": ["Mike Lee"]
+        },
+        "updates": [
+          {"date": "2026-01-15", "text": "Initial portal setup complete."},
+          {"date": "2026-01-28", "text": "Uploaded new investor deck."}
+        ]
