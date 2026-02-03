@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | Atmilio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-purple-100 via-white to-purple-200">
+    <header class="w-full bg-white/90 shadow-md py-6 px-8 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <svg class="w-10 h-10" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+                <title id="logoTitle">Atmilio Logo</title>
+                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
+                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
+                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
+            </svg>
+            <span class="text-2xl font-bold text-purple-700">Admin Portal</span>
+        </div>
+    </header>
+    <main class="flex-1 w-full max-w-3xl mx-auto py-12 px-4 md:px-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-8">Admin Portal</h1>
+        <section class="mb-8">
+            <label class="block font-semibold mb-2">Select Client</label>
+            <select id="clientSelect" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 text-lg p-3 mb-4"></select>
+            <div class="text-gray-700 mb-2">Current Cost Tracking: <span id="clientCost" class="font-semibold text-indigo-700"></span></div>
+        </section>
+        <section class="mb-8">
+            <h2 class="text-2xl font-bold text-purple-600 mb-4">Generate Invoice</h2>
+            <div class="mb-2">Client: <span id="invoiceClientName" class="font-semibold"></span></div>
+            <button id="generateInvoiceBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 mb-4">Generate Invoice</button>
+            <section id="invoiceSection" class="hidden bg-white rounded-lg shadow-md p-6 mt-4">
+                <h3 class="text-xl font-bold mb-2">Invoice</h3>
+                <table class="w-full mb-4 border">
+                    <thead>
+                        <tr class="bg-purple-100">
+                            <th class="p-2 text-left">Date</th>
+                            <th class="p-2 text-left">Description</th>
+                            <th class="p-2 text-left">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceTableBody"></tbody>
+                </table>
+                <button id="printInvoiceBtn" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Print to PDF</button>
+            </section>
+        </section>
+    </main>
+    <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
+    <script src="atmilio-admin.js"></script>
+</body>
+</html>
