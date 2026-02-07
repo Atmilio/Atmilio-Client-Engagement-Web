@@ -6,6 +6,11 @@
   <title>Atmilio Admin | Client Management</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- html2pdf (client-side HTML -> PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
   <style>
     body { font-family: 'Inter', sans-serif; }
     .card { background:#fff; border:1px solid rgb(226,232,240); box-shadow:0 10px 24px rgba(15,23,42,0.06); }
@@ -153,12 +158,11 @@
               Delete Selected Invoice
             </button>
 
-            <!-- Split buttons as requested -->
             <button id="btnPrintInvoice" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800" disabled>
               Print
             </button>
             <button id="btnSaveInvoice" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
-              Save
+              Download PDF
             </button>
           </div>
 
@@ -314,7 +318,6 @@
           <input id="iIssued" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold" />
         </div>
 
-        <!-- Pay Period / Terms -->
         <div>
           <label class="text-xs font-bold text-slate-600">Pay Period (Terms)</label>
           <select id="iTerms" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 font-bold">
@@ -459,7 +462,7 @@
     }
 
     // =========================================================
-    // NEW: Pay period -> due date generator
+    // Pay period -> due date generator
     // =========================================================
     function addDaysToDateInput(dateStr, days){
       if(!dateStr) return "";
@@ -560,7 +563,7 @@
       const btnPaid = $("btnMarkPaid");
       const btnDelInv = $("btnDeleteInvoice");
       const btnPrint = $("btnPrintInvoice");
-      const btnSave = $("btnSaveInvoice");
+      const btnSavePDF = $("btnSaveInvoice");
 
       if(!client){
         $("clientTitle").textContent = "No client selected";
@@ -574,7 +577,7 @@
         $("mLastInv").textContent = "Last invoice: —";
         $("invoiceList").innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No client selected.</div>`;
         $("printArea").classList.add("hidden");
-        [btnEdit, btnCreateInv, btnPaid, btnDelInv, btnPrint, btnSave].forEach(b => b.disabled = true);
+        [btnEdit, btnCreateInv, btnPaid, btnDelInv, btnPrint, btnSavePDF].forEach(b => b.disabled = true);
         return;
       }
 
@@ -601,7 +604,7 @@
         list.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No invoices yet. Click “Create Invoice”.</div>`;
         state.selectedInvoiceId = null;
         save(state);
-        [btnPaid, btnDelInv, btnPrint, btnSave].forEach(b => b.disabled = true);
+        [btnPaid, btnDelInv, btnPrint, btnSavePDF].forEach(b => b.disabled = true);
         $("printArea").classList.add("hidden");
         return;
       }
@@ -634,7 +637,7 @@
       btnPaid.disabled = !hasSelected;
       btnDelInv.disabled = !hasSelected;
       btnPrint.disabled = !hasSelected;
-      btnSave.disabled = !hasSelected;
+      btnSavePDF.disabled = !hasSelected;
 
       renderPrintPreview(state);
     }
@@ -758,10 +761,9 @@
       const today = new Date();
       $("iIssued").value = today.toISOString().slice(0,10);
 
-      // Default terms
       $("iTerms").value = "14";
       $("iCustomDays").value = "14";
-      toggleCustomTerms(); // also sets due
+      toggleCustomTerms();
 
       $("iTax").value = "0";
       $("iDiscount").value = "0";
@@ -836,7 +838,6 @@
       $("iTotal").textContent = money(total);
     }
 
-    // Hook terms and issued changes -> due update
     $("iTerms").addEventListener("change", toggleCustomTerms);
     $("iCustomDays").addEventListener("input", syncDueDate);
     $("iIssued").addEventListener("change", syncDueDate);
@@ -916,51 +917,62 @@
       renderAll();
     });
 
-    // Print is separate
     $("btnPrintInvoice").addEventListener("click", ()=>{
       const st = load();
       renderPrintPreview(st);
       window.print();
     });
 
-    // Save is separate: downloads invoice HTML (clean + printable)
-    $("btnSaveInvoice").addEventListener("click", ()=>{
+    // PDF download (replaces old HTML export)
+    $("btnSaveInvoice").addEventListener("click", async ()=>{
       const st = load();
       const inv = getSelectedInvoice(st);
       const client = getSelectedClient(st);
       if(!inv || !client) return;
 
-      // Use the current printArea HTML as the exported invoice body
       renderPrintPreview(st);
-      const content = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Invoice ${safeText(inv.number||"")}</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-<style>
-  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#0f172a;}
-  .card{border:1px solid #e2e8f0;border-radius:16px;padding:20px;}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;}
-  @media print{ body{margin:0} .card{border:none} }
-</style>
-</head>
-<body>
-  <div class="card">
-    ${document.getElementById("printArea").innerHTML}
-  </div>
-</body>
-</html>`.trim();
+      const printArea = $("printArea");
+      const wasHidden = printArea.classList.contains("hidden");
+      if (wasHidden) printArea.classList.remove("hidden");
 
-      const blob = new Blob([content], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `invoice_${(inv.number||"ATM").replace(/[^A-Za-z0-9-_]/g,"")}_${(client.name||"client").replace(/[^A-Za-z0-9-_]/g,"")}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const wrapper = document.createElement("div");
+      wrapper.style.background = "#ffffff";
+      wrapper.style.padding = "16px";
+      wrapper.style.boxSizing = "border-box";
+
+      const paper = document.createElement("div");
+      paper.style.border = "1px solid #e2e8f0";
+      paper.style.borderRadius = "16px";
+      paper.style.padding = "18px";
+      paper.style.boxSizing = "border-box";
+      paper.innerHTML = printArea.innerHTML;
+
+      wrapper.appendChild(paper);
+
+      wrapper.style.position = "fixed";
+      wrapper.style.left = "-10000px";
+      wrapper.style.top = "0";
+      wrapper.style.width = "794px"; // ~A4 width @ 96dpi
+      document.body.appendChild(wrapper);
+
+      const safeInv = (inv.number || "ATM").replace(/[^A-Za-z0-9-_]/g, "");
+      const safeClient = (client.name || "client").replace(/[^A-Za-z0-9-_]/g, "");
+      const filename = `invoice_${safeInv}_${safeClient}.pdf`;
+
+      const opt = {
+        margin:       [10, 10, 10, 10],
+        filename,
+        image:        { type: "jpeg", quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
+      };
+
+      try{
+        await html2pdf().set(opt).from(wrapper).save();
+      } finally {
+        document.body.removeChild(wrapper);
+        if (wasHidden) printArea.classList.add("hidden");
+      }
     });
 
     // =========================================================
@@ -1049,3 +1061,4 @@
   </script>
 </body>
 </html>
+
