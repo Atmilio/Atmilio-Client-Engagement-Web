@@ -18,10 +18,29 @@
     .thin::-webkit-scrollbar { width:8px; height:8px; }
     .thin::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.25); border-radius:999px; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    /* ---- Compact PRINT/PDF invoice layout ---- */
+    #printArea.invoice-print {
+      padding: 16px !important;
+    }
+    #printArea.invoice-print .inv-h1 { font-size: 22px; line-height: 1.1; }
+    #printArea.invoice-print .inv-sub { font-size: 12px; }
+    #printArea.invoice-print .inv-meta { font-size: 12px; }
+    #printArea.invoice-print .inv-card { padding: 12px !important; }
+    #printArea.invoice-print .inv-section { margin-top: 12px !important; }
+    #printArea.invoice-print .inv-table-head { padding-top: 8px !important; padding-bottom: 8px !important; }
+    #printArea.invoice-print .inv-row { padding-top: 8px !important; padding-bottom: 8px !important; }
+    #printArea.invoice-print .inv-footer { margin-top: 14px !important; }
+
+    /* Prevent awkward splits */
+    .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+    .avoid-break * { break-inside: avoid; page-break-inside: avoid; }
+
     @media print {
       body { background:#fff !important; }
       .no-print { display:none !important; }
       .print-card { box-shadow:none !important; border:none !important; }
+      #printArea { margin: 0 !important; }
     }
   </style>
 </head>
@@ -179,61 +198,60 @@
           </div>
         </div>
 
-        <!-- Printable Invoice Preview -->
-        <div id="printArea" class="mt-4 card rounded-2xl p-6 print-card hidden">
+        <!-- Printable Invoice Preview (COMPACT) -->
+        <div id="printArea" class="mt-4 card rounded-2xl p-6 print-card hidden invoice-print">
           <div class="flex items-start justify-between gap-6">
-            <!-- LEFT HEADER: LOGO + COMPANY -->
-            <div class="flex items-center gap-4">
-              <!-- IMPORTANT: put this file in same folder as admin_management.html OR change the path -->
+            <div class="flex items-center gap-3">
               <img
+                id="atmilioInvoiceLogo"
                 src="Screenshot 2026-02-07 193235.png"
                 alt="Atmilio Logo"
-                class="h-12 w-auto object-contain"
+                class="h-10 w-auto object-contain"
                 crossorigin="anonymous"
               />
               <div>
-                <div class="text-2xl font-extrabold">INVOICE</div>
-                <div class="text-sm text-slate-600 mt-1">Atmilio</div>
-                <div class="text-sm text-slate-600">216 Timber Lake Dr, Southlake, TX 76092</div>
+                <div class="inv-h1 font-extrabold">INVOICE</div>
+                <div class="inv-sub text-slate-600 mt-1">Atmilio</div>
+                <div class="inv-sub text-slate-600">216 Timber Lake Dr, Southlake, TX 76092</div>
               </div>
             </div>
 
-            <!-- RIGHT HEADER: META -->
-            <div class="text-right">
-              <div class="text-sm text-slate-600">Invoice #</div>
-              <div id="pInvNum" class="text-lg font-extrabold mono">—</div>
-              <div class="mt-2 text-sm text-slate-600">Issued</div>
+            <div class="text-right inv-meta">
+              <div class="text-slate-600">Invoice #</div>
+              <div id="pInvNum" class="text-base font-extrabold mono">—</div>
+              <div class="mt-1 text-slate-600">Issued</div>
               <div id="pIssued" class="font-bold">—</div>
-              <div class="mt-2 text-sm text-slate-600">Due</div>
+              <div class="mt-1 text-slate-600">Due</div>
               <div id="pDue" class="font-bold">—</div>
             </div>
           </div>
 
-          <div class="mt-6 grid md:grid-cols-2 gap-4">
-            <div class="rounded-2xl border border-slate-200 p-4">
+          <div class="inv-section grid md:grid-cols-2 gap-3 mt-4">
+            <div class="inv-card avoid-break rounded-2xl border border-slate-200 p-4">
               <div class="text-xs text-slate-500">Bill To</div>
               <div id="pBillTo" class="font-extrabold mt-1">—</div>
               <div id="pBillEmail" class="text-sm text-slate-600">—</div>
             </div>
-            <div class="rounded-2xl border border-slate-200 p-4">
+
+            <div class="inv-card avoid-break rounded-2xl border border-slate-200 p-4">
               <div class="text-xs text-slate-500">Summary</div>
               <div class="mt-2 flex items-center justify-between text-sm">
                 <span>Subtotal</span><span id="pSubtotal" class="font-bold">$0</span>
               </div>
-              <div class="mt-2 flex items-center justify-between text-sm">
+              <div class="mt-1 flex items-center justify-between text-sm">
                 <span>Tax</span><span id="pTax" class="font-bold">$0</span>
               </div>
-              <div class="mt-2 flex items-center justify-between text-sm">
+              <div class="mt-1 flex items-center justify-between text-sm">
                 <span>Discount</span><span id="pDiscount" class="font-bold">$0</span>
               </div>
-              <div class="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between">
-                <span class="font-extrabold">Total</span><span id="pTotal" class="text-lg font-extrabold">$0</span>
+              <div class="mt-2 pt-2 border-t border-slate-200 flex items-center justify-between">
+                <span class="font-extrabold">Total</span><span id="pTotal" class="text-base font-extrabold">$0</span>
               </div>
             </div>
           </div>
 
-          <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200">
-            <div class="grid grid-cols-12 gap-2 px-4 py-3 text-xs font-bold text-slate-500 bg-slate-50 border-b border-slate-200">
+          <div class="inv-section avoid-break mt-4 overflow-hidden rounded-2xl border border-slate-200">
+            <div class="inv-table-head grid grid-cols-12 gap-2 px-4 py-2 text-xs font-bold text-slate-500 bg-slate-50 border-b border-slate-200">
               <div class="col-span-7">Description</div>
               <div class="col-span-2 text-right">Qty</div>
               <div class="col-span-3 text-right">Amount</div>
@@ -241,27 +259,28 @@
             <div id="pLines" class="divide-y divide-slate-200 bg-white"></div>
           </div>
 
-          <div class="mt-6">
+          <div class="inv-section avoid-break mt-4">
             <div class="text-xs text-slate-500 font-bold">Notes</div>
             <div id="pNotes" class="text-sm text-slate-700 mt-1">—</div>
           </div>
 
-          <!-- Wire Instructions -->
-          <div class="mt-6 rounded-2xl border border-slate-200 p-4">
+          <!-- Wire Instructions (CONDENSED 2-column) -->
+          <div class="inv-section avoid-break mt-4 rounded-2xl border border-slate-200 p-3">
             <div class="text-xs text-slate-500 font-bold">Wire Instructions</div>
-            <div class="mt-2 text-sm text-slate-700 leading-relaxed">
-              <div><span class="font-bold">Domestic Wire Routing Number:</span> <span class="mono">121000248</span></div>
+
+            <div class="mt-2 grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-slate-700">
+              <div><span class="font-bold">Domestic Routing:</span> <span class="mono">121000248</span></div>
               <div><span class="font-bold">Swift Code:</span> <span class="mono">WFBIUS63</span></div>
-              <div class="mt-2"><span class="font-bold">Bank Name:</span> Wells Fargo Bank, N.A.</div>
-              <div>333 Market Street</div>
-              <div>San Francisco, CA 94105</div>
-              <div class="mt-2"><span class="font-bold">Account Name:</span> Atmilio Consulting Company</div>
-              <div><span class="font-bold">Business Address:</span> 7755 JOHN Q HAMMONS DR APT 2413 FRISCO, TX 75034-2226</div>
-              <div class="mt-2"><span class="font-bold">Account Number:</span> <span class="mono">7078137382</span></div>
+
+              <div class="col-span-2 mt-1"><span class="font-bold">Bank:</span> Wells Fargo Bank, N.A., 333 Market Street, San Francisco, CA 94105</div>
+
+              <div class="col-span-2 mt-1"><span class="font-bold">Account Name:</span> Atmilio Consulting Company</div>
+              <div class="col-span-2"><span class="font-bold">Account #:</span> <span class="mono">7078137382</span></div>
+              <div class="col-span-2"><span class="font-bold">Business Address:</span> 7755 JOHN Q HAMMONS DR APT 2413 FRISCO, TX 75034-2226</div>
             </div>
           </div>
 
-          <div class="mt-8 text-xs text-slate-500">
+          <div class="inv-footer text-xs text-slate-500 mt-4">
             Make payments to Atmilio. Thank you.
           </div>
         </div>
@@ -418,15 +437,9 @@
   </div>
 
   <script>
-    // =========================================================
-    // Atmilio Admin Management (front-end demo)
-    // =========================================================
     const LS_KEY = "atmilio_admin_store_v2_terms_saveprint";
     const $ = (id) => document.getElementById(id);
-
-    // Logo path for invoice header (put file next to admin_management.html OR change this to /assets/... etc)
     const ATMILIO_LOGO_SRC = "Screenshot 2026-02-07 193235.png";
-
     const DEFAULT = { clients: [], invoices: [], selectedClientId: null, selectedInvoiceId: null };
 
     function clone(x){ return JSON.parse(JSON.stringify(x)); }
@@ -491,9 +504,6 @@
       return `<span class="chip bg-slate-100 text-slate-700 font-bold">${safeText(status||"—")}</span>`;
     }
 
-    // =========================================================
-    // Pay period -> due date generator
-    // =========================================================
     function addDaysToDateInput(dateStr, days){
       if(!dateStr) return "";
       const base = new Date(dateStr + "T00:00:00");
@@ -521,9 +531,6 @@
       syncDueDate();
     }
 
-    // =========================================================
-    // Render
-    // =========================================================
     function renderAll(){
       const state = load();
       renderKPIs(state);
@@ -678,10 +685,7 @@
       if(!inv || !client){ $("printArea").classList.add("hidden"); return; }
 
       $("printArea").classList.remove("hidden");
-
-      // ensure logo src is set (in case you change it in JS)
-      const logoEl = document.getElementById("atmilioInvoiceLogo");
-      if(logoEl) logoEl.src = ATMILIO_LOGO_SRC;
+      $("atmilioInvoiceLogo").src = ATMILIO_LOGO_SRC;
 
       $("pInvNum").textContent = inv.number || "—";
       $("pIssued").textContent = fmtDate(inv.issuedDate);
@@ -698,7 +702,7 @@
       $("pLines").innerHTML = lines.length ? lines.map(l => {
         const amt = Number(l.qty||0) * Number(l.rate||0);
         return `
-          <div class="grid grid-cols-12 gap-2 px-4 py-3 items-center">
+          <div class="inv-row grid grid-cols-12 gap-2 px-4 py-2 items-center">
             <div class="col-span-7">${safeText(l.desc||"—")}</div>
             <div class="col-span-2 text-right mono">${Number(l.qty||0)}</div>
             <div class="col-span-3 text-right mono">${money(amt)}</div>
@@ -709,9 +713,7 @@
       $("pNotes").textContent = inv.notes || "—";
     }
 
-    // =========================================================
-    // Client Modal
-    // =========================================================
+    // ---- Client modal wiring ----
     const clientModal = $("clientModal");
     let editingClientId = null;
 
@@ -779,9 +781,7 @@
       renderAll();
     });
 
-    // =========================================================
-    // Invoice Modal
-    // =========================================================
+    // ---- Invoice modal wiring ----
     const invoiceModal = $("invoiceModal");
 
     function openInvoiceModal(){
@@ -924,9 +924,6 @@
       renderPrintPreview(load());
     });
 
-    // =========================================================
-    // Invoice actions
-    // =========================================================
     $("btnMarkPaid").addEventListener("click", ()=>{
       const st = load();
       const inv = getSelectedInvoice(st);
@@ -958,7 +955,6 @@
       window.print();
     });
 
-    // PDF download
     $("btnSaveInvoice").addEventListener("click", async ()=>{
       const st = load();
       const inv = getSelectedInvoice(st);
@@ -972,13 +968,13 @@
 
       const wrapper = document.createElement("div");
       wrapper.style.background = "#ffffff";
-      wrapper.style.padding = "16px";
+      wrapper.style.padding = "10px";
       wrapper.style.boxSizing = "border-box";
 
       const paper = document.createElement("div");
       paper.style.border = "1px solid #e2e8f0";
-      paper.style.borderRadius = "16px";
-      paper.style.padding = "18px";
+      paper.style.borderRadius = "14px";
+      paper.style.padding = "12px";
       paper.style.boxSizing = "border-box";
       paper.innerHTML = printArea.innerHTML;
 
@@ -987,7 +983,7 @@
       wrapper.style.position = "fixed";
       wrapper.style.left = "-10000px";
       wrapper.style.top = "0";
-      wrapper.style.width = "794px"; // ~A4 width @ 96dpi
+      wrapper.style.width = "794px"; // A4 width @ 96dpi
       document.body.appendChild(wrapper);
 
       const safeInv = (inv.number || "ATM").replace(/[^A-Za-z0-9-_]/g, "");
@@ -995,11 +991,12 @@
       const filename = `invoice_${safeInv}_${safeClient}.pdf`;
 
       const opt = {
-        margin:       [10, 10, 10, 10],
+        margin:       [6, 6, 6, 6],
         filename,
         image:        { type: "jpeg", quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
+        jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak:    { mode: ["avoid-all", "css", "legacy"] }
       };
 
       try{
@@ -1010,15 +1007,9 @@
       }
     });
 
-    // =========================================================
-    // Search / Filter
-    // =========================================================
     $("clientSearch").addEventListener("input", ()=>renderClients(load()));
     $("clientFilter").addEventListener("change", ()=>renderClients(load()));
 
-    // =========================================================
-    // Header utilities
-    // =========================================================
     $("btnReset").addEventListener("click", ()=>{
       if(!confirm("Reset all admin data (clients + invoices)?")) return;
       localStorage.removeItem(LS_KEY);
@@ -1047,7 +1038,7 @@
         primaryContact: "Denish (CEO)",
         email: "denish@completeintake.com",
         startDate: new Date().toISOString(),
-        retainer: 3000,
+        retainer: 4000,
         goal: 5000000,
         raised: 0,
         createdAt: nowISO(),
@@ -1069,12 +1060,12 @@
           dueDate: new Date(Date.now() + 14*24*3600*1000).toISOString(),
           termsDays: 14,
           status: "open",
-          lines: [{ desc: "Monthly retainer", qty: 1, rate: 3000 }],
+          lines: [{ desc: "Monthly retainer", qty: 1, rate: 4000 }],
           tax: 0,
           discount: 0,
-          notes: "Retainer for fundraising support & portal access.",
-          subtotal: 3000,
-          total: 3000,
+          notes: "",
+          subtotal: 4000,
+          total: 4000,
           createdAt: nowISO(),
           updatedAt: nowISO(),
           paidAt: ""
@@ -1089,24 +1080,7 @@
       renderAll();
     });
 
-    // =========================================================
-    // Boot
-    // =========================================================
     renderAll();
-  </script>
-
-  <!-- Patch logo ID after HTML loads -->
-  <script>
-    // Add an ID to the logo element in printArea (so JS can set src reliably)
-    // This runs once on load and is safe even if you edit the HTML later.
-    (function(){
-      const printArea = document.getElementById("printArea");
-      if(!printArea) return;
-      const img = printArea.querySelector("img[alt='Atmilio Logo']");
-      if(img){
-        img.id = "atmilioInvoiceLogo";
-      }
-    })();
   </script>
 </body>
 </html>
