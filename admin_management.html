@@ -234,6 +234,54 @@
             <div id="pNotes" class="text-sm text-slate-700 mt-1">—</div>
           </div>
 
+          <!-- NEW: Wire Instructions -->
+          <div class="mt-6 rounded-2xl border border-slate-200 p-4">
+            <div class="text-xs text-slate-500 font-bold">Wire Instructions (USD)</div>
+
+            <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
+              <div>
+                <div class="text-xs text-slate-500">Domestic Wire Routing Number (ABA)</div>
+                <div class="font-extrabold mono">121000248</div>
+              </div>
+              <div>
+                <div class="text-xs text-slate-500">SWIFT Code</div>
+                <div class="font-extrabold mono">WFBIUS63</div>
+              </div>
+
+              <div class="md:col-span-2">
+                <div class="text-xs text-slate-500">Bank Name & Address</div>
+                <div class="font-extrabold">Wells Fargo Bank, N.A.</div>
+                <div class="text-slate-700">333 Market Street<br/>San Francisco, CA 94105</div>
+              </div>
+
+              <div>
+                <div class="text-xs text-slate-500">Account Name</div>
+                <div class="font-extrabold">Atmilio Consulting Company</div>
+              </div>
+              <div>
+                <div class="text-xs text-slate-500">Account Number</div>
+                <div class="font-extrabold mono">7078137382</div>
+              </div>
+
+              <div class="md:col-span-2">
+                <div class="text-xs text-slate-500">Business Address</div>
+                <div class="text-slate-700">
+                  7755 JOHN Q HAMMONS DR APT 2413<br/>
+                  FRISCO, TX 75034-2226
+                </div>
+              </div>
+
+              <div class="md:col-span-2">
+                <div class="text-xs text-slate-500">Reference / Memo</div>
+                <div class="text-slate-700">Please include the invoice number as the wire reference.</div>
+              </div>
+            </div>
+
+            <div class="mt-3 text-xs text-slate-500">
+              For security, wiring instructions will not change without written confirmation from Atmilio.
+            </div>
+          </div>
+
           <div class="mt-8 text-xs text-slate-500">
             Make payments to Atmilio. Thank you.
           </div>
@@ -396,6 +444,17 @@
     // =========================================================
     const LS_KEY = "atmilio_admin_store_v2_terms_saveprint";
     const $ = (id) => document.getElementById(id);
+
+    // NEW: Wire instructions (used in invoice preview + PDF)
+    const WIRE = {
+      aba: "121000248",
+      swift: "WFBIUS63",
+      bankName: "Wells Fargo Bank, N.A.",
+      bankAddress: "333 Market Street\nSan Francisco, CA 94105",
+      accountName: "Atmilio Consulting Company",
+      businessAddress: "7755 JOHN Q HAMMONS DR APT 2413\nFRISCO, TX 75034-2226",
+      accountNumber: "7078137382"
+    };
 
     const DEFAULT = { clients: [], invoices: [], selectedClientId: null, selectedInvoiceId: null };
 
@@ -672,6 +731,11 @@
       }).join("") : `<div class="px-4 py-6 text-sm text-slate-500">No line items.</div>`;
 
       $("pNotes").textContent = inv.notes || "—";
+
+      // Also stamp wire data into hidden dataset if you want later (not required)
+      $("printArea").dataset.wireAba = WIRE.aba;
+      $("printArea").dataset.wireSwift = WIRE.swift;
+      $("printArea").dataset.wireAccount = WIRE.accountNumber;
     }
 
     // =========================================================
