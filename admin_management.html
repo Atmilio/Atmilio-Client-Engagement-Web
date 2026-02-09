@@ -182,11 +182,23 @@
         <!-- Printable Invoice Preview -->
         <div id="printArea" class="mt-4 card rounded-2xl p-6 print-card hidden">
           <div class="flex items-start justify-between gap-6">
-            <div>
-              <div class="text-2xl font-extrabold">INVOICE</div>
-              <div class="text-sm text-slate-600 mt-1">Atmilio</div>
-              <div class="text-sm text-slate-600">216 Timber Lake Dr, Southlake, TX 76092</div>
+            <!-- LEFT HEADER: LOGO + COMPANY -->
+            <div class="flex items-center gap-4">
+              <!-- IMPORTANT: put this file in same folder as admin_management.html OR change the path -->
+              <img
+                src="Screenshot 2026-02-07 193235.png"
+                alt="Atmilio Logo"
+                class="h-12 w-auto object-contain"
+                crossorigin="anonymous"
+              />
+              <div>
+                <div class="text-2xl font-extrabold">INVOICE</div>
+                <div class="text-sm text-slate-600 mt-1">Atmilio</div>
+                <div class="text-sm text-slate-600">216 Timber Lake Dr, Southlake, TX 76092</div>
+              </div>
             </div>
+
+            <!-- RIGHT HEADER: META -->
             <div class="text-right">
               <div class="text-sm text-slate-600">Invoice #</div>
               <div id="pInvNum" class="text-lg font-extrabold mono">—</div>
@@ -234,51 +246,18 @@
             <div id="pNotes" class="text-sm text-slate-700 mt-1">—</div>
           </div>
 
-          <!-- NEW: Wire Instructions -->
+          <!-- Wire Instructions -->
           <div class="mt-6 rounded-2xl border border-slate-200 p-4">
-            <div class="text-xs text-slate-500 font-bold">Wire Instructions (USD)</div>
-
-            <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
-              <div>
-                <div class="text-xs text-slate-500">Domestic Wire Routing Number (ABA)</div>
-                <div class="font-extrabold mono">121000248</div>
-              </div>
-              <div>
-                <div class="text-xs text-slate-500">SWIFT Code</div>
-                <div class="font-extrabold mono">WFBIUS63</div>
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="text-xs text-slate-500">Bank Name & Address</div>
-                <div class="font-extrabold">Wells Fargo Bank, N.A.</div>
-                <div class="text-slate-700">333 Market Street<br/>San Francisco, CA 94105</div>
-              </div>
-
-              <div>
-                <div class="text-xs text-slate-500">Account Name</div>
-                <div class="font-extrabold">Atmilio Consulting Company</div>
-              </div>
-              <div>
-                <div class="text-xs text-slate-500">Account Number</div>
-                <div class="font-extrabold mono">7078137382</div>
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="text-xs text-slate-500">Business Address</div>
-                <div class="text-slate-700">
-                  7755 JOHN Q HAMMONS DR APT 2413<br/>
-                  FRISCO, TX 75034-2226
-                </div>
-              </div>
-
-              <div class="md:col-span-2">
-                <div class="text-xs text-slate-500">Reference / Memo</div>
-                <div class="text-slate-700">Please include the invoice number as the wire reference.</div>
-              </div>
-            </div>
-
-            <div class="mt-3 text-xs text-slate-500">
-              For security, wiring instructions will not change without written confirmation from Atmilio.
+            <div class="text-xs text-slate-500 font-bold">Wire Instructions</div>
+            <div class="mt-2 text-sm text-slate-700 leading-relaxed">
+              <div><span class="font-bold">Domestic Wire Routing Number:</span> <span class="mono">121000248</span></div>
+              <div><span class="font-bold">Swift Code:</span> <span class="mono">WFBIUS63</span></div>
+              <div class="mt-2"><span class="font-bold">Bank Name:</span> Wells Fargo Bank, N.A.</div>
+              <div>333 Market Street</div>
+              <div>San Francisco, CA 94105</div>
+              <div class="mt-2"><span class="font-bold">Account Name:</span> Atmilio Consulting Company</div>
+              <div><span class="font-bold">Business Address:</span> 7755 JOHN Q HAMMONS DR APT 2413 FRISCO, TX 75034-2226</div>
+              <div class="mt-2"><span class="font-bold">Account Number:</span> <span class="mono">7078137382</span></div>
             </div>
           </div>
 
@@ -445,16 +424,8 @@
     const LS_KEY = "atmilio_admin_store_v2_terms_saveprint";
     const $ = (id) => document.getElementById(id);
 
-    // NEW: Wire instructions (used in invoice preview + PDF)
-    const WIRE = {
-      aba: "121000248",
-      swift: "WFBIUS63",
-      bankName: "Wells Fargo Bank, N.A.",
-      bankAddress: "333 Market Street\nSan Francisco, CA 94105",
-      accountName: "Atmilio Consulting Company",
-      businessAddress: "7755 JOHN Q HAMMONS DR APT 2413\nFRISCO, TX 75034-2226",
-      accountNumber: "7078137382"
-    };
+    // Logo path for invoice header (put file next to admin_management.html OR change this to /assets/... etc)
+    const ATMILIO_LOGO_SRC = "Screenshot 2026-02-07 193235.png";
 
     const DEFAULT = { clients: [], invoices: [], selectedClientId: null, selectedInvoiceId: null };
 
@@ -707,6 +678,11 @@
       if(!inv || !client){ $("printArea").classList.add("hidden"); return; }
 
       $("printArea").classList.remove("hidden");
+
+      // ensure logo src is set (in case you change it in JS)
+      const logoEl = document.getElementById("atmilioInvoiceLogo");
+      if(logoEl) logoEl.src = ATMILIO_LOGO_SRC;
+
       $("pInvNum").textContent = inv.number || "—";
       $("pIssued").textContent = fmtDate(inv.issuedDate);
       $("pDue").textContent = fmtDate(inv.dueDate);
@@ -731,11 +707,6 @@
       }).join("") : `<div class="px-4 py-6 text-sm text-slate-500">No line items.</div>`;
 
       $("pNotes").textContent = inv.notes || "—";
-
-      // Also stamp wire data into hidden dataset if you want later (not required)
-      $("printArea").dataset.wireAba = WIRE.aba;
-      $("printArea").dataset.wireSwift = WIRE.swift;
-      $("printArea").dataset.wireAccount = WIRE.accountNumber;
     }
 
     // =========================================================
@@ -987,7 +958,7 @@
       window.print();
     });
 
-    // PDF download (replaces old HTML export)
+    // PDF download
     $("btnSaveInvoice").addEventListener("click", async ()=>{
       const st = load();
       const inv = getSelectedInvoice(st);
@@ -1122,6 +1093,20 @@
     // Boot
     // =========================================================
     renderAll();
+  </script>
+
+  <!-- Patch logo ID after HTML loads -->
+  <script>
+    // Add an ID to the logo element in printArea (so JS can set src reliably)
+    // This runs once on load and is safe even if you edit the HTML later.
+    (function(){
+      const printArea = document.getElementById("printArea");
+      if(!printArea) return;
+      const img = printArea.querySelector("img[alt='Atmilio Logo']");
+      if(img){
+        img.id = "atmilioInvoiceLogo";
+      }
+    })();
   </script>
 </body>
 </html>
