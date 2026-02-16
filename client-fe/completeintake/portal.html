@@ -8,13 +8,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
-    .card { background: rgba(255,255,255,0.82); border: 1px solid rgba(99,102,241,0.12); box-shadow: 0 10px 24px rgba(15,23,42,0.06); }
-    .chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; }
-    .thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.25); border-radius: 999px; }
+    .card { background:#fff; border:1px solid rgb(226,232,240); box-shadow:0 10px 24px rgba(15,23,42,0.06); }
+    .chip { font-size:12px; padding:4px 10px; border-radius:999px; }
+    .thin-scroll::-webkit-scrollbar { width:8px; height:8px; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.25); border-radius:999px; }
   </style>
 </head>
-<<<<<<< HEAD
 
 <body class="min-h-screen bg-slate-50 text-slate-900">
   <!-- Header -->
@@ -22,7 +21,7 @@
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none">
+          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M12 2l9 5-9 5-9-5 9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
             <path d="M21 7v10l-9 5-9-5V7" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
             <path d="M12 12v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -42,7 +41,7 @@
         <div class="h-10 w-px bg-slate-200"></div>
         <div class="text-right">
           <div class="text-xs text-slate-500">Goal</div>
-          <div class="font-extrabold">$5,000,000</div>
+          <div id="goalTop" class="font-extrabold">$5,000,000</div>
         </div>
       </div>
 
@@ -57,7 +56,9 @@
     <!-- Welcome + KPI row -->
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold">Welcome, <span id="clientNameHeader">CompleteIntake</span></h1>
+        <h1 class="text-2xl md:text-3xl font-extrabold">
+          Welcome, <span id="clientNameHeader">CompleteIntake</span>
+        </h1>
         <p class="text-slate-600 mt-1">Upload documents, track meetings, and view updates — all in one place.</p>
       </div>
 
@@ -83,7 +84,7 @@
       <div class="flex items-center justify-between gap-3">
         <div>
           <div class="text-sm text-slate-500">Capital Raise</div>
-          <div class="text-xl font-extrabold">Progress to $5,000,000</div>
+          <div class="text-xl font-extrabold">Progress to <span id="goalTitle">$5,000,000</span></div>
         </div>
         <div id="progressChip" class="chip bg-indigo-100 text-indigo-800 font-bold">0%</div>
       </div>
@@ -94,7 +95,7 @@
 
       <div class="mt-3 flex items-center justify-between text-sm text-slate-700">
         <span>Raised: <span id="raisedAmount" class="font-bold">$0</span></span>
-        <span>Goal: <span class="font-bold">$5,000,000</span></span>
+        <span>Goal: <span id="goalInline" class="font-bold">$5,000,000</span></span>
       </div>
     </div>
 
@@ -274,23 +275,25 @@
 
   <script>
     // =========================================================
-    // Minimal CRM Portal (Clean Edition)
-    // - Loads portal_data.json if available
-    // - Persists user-added docs/meetings/updates in localStorage
+    // Portal (Cleaned + Unified)
+    // - Removed git conflict markers + duplicate functions
+    // - Uses backend meetings if available (/api/meetings/*)
+    // - Uses localStorage for documents + updates (demo)
     // =========================================================
-    const LS_KEY = "atmilio_portal_store_clean_v1";
+    const LS_KEY = "atmilio_portal_store_clean_v2";
     const DEFAULT_STORE = {
       client: {
         name: "CompleteIntake",
         goal: 5000000,
         raised: 0,
         documents: [],
-        updates: [],
-        meetings: []
+        updates: []
       }
     };
 
     const $ = (id) => document.getElementById(id);
+    const TAB_IDS = ["dashboard","documents","meetings","updates"];
+    let _meetingsCache = [];
 
     function clone(x){ return JSON.parse(JSON.stringify(x)); }
 
@@ -301,20 +304,17 @@
     }
     function saveStore(store){ localStorage.setItem(LS_KEY, JSON.stringify(store)); }
 
-    function money(n){
-      return (Number(n)||0).toLocaleString("en-US",{style:"currency",currency:"USD"});
-    }
+    function money(n){ return (Number(n)||0).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
     function fmtBytes(bytes){
       if (bytes === undefined || bytes === null) return "-";
       const u=["B","KB","MB","GB"]; let i=0, v=bytes;
       while(v>=1024 && i<u.length-1){ v/=1024; i++; }
       return `${v.toFixed(i===0?0:1)} ${u[i]}`;
     }
-    function safeText(s){
-      return String(s||"").replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]));
-    }
+    function safeText(s){ return String(s||"").replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c])); }
+
     function fileTypeLabel(name){
-      const ext=(name.split(".").pop()||"").toLowerCase();
+      const ext=(String(name||"").split(".").pop()||"").toLowerCase();
       if(["ppt","pptx"].includes(ext)) return "PowerPoint";
       if(["xls","xlsx","csv"].includes(ext)) return "Excel";
       if(["doc","docx"].includes(ext)) return "Word";
@@ -322,6 +322,7 @@
       if(["png","jpg","jpeg"].includes(ext)) return "Image";
       return ext ? ext.toUpperCase() : "File";
     }
+
     function statusChip(dtISO){
       const now=Date.now();
       const t=new Date(dtISO).getTime();
@@ -331,8 +332,6 @@
       return {text:"Scheduled", cls:"bg-indigo-100 text-indigo-800"};
     }
 
-    // Tabs
-    const TAB_IDS = ["dashboard","documents","meetings","updates"];
     function setTab(tab){
       TAB_IDS.forEach(t => $("tab-"+t).classList.toggle("hidden", t !== tab));
       document.querySelectorAll(".tabBtn").forEach(btn => {
@@ -344,21 +343,21 @@
     }
     document.querySelectorAll(".tabBtn").forEach(btn => btn.addEventListener("click", ()=>setTab(btn.dataset.tab)));
 
-    // Load remote if present (merge with local)
+    // Load remote portal_data.json if present (merge with local; local wins)
     async function loadRemote(){
-      try {
-        const res = await fetch("portal_data.json", { cache: "no-store" });
+      const local = loadStore();
+      try{
+        const res = await fetch("portal_data.json", { cache:"no-store" });
         if(!res.ok) throw new Error("no json");
         const remote = await res.json();
 
-        const local = loadStore();
         const merged = clone(DEFAULT_STORE);
         if(remote?.client) merged.client = { ...merged.client, ...remote.client };
-        merged.client = { ...merged.client, ...local.client }; // local overrides
+        merged.client = { ...merged.client, ...local.client };
+
         saveStore(merged);
         return merged;
       } catch {
-        const local = loadStore();
         const merged = clone(DEFAULT_STORE);
         merged.client = { ...merged.client, ...local.client };
         saveStore(merged);
@@ -366,44 +365,43 @@
       }
     }
 
-    // --- MEETINGS BACKEND INTEGRATION ---
-    async function fetchMeetings() {
-      try {
-        const res = await fetch('/api/meetings/list');
-        if (!res.ok) throw new Error('Failed to fetch meetings');
-        return await res.json();
-      } catch (e) {
+    // Meetings API (optional)
+    async function fetchMeetings(){
+      try{
+        const res = await fetch("/api/meetings/list");
+        if(!res.ok) throw new Error("meetings api missing");
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch {
         return [];
       }
     }
-
-    async function addMeeting(meeting) {
-      try {
-        const res = await fetch('/api/meetings/add', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+    async function addMeeting(meeting){
+      try{
+        const res = await fetch("/api/meetings/add", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
           body: JSON.stringify(meeting)
         });
-        if (!res.ok) throw new Error('Failed to add meeting');
+        if(!res.ok) throw new Error("add failed");
         return await res.json();
-      } catch (e) {
-        alert('Failed to add meeting.');
+      } catch {
+        alert("Failed to add meeting (API not available).");
         return null;
       }
     }
-
-    async function deleteMeeting(id) {
-      try {
-        const res = await fetch(`/api/meetings/delete/${id}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Failed to delete meeting');
+    async function deleteMeeting(id){
+      try{
+        const res = await fetch(`/api/meetings/delete/${encodeURIComponent(id)}`, { method:"DELETE" });
+        if(!res.ok) throw new Error("delete failed");
         return true;
-      } catch (e) {
-        alert('Failed to delete meeting.');
+      } catch {
+        alert("Failed to delete meeting (API not available).");
         return false;
       }
     }
 
-    function getNextMeetingFromList(meetings) {
+    function getNextMeetingFromList(meetings){
       const ms = (meetings||[])
         .map(m => ({...m, ts:new Date(m.when).getTime()}))
         .filter(m => !isNaN(m.ts))
@@ -412,9 +410,11 @@
       return ms.find(m=>m.ts>=now) || null;
     }
 
-    async function render(store) {
+    async function render(){
+      const store = loadStore();
       const c = store.client;
 
+      // Top labels
       $("clientNameTop").textContent = c.name || "Client";
       $("clientNameHeader").textContent = c.name || "Client";
 
@@ -422,16 +422,20 @@
       const raised = Number(c.raised||0);
       const pct = goal>0 ? Math.max(0, Math.min(100, Math.round((raised/goal)*100))) : 0;
 
+      $("goalTop").textContent = money(goal);
+      $("goalTitle").textContent = money(goal);
+      $("goalInline").textContent = money(goal);
+
+      // KPIs
       $("kpiRaised").textContent = money(raised);
       $("kpiPct").textContent = `${pct}%`;
       $("progressChip").textContent = `${pct}%`;
       $("progressBar").style.width = `${pct}%`;
       $("raisedAmount").textContent = money(raised);
 
-      // Fetch meetings from backend
-      const meetings = await fetchMeetings();
-      window._atmilioMeetings = meetings; // for other functions
-      const next = getNextMeetingFromList(meetings);
+      // Meetings
+      _meetingsCache = await fetchMeetings();
+      const next = getNextMeetingFromList(_meetingsCache);
       if(next){
         $("kpiNextMeeting").textContent = next.title || "Meeting";
         $("kpiNextMeetingWhen").textContent = new Date(next.when).toLocaleString();
@@ -440,11 +444,11 @@
         $("kpiNextMeetingWhen").textContent = "";
       }
 
-      renderMeetingsPreview(meetings);
-      renderActivity(store, meetings);
-      renderDocuments(store);
-      renderMeetings(meetings);
+      renderMeetingsPreview(_meetingsCache);
+      renderMeetingsTable(_meetingsCache);
+      renderDocumentsTable(store);
       renderUpdates(store);
+      renderActivity(store, _meetingsCache);
     }
 
     function renderMeetingsPreview(meetings){
@@ -453,6 +457,7 @@
         .map(m => ({...m, ts:new Date(m.when).getTime()}))
         .filter(m => !isNaN(m.ts))
         .sort((a,b)=>a.ts-b.ts);
+
       const upcoming = ms.filter(m => m.ts >= Date.now()).slice(0,5);
       if(!upcoming.length){
         wrap.innerHTML = `<div class="text-sm text-slate-500">No upcoming meetings. Click “Add” to schedule one.</div>`;
@@ -473,107 +478,22 @@
       }).join("");
     }
 
-    function renderActivity(store, meetings){
-      const feed = $("activityFeed");
-      const items = [];
-      (store.client.documents||[]).forEach(d=>{
-        items.push({ts:d.addedAt||0, kind:"Document", title:d.title||d.name||"Upload", detail:fileTypeLabel(d.title||d.name||"")});
-      });
-      (store.client.updates||[]).forEach(u=>{
-        items.push({ts:u.ts||0, kind:"Update", title:(u.text||"").slice(0,52)+((u.text||"").length>52?"…":""), detail:"Client update"});
-      });
-      (meetings||[]).forEach(m=>{
-        const t=new Date(m.when).getTime();
-        items.push({ts:isNaN(t)?0:t, kind:"Meeting", title:m.title||"Meeting scheduled", detail:isNaN(t)?"":new Date(m.when).toLocaleString()});
-      });
-      items.sort((a,b)=>(b.ts||0)-(a.ts||0));
-      const top = items.slice(0,10);
-      if(!top.length){
-        feed.innerHTML = `<div class="text-sm text-slate-500">No activity yet.</div>`;
-        return;
-      }
-      feed.innerHTML = top.map(it=>{
-        const when = it.ts ? new Date(it.ts).toLocaleString() : "";
-        return `
-          <div class="p-4 rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between">
-              <div class="text-xs text-slate-500">${safeText(it.kind)}</div>
-              <div class="text-xs text-slate-400">${safeText(when)}</div>
-            </div>
-            <div class="mt-1 font-extrabold">${safeText(it.title)}</div>
-            <div class="text-xs text-slate-500 mt-1">${safeText(it.detail)}</div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderMeetings(meetings){
+    function renderMeetingsTable(meetings){
       const wrap = $("meetingsTable");
       const notes = $("meetingNotes");
+
       const ms = (meetings||[])
         .map(m=>({...m, ts:new Date(m.when).getTime()}))
         .filter(m=>!isNaN(m.ts))
         .sort((a,b)=>a.ts-b.ts);
+
       if(!ms.length){
         wrap.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No meetings yet.</div>`;
         notes.textContent = "No meeting selected.";
         return;
       }
+
       wrap.innerHTML = ms.map((m, idx)=>{
-        const s = statusChip(m.when);
-        return `
-          <button data-midx="${idx}" class="w-full text-left grid grid-cols-12 gap-2 px-4 py-3 hover:bg-slate-50">
-            <div class="col-span-4">
-              <div class="font-bold">${new Date(m.when).toLocaleString()}</div>
-              <div class="text-xs text-slate-500">ID: ${(m.id||(\"mtg_\"+idx)).slice(0,10)}</div>
-            </div>
-            <div class="col-span-4">
-              <div class="font-extrabold">${safeText(m.title||"Meeting")}</div>
-              <div class="text-xs text-slate-500 truncate">${safeText(m.notes||"")}</div>
-            </div>
-            <div class="col-span-2 text-sm text-slate-700 truncate">${safeText(m.attendees||"—")}</div>
-            <div class="col-span-2 flex justify-end">
-              <span class="chip ${s.cls} font-bold">${s.text}</span>
-            </div>
-          </button>
-        `;
-      }).join("");
-      wrap.querySelectorAll("[data-midx]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const idx = Number(btn.getAttribute("data-midx"));
-          const m = ms[idx];
-          notes.innerHTML = `
-            <div class="text-xs text-slate-500">${new Date(m.when).toLocaleString()}</div>
-            <div class="mt-1 text-base font-extrabold">${safeText(m.title||"Meeting")}</div>
-            <div class="mt-2 text-sm"><span class="font-bold">Attendees:</span> ${safeText(m.attendees||"—")}</div>
-            <div class="mt-2 text-sm"><span class="font-bold">Notes:</span><br>${safeText(m.notes||"—").replace(/\n/g,"<br>")}</div>
-            <div class="mt-3">
-              <button data-del-meeting="${m.id}" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
-            </div>
-          `;
-          notes.querySelector("[data-del-meeting]")?.addEventListener("click", async ()=>{
-            if(confirm('Delete this meeting?')){
-              await deleteMeeting(m.id);
-              await render(loadStore());
-            }
-          });
-        });
-      });
-    }
-      const notes = $("meetingNotes");
-
-      const meetings = (store.client.meetings||[])
-        .map(m=>({...m, ts:new Date(m.when).getTime()}))
-        .filter(m=>!isNaN(m.ts))
-        .sort((a,b)=>a.ts-b.ts);
-
-      if(!meetings.length){
-        wrap.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No meetings yet.</div>`;
-        notes.textContent = "No meeting selected.";
-        return;
-      }
-
-      wrap.innerHTML = meetings.map((m, idx)=>{
         const s = statusChip(m.when);
         return `
           <button data-midx="${idx}" class="w-full text-left grid grid-cols-12 gap-2 px-4 py-3 hover:bg-slate-50">
@@ -596,21 +516,127 @@
       wrap.querySelectorAll("[data-midx]").forEach(btn=>{
         btn.addEventListener("click", ()=>{
           const idx = Number(btn.getAttribute("data-midx"));
-          const m = meetings[idx];
+          const m = ms[idx];
           notes.innerHTML = `
             <div class="text-xs text-slate-500">${new Date(m.when).toLocaleString()}</div>
             <div class="mt-1 text-base font-extrabold">${safeText(m.title||"Meeting")}</div>
             <div class="mt-2 text-sm"><span class="font-bold">Attendees:</span> ${safeText(m.attendees||"—")}</div>
             <div class="mt-2 text-sm"><span class="font-bold">Notes:</span><br>${safeText(m.notes||"—").replace(/\n/g,"<br>")}</div>
             <div class="mt-3">
-              <button data-del-meeting="${m.id}" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
+              <button id="btnDeleteMeeting" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
             </div>
           `;
-          notes.querySelector("[data-del-meeting]")?.addEventListener("click", ()=>{
-            store.client.meetings = (store.client.meetings||[]).filter(x=>x.id!==m.id);
-            saveStore(store);
-            render(store);
+          notes.querySelector("#btnDeleteMeeting")?.addEventListener("click", async ()=>{
+            if(!m.id){ alert("This meeting has no id."); return; }
+            if(confirm("Delete this meeting?")){
+              await deleteMeeting(m.id);
+              await render();
+            }
           });
+        });
+      });
+    }
+
+    function renderActivity(store, meetings){
+      const feed = $("activityFeed");
+      const items = [];
+
+      (store.client.documents||[]).forEach(d=>{
+        items.push({
+          ts: d.addedAt || 0,
+          kind: "Document",
+          title: d.title || d.name || "Upload",
+          detail: fileTypeLabel(d.title || d.name || "")
+        });
+      });
+
+      (store.client.updates||[]).forEach(u=>{
+        items.push({
+          ts: u.ts || 0,
+          kind: "Update",
+          title: (u.text||"").slice(0,52) + ((u.text||"").length>52 ? "…" : ""),
+          detail: "Client update"
+        });
+      });
+
+      (meetings||[]).forEach(m=>{
+        const t=new Date(m.when).getTime();
+        items.push({
+          ts: isNaN(t) ? 0 : t,
+          kind: "Meeting",
+          title: m.title || "Meeting scheduled",
+          detail: isNaN(t) ? "" : new Date(m.when).toLocaleString()
+        });
+      });
+
+      items.sort((a,b)=>(b.ts||0)-(a.ts||0));
+      const top = items.slice(0,10);
+
+      if(!top.length){
+        feed.innerHTML = `<div class="text-sm text-slate-500">No activity yet.</div>`;
+        return;
+      }
+
+      feed.innerHTML = top.map(it=>{
+        const when = it.ts ? new Date(it.ts).toLocaleString() : "";
+        return `
+          <div class="p-4 rounded-2xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-slate-500">${safeText(it.kind)}</div>
+              <div class="text-xs text-slate-400">${safeText(when)}</div>
+            </div>
+            <div class="mt-1 font-extrabold">${safeText(it.title)}</div>
+            <div class="text-xs text-slate-500 mt-1">${safeText(it.detail)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderDocumentsTable(store){
+      const q = ($("docSearch")?.value || "").toLowerCase().trim();
+      const wrap = $("documentsTable");
+      const docs = (store.client.documents||[])
+        .filter(d => !q || String(d.title||d.name||"").toLowerCase().includes(q))
+        .sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
+
+      if(!docs.length){
+        wrap.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No documents yet. Upload a pitch deck, model, or term sheet.</div>`;
+        return;
+      }
+
+      wrap.innerHTML = docs.map((d, idx)=>{
+        const name = d.title || d.name || "File";
+        const type = d.type || fileTypeLabel(name);
+        const sizeLabel = d.sizeLabel || fmtBytes(d.size);
+        const canOpen = !!d.url;
+
+        return `
+          <div class="grid grid-cols-12 gap-2 px-4 py-3 items-center">
+            <div class="col-span-7">
+              <div class="font-extrabold truncate">${safeText(name)}</div>
+              <div class="text-xs text-slate-500">${d.addedAt ? new Date(d.addedAt).toLocaleString() : ""}</div>
+            </div>
+            <div class="col-span-2 text-sm text-slate-700">${safeText(type)}</div>
+            <div class="col-span-1 text-sm text-slate-700">${safeText(sizeLabel)}</div>
+            <div class="col-span-2 flex justify-end gap-2">
+              <button data-del-doc="${idx}" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
+              ${canOpen
+                ? `<a href="${d.url}" target="_blank" rel="noreferrer" class="px-3 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">Open</a>`
+                : `<button class="px-3 py-2 rounded-xl bg-slate-200 text-slate-600 font-bold cursor-not-allowed" disabled>Open</button>`
+              }
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      wrap.querySelectorAll("[data-del-doc]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const idx = Number(btn.getAttribute("data-del-doc"));
+          const st = loadStore();
+          st.client.documents = (st.client.documents||[]);
+          st.client.documents.splice(idx, 1);
+          saveStore(st);
+          render();
         });
       });
     }
@@ -618,12 +644,10 @@
     function renderUpdates(store){
       const list = $("updatesList");
       const updates = (store.client.updates||[]).slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
-
       if(!updates.length){
         list.innerHTML = `<div class="text-sm text-slate-500">No updates yet.</div>`;
         return;
       }
-
       list.innerHTML = updates.map(u=>{
         return `
           <div class="p-4 rounded-2xl border border-slate-200 bg-white">
@@ -641,21 +665,21 @@
       list.querySelectorAll("[data-del-update]").forEach(btn=>{
         btn.addEventListener("click", ()=>{
           const id = btn.getAttribute("data-del-update");
-          store.client.updates = (store.client.updates||[]).filter(u=>u.id!==id);
-          saveStore(store);
-          render(store);
+          const st = loadStore();
+          st.client.updates = (st.client.updates||[]).filter(u=>u.id!==id);
+          saveStore(st);
+          render();
         });
       });
     }
 
-    // Upload UI (front-end demo)
+    // Documents upload (demo: localStorage only)
     const dropZone = $("dropZone");
     const fileInput = $("fileInput");
     const btnUploadDoc = $("btnUploadDoc");
     const docSearch = $("docSearch");
 
     function openPicker(){ fileInput.click(); }
-
     btnUploadDoc.addEventListener("click", openPicker);
     dropZone.addEventListener("click", openPicker);
 
@@ -665,44 +689,37 @@
     ["dragleave","drop"].forEach(evt => dropZone.addEventListener(evt, (e)=>{
       e.preventDefault(); dropZone.classList.remove("bg-slate-100");
     }));
-    dropZone.addEventListener("drop", (e)=>{
-      const files = Array.from(e.dataTransfer.files||[]);
-      handleFiles(files);
-    });
-
+    dropZone.addEventListener("drop", (e)=>handleFiles(Array.from(e.dataTransfer.files||[])));
     fileInput.addEventListener("change", ()=>{
       handleFiles(Array.from(fileInput.files||[]));
       fileInput.value="";
     });
+    docSearch?.addEventListener("input", ()=>renderDocumentsTable(loadStore()));
 
-    async function handleFiles(files){
+    function handleFiles(files){
       if(!files.length) return;
-      const store = loadStore();
+      const st = loadStore();
+      st.client.documents = st.client.documents || [];
 
       for(const f of files){
         const max = 25 * 1024 * 1024;
         if(f.size > max){ alert(`File too large: ${f.name} (max 25MB)`); continue; }
 
-        const docItem = {
+        st.client.documents.unshift({
           name: f.name,
           title: f.name,
           type: fileTypeLabel(f.name),
           size: f.size,
           sizeLabel: fmtBytes(f.size),
           addedAt: Date.now(),
-          url: "" // add backend URL later
-        };
-
-        store.client.documents = store.client.documents || [];
-        store.client.documents.unshift(docItem);
+          url: "" // TODO: hook to backend upload to get a real URL
+        });
       }
 
-      saveStore(store);
-      render(store);
+      saveStore(st);
+      render();
       setTab("documents");
     }
-
-    docSearch?.addEventListener("input", ()=>renderDocuments(loadStore()));
 
     // Meeting modal
     const meetingModal = $("meetingModal");
@@ -726,9 +743,10 @@
       if(isNaN(when.getTime())){ alert("Invalid date/time."); return; }
 
       await addMeeting({ title, attendees, when: when.toISOString(), notes });
+
       $("mTitle").value=""; $("mAttendees").value=""; $("mDate").value=""; $("mTime").value=""; $("mNotes").value="";
       closeMeeting();
-      await render(loadStore());
+      await render();
       setTab("meetings");
     });
 
@@ -745,18 +763,17 @@
       const text = $("uText").value.trim();
       if(!text){ alert("Please enter an update."); return; }
 
-      const store = loadStore();
-      store.client.updates = store.client.updates || [];
-      store.client.updates.unshift({ id:"upd_"+Math.random().toString(16).slice(2), ts: Date.now(), text });
+      const st = loadStore();
+      st.client.updates = st.client.updates || [];
+      st.client.updates.unshift({ id:"upd_"+Math.random().toString(16).slice(2), ts: Date.now(), text });
 
-      saveStore(store);
+      saveStore(st);
       $("uText").value="";
       closeUpdate();
-      render(store);
+      render();
       setTab("updates");
     });
 
-    // Settings placeholder
     $("btnSettings").addEventListener("click", ()=>{
       alert("Settings placeholder. Next step: add user roles + permissions + integrations.");
     });
@@ -774,210 +791,8 @@
         });
         saveStore(store);
       }
-      await render(store);
+      await render();
     })();
   </script>
-=======
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-purple-100 via-white to-purple-200">
-    <header class="w-full bg-white/90 shadow-md py-6 px-8 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <svg class="w-10 h-10" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
-                <title id="logoTitle">Atmilio Logo</title>
-                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
-                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
-                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
-            </svg>
-            <span class="text-2xl font-bold text-purple-700">CompleteIntake Portal</span>
-        </div>
-        <div class="flex items-center space-x-4">
-            <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
-            <button onclick="logout()" class="ml-4 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">Logout</button>
-        </div>
-    </header>
-    <main class="flex-1 w-full max-w-4xl mx-auto py-12 px-4 md:px-8">
-        <div class="mb-10">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
-            <p class="text-lg text-gray-600">Track your capital raise progress and access important documents and updates from Atmilio.</p>
-        </div>
-        <div class="mb-10 grid md:grid-cols-2 gap-8">
-            <div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Fundraising Timeline</h2>
-                <div class="mb-2 text-gray-700">Start Date: <span id="startDate"></span></div>
-                <ul id="timeline" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Committed Investors</h2>
-                <ul id="committedInvestors" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Round</h2>
-                <div id="roundInfo" class="text-lg text-gray-800 mb-4">Seed Round</div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Contacted Firms</h2>
-                <ul id="contactedFirms" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Upcoming Meetings</h2>
-                <ul id="upcomingMeetings" class="mb-4 text-gray-700"></ul>
-                <div id="calendar" class="bg-white border border-purple-100 rounded-lg p-4 shadow-sm"></div>
-            </div>
-            <div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
-                <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
-                    <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
-                </div>
-                <div class="flex justify-between text-sm text-gray-700 mb-8">
-                    <span>Raised: <span id="raisedAmount">$0</span></span>
-                    <span>Goal: $5,000,000</span>
-                </div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Upload Documents</h2>
-                <form id="uploadForm" class="mb-4 flex flex-col md:flex-row md:space-x-2 items-start md:items-end">
-                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt" class="mb-2 md:mb-0 border rounded p-2" required>
-                    <input type="text" id="fileTitle" placeholder="Title (e.g. Pitch Deck, Financials, etc.)" class="mb-2 md:mb-0 border rounded p-2" required>
-                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Upload</button>
-                </form>
-                <ul id="documentsList" class="space-y-3 mb-8"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Team Members</h2>
-                <ul id="teamMembers" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Board Members</h2>
-                <ul id="boardMembers" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Investor Contact Settings</h2>
-                <div id="investorContactSettings" class="mb-8 text-gray-700"></div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
-                <ul id="updatesList" class="space-y-3"></ul>
-            </div>
-        </div>
-
-    <script>
-    function logout() {
-        // For demo: redirect to login page. In production, clear session/cookies as needed.
-        window.location.href = '../portal.html';
-    }
-    let portalData;
-    fetch('portal_data.json')
-        .then(res => res.json())
-        .then(data => {
-            portalData = data;
-            const c = data.client;
-            // Timeline & Start Date
-            document.getElementById('startDate').textContent = c.start_date || 'N/A';
-            document.getElementById('timeline').innerHTML = (c.timeline || []).map(e => `<li>${e.date}: ${e.event}</li>`).join('') || '<li class="text-gray-500">No timeline events.</li>';
-            // Committed Investors
-            document.getElementById('committedInvestors').innerHTML = (c.committed_investors || []).map(inv => `<li><span class='font-semibold'>${inv.name}</span> – ${inv.amount.toLocaleString('en-US', {style: 'currency', currency: 'USD'})} (<span class='text-indigo-700'>${inv.contact}</span>)</li>`).join('') || '<li class="text-gray-500">No committed investors.</li>';
-            // Round
-            document.getElementById('roundInfo').textContent = c.round || 'N/A';
-            // Contacted Firms
-            document.getElementById('contactedFirms').innerHTML = (c.contacted_firms || []).map(firm => `<li>${firm}</li>`).join('') || '<li class="text-gray-500">None listed.</li>';
-            // Upcoming Meetings
-            document.getElementById('upcomingMeetings').innerHTML = (c.upcoming_meetings || []).map(m => `<li>${m.date} – <span class='font-semibold'>${m.firm}</span> (<span class='text-indigo-700'>${m.individual || ''}</span>)</li>`).join('') || '<li class="text-gray-500">No upcoming meetings.</li>';
-            // Calendar
-            const meetings = c.upcoming_meetings || [];
-            if (meetings.length === 0) {
-                document.getElementById('calendar').innerHTML = '<div class="text-gray-500">No meetings scheduled.</div>';
-            } else {
-                let cal = '<table class="w-full text-left"><thead><tr><th class="pb-2">Date</th><th class="pb-2">Firm</th><th class="pb-2">Individual</th></tr></thead><tbody>';
-                meetings.forEach(m => {
-                    cal += `<tr><td class="py-1 pr-4">${m.date}</td><td class="py-1 pr-4">${m.firm}</td><td class="py-1">${m.individual || ''}</td></tr>`;
-                });
-                cal += '</tbody></table>';
-                document.getElementById('calendar').innerHTML = cal;
-            }
-            // Progress
-            const percent = c.goal > 0 ? Math.round((c.raised / c.goal) * 100) : 0;
-            document.getElementById('progressBar').style.width = percent + '%';
-            document.getElementById('progressBar').textContent = percent + '%';
-            document.getElementById('raisedAmount').textContent = c.raised.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-            // Documents
-            renderDocuments();
-            // Team Members
-            document.getElementById('teamMembers').innerHTML = (c.team_members || []).map(tm => `<li><span class='font-semibold'>${tm.name}</span> – ${tm.role} (<span class='text-indigo-700'>${tm.email}</span>)</li>`).join('') || '<li class="text-gray-500">No team members listed.</li>';
-            // Board Members
-            document.getElementById('boardMembers').innerHTML = (c.board_members || []).map(bm => `<li><span class='font-semibold'>${bm.name}</span> – ${bm.role} (<span class='text-indigo-700'>${bm.email}</span>)</li>`).join('') || '<li class="text-gray-500">No board members listed.</li>';
-            // Investor Contact Settings
-            const ics = c.investor_contact_settings || {};
-            document.getElementById('investorContactSettings').innerHTML = `<div>Primary Contact: <span class='font-semibold'>${ics.primary_contact || 'N/A'}</span></div><div>CC: ${(ics.cc || []).join(', ') || 'None'}</div>`;
-            // Updates
-            const updates = (c.updates || []).map(u => `<li class="border border-purple-100 rounded-lg p-3 bg-purple-50/50"><span class="font-semibold text-gray-800">${u.date}</span><br><span class="text-gray-700">${u.text}</span></li>`).join('');
-            document.getElementById('updatesList').innerHTML = updates || '<li class="text-gray-500">No updates yet.</li>';
-        });
-        function renderFundraisingMaterials() {
-            const mats = (portalData.client.fundraising_materials || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
-            document.getElementById('fundraisingMaterialsList').innerHTML = mats || '<li class="text-gray-500">No fundraising materials uploaded.</li>';
-        }
-        document.getElementById('fundraisingUploadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('fundraisingFileInput');
-            const fileTitle = document.getElementById('fundraisingFileTitle').value.trim();
-            const file = fileInput.files[0];
-            if(file && fileTitle) {
-                // For demo: just add file name (in production, upload to server and store URL)
-                const url = URL.createObjectURL(file);
-                portalData.client.fundraising_materials = portalData.client.fundraising_materials || [];
-                portalData.client.fundraising_materials.push({ url, title: fileTitle + ' (' + file.name + ')' });
-                renderFundraisingMaterials();
-                fileInput.value = '';
-                document.getElementById('fundraisingFileTitle').value = '';
-            }
-        });
-        function renderDocuments() {
-            const docs = (portalData.client.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
-            document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
-        }
-        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
-          e.preventDefault();
-          const fileInput = document.getElementById('fileInput');
-          const fileTitle = document.getElementById('fileTitle').value.trim();
-          const file = fileInput.files[0];
-          if(file && fileTitle) {
-            const formData = new FormData();
-            formData.append('file', file);
-            // Optionally add title as metadata
-            try {
-              const res = await fetch('/api/documents/upload', {
-                method: 'POST',
-                body: formData
-              });
-              if (!res.ok) throw new Error('Upload failed');
-              const data = await res.json();
-              // Save to portalData and re-render
-              portalData.client.documents = portalData.client.documents || [];
-              portalData.client.documents.push({ url: data.url, title: fileTitle });
-              renderDocuments();
-              fileInput.value = '';
-              document.getElementById('fileTitle').value = '';
-            } catch (err) {
-              alert('Upload failed: ' + err.message);
-            }
-          }
-        });
-    async function renderDocuments() {
-      // Fetch from backend
-      try {
-        const res = await fetch('/api/documents/list');
-        if (!res.ok) throw new Error('Failed to fetch documents');
-        const files = await res.json();
-        // Use titles from portalData if available, else fallback to filename
-        const docs = files.map(file => {
-          // Try to find a matching title by filename
-          const match = (portalData.client.documents || []).find(d => d.url === file.url);
-          const title = match ? match.title : file.filename;
-          return `<li><a href="${file.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${title}</a></li>`;
-        }).join('');
-        document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
-      } catch (err) {
-        document.getElementById('documentsList').innerHTML = '<li class="text-red-500">Failed to load documents.</li>';
-      }
-    }
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const fileInput = document.getElementById('fileInput');
-        const fileTitle = document.getElementById('fileTitle').value.trim();
-        const file = fileInput.files[0];
-        if(file && fileTitle) {
-            // For demo: just add file name (in production, upload to server and store URL)
-            const url = URL.createObjectURL(file);
-            portalData.client.documents = portalData.client.documents || [];
-            portalData.client.documents.push({ url, title: fileTitle + ' (' + file.name + ')' });
-            renderDocuments();
-            fileInput.value = '';
-            document.getElementById('fileTitle').value = '';
-        }
-    });
-    </script>
->>>>>>> fe3366c (Add client document upload section to CompleteIntake portal)
 </body>
 </html>
-
