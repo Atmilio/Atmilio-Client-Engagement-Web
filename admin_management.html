@@ -30,6 +30,20 @@
     .inv-tight .mt-6 { margin-top: 1rem !important; }
     .inv-tight .p-6 { padding: 1.25rem !important; }
     .inv-tight .py-3 { padding-top: .55rem !important; padding-bottom: .55rem !important; }
+
+    /* Force a consistent paper size when printing/exporting */
+    @page { size: letter; margin: 0.35in; }
+
+    /* Extra-tight PDF mode (applied only to the cloned export) */
+    .pdf-onepage { font-size: 12px; line-height: 1.25; }
+    .pdf-onepage .text-2xl { font-size: 1.25rem !important; }
+    .pdf-onepage .text-lg  { font-size: 1.05rem !important; }
+    .pdf-onepage .p-6      { padding: 1rem !important; }
+    .pdf-onepage .p-5      { padding: 1rem !important; }
+    .pdf-onepage .p-4      { padding: .85rem !important; }
+    .pdf-onepage .mt-6     { margin-top: .9rem !important; }
+    .pdf-onepage .mt-4     { margin-top: .7rem !important; }
+    .pdf-onepage .rounded-2xl { border-radius: 14px !important; }
   </style>
 </head>
 
@@ -41,6 +55,7 @@
         <div class="w-11 h-11 rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden">
           <img src="Screenshot 2026-02-07 193235.png" alt="Atmilio" class="w-full h-full object-contain p-2"
                onerror="this.remove(); this.parentElement.innerHTML='<span class=&quot;text-white font-black&quot;>A</span>';">
+
         </div>
         <div>
           <div class="text-xs text-slate-500">Atmilio</div>
@@ -194,6 +209,7 @@
               <div class="w-12 h-12 rounded-2xl border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
                 <img id="invoiceLogo" src="Screenshot 2026-02-07 193235.png" alt="Atmilio Logo" class="w-full h-full object-contain p-2"
                      onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center font-black&quot;>A</div>';">
+
               </div>
               <div>
                 <div class="text-2xl font-extrabold">INVOICE</div>
@@ -950,6 +966,7 @@
       window.print();
     });
 
+    // ✅ One-page PDF export (auto-scales to fit on a single Letter page)
     $("btnSaveInvoice").addEventListener("click", async ()=>{
       const st = load();
       const inv = getSelectedInvoice(st);
@@ -962,40 +979,73 @@
       const wasHidden = printArea.classList.contains("hidden");
       if (wasHidden) printArea.classList.remove("hidden");
 
+      // LETTER page at 96dpi ≈ 816 x 1056 px
+      const LETTER_W = 816;
+      const LETTER_H = 1056;
+
+      // Create offscreen wrapper
       const wrapper = document.createElement("div");
+      wrapper.style.position = "fixed";
+      wrapper.style.left = "-10000px";
+      wrapper.style.top = "0";
+      wrapper.style.width = LETTER_W + "px";
       wrapper.style.background = "#ffffff";
-      wrapper.style.padding = "12px";
+      wrapper.style.padding = "0";
       wrapper.style.boxSizing = "border-box";
 
+      // Clone invoice into "paper"
       const paper = document.createElement("div");
+      paper.id = "pdfPaper";
+      paper.className = "pdf-onepage";              // tighter typography for PDF only
       paper.style.border = "1px solid #e2e8f0";
       paper.style.borderRadius = "16px";
       paper.style.padding = "14px";
       paper.style.boxSizing = "border-box";
       paper.style.width = "100%";
+      paper.style.background = "#ffffff";
       paper.innerHTML = printArea.innerHTML;
 
+      // Ensure logo is set
       const tempLogo = paper.querySelector("#invoiceLogo");
       if (tempLogo) tempLogo.setAttribute("src", ATMILIO_LOGO_SRC);
 
       wrapper.appendChild(paper);
-
-      wrapper.style.position = "fixed";
-      wrapper.style.left = "-10000px";
-      wrapper.style.top = "0";
-      wrapper.style.width = "794px";
       document.body.appendChild(wrapper);
+
+      // ---- Auto-scale to 1 page ----
+      // Leave a little breathing room for margins/padding
+      const paddingAllowance = 36; // px
+      const maxContentH = LETTER_H - paddingAllowance;
+
+      // Measure after insertion
+      const contentH = paper.scrollHeight;
+
+      // Scale only if too tall
+      const scale = Math.min(1, maxContentH / contentH);
+
+      if(scale < 1){
+        paper.style.transformOrigin = "top left";
+        paper.style.transform = `scale(${scale})`;
+        // Expand width so scaled content still fills the page nicely
+        paper.style.width = `${100 / scale}%`;
+      }
 
       const safeInv = (inv.number || "ATM").replace(/[^A-Za-z0-9-_]/g, "");
       const safeClient = (client.name || "client").replace(/[^A-Za-z0-9-_]/g, "");
       const filename = `invoice_${safeInv}_${safeClient}.pdf`;
 
       const opt = {
-        margin:       [7, 7, 7, 7],
+        margin:      [8, 8, 8, 8], // mm
         filename,
-        image:        { type: "jpeg", quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-        jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
+        image:       { type: "jpeg", quality: 0.98 },
+        pagebreak:   { mode: ["avoid-all", "css", "legacy"] },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: LETTER_W
+        },
+        jsPDF: { unit: "mm", format: "letter", orientation: "portrait" }
       };
 
       try{
@@ -1083,4 +1133,5 @@
   </script>
 </body>
 </html>
+
 
