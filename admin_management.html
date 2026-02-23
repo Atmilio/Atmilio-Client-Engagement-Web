@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- html2pdf (client-side HTML -> PDF) -->
+  <!-- html2pdf bundle includes: html2pdf + html2canvas + jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
           crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -55,7 +55,6 @@
         <div class="w-11 h-11 rounded-2xl bg-slate-900 flex items-center justify-center overflow-hidden">
           <img src="Screenshot 2026-02-07 193235.png" alt="Atmilio" class="w-full h-full object-contain p-2"
                onerror="this.remove(); this.parentElement.innerHTML='<span class=&quot;text-white font-black&quot;>A</span>';">
-
         </div>
         <div>
           <div class="text-xs text-slate-500">Atmilio</div>
@@ -209,7 +208,6 @@
               <div class="w-12 h-12 rounded-2xl border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
                 <img id="invoiceLogo" src="Screenshot 2026-02-07 193235.png" alt="Atmilio Logo" class="w-full h-full object-contain p-2"
                      onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;w-full h-full flex items-center justify-center font-black&quot;>A</div>';">
-
               </div>
               <div>
                 <div class="text-2xl font-extrabold">INVOICE</div>
@@ -966,8 +964,20 @@
       window.print();
     });
 
-    // ✅ One-page PDF export (auto-scales to fit on a single Letter page)
-    $("btnSaveInvoice").addEventListener("click", async ()=>{
+    // --- helper: wait for images inside an element to finish loading ---
+    function waitForImages(rootEl){
+      const imgs = Array.from(rootEl.querySelectorAll("img"));
+      const pending = imgs
+        .filter(img => !img.complete)
+        .map(img => new Promise(resolve => {
+          img.addEventListener("load", resolve, { once:true });
+          img.addEventListener("error", resolve, { once:true });
+        }));
+      return Promise.all(pending);
+    }
+
+    // ✅ Guaranteed ONE-PAGE PDF export (fits invoice as an image onto Letter)
+    $("btnSaveInvoice").addEventListener("click", async ()=> {
       const st = load();
       const inv = getSelectedInvoice(st);
       const client = getSelectedClient(st);
@@ -979,77 +989,74 @@
       const wasHidden = printArea.classList.contains("hidden");
       if (wasHidden) printArea.classList.remove("hidden");
 
-      // LETTER page at 96dpi ≈ 816 x 1056 px
-      const LETTER_W = 816;
-      const LETTER_H = 1056;
-
-      // Create offscreen wrapper
+      // Offscreen "paper" clone for export-only styling
       const wrapper = document.createElement("div");
       wrapper.style.position = "fixed";
       wrapper.style.left = "-10000px";
       wrapper.style.top = "0";
-      wrapper.style.width = LETTER_W + "px";
-      wrapper.style.background = "#ffffff";
+      wrapper.style.width = "816px";     // ~ Letter width @96dpi
+      wrapper.style.background = "#fff";
       wrapper.style.padding = "0";
       wrapper.style.boxSizing = "border-box";
 
-      // Clone invoice into "paper"
       const paper = document.createElement("div");
-      paper.id = "pdfPaper";
-      paper.className = "pdf-onepage";              // tighter typography for PDF only
+      paper.className = "pdf-onepage"; // tighter PDF typography
+      paper.style.background = "#fff";
       paper.style.border = "1px solid #e2e8f0";
       paper.style.borderRadius = "16px";
       paper.style.padding = "14px";
       paper.style.boxSizing = "border-box";
-      paper.style.width = "100%";
-      paper.style.background = "#ffffff";
       paper.innerHTML = printArea.innerHTML;
 
-      // Ensure logo is set
+      // Ensure logo points to correct src in the clone
       const tempLogo = paper.querySelector("#invoiceLogo");
       if (tempLogo) tempLogo.setAttribute("src", ATMILIO_LOGO_SRC);
 
       wrapper.appendChild(paper);
       document.body.appendChild(wrapper);
 
-      // ---- Auto-scale to 1 page ----
-      // Leave a little breathing room for margins/padding
-      const paddingAllowance = 36; // px
-      const maxContentH = LETTER_H - paddingAllowance;
+      try {
+        // Wait for fonts/images so canvas sizing is stable
+        if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
+        await waitForImages(paper);
 
-      // Measure after insertion
-      const contentH = paper.scrollHeight;
-
-      // Scale only if too tall
-      const scale = Math.min(1, maxContentH / contentH);
-
-      if(scale < 1){
-        paper.style.transformOrigin = "top left";
-        paper.style.transform = `scale(${scale})`;
-        // Expand width so scaled content still fills the page nicely
-        paper.style.width = `${100 / scale}%`;
-      }
-
-      const safeInv = (inv.number || "ATM").replace(/[^A-Za-z0-9-_]/g, "");
-      const safeClient = (client.name || "client").replace(/[^A-Za-z0-9-_]/g, "");
-      const filename = `invoice_${safeInv}_${safeClient}.pdf`;
-
-      const opt = {
-        margin:      [8, 8, 8, 8], // mm
-        filename,
-        image:       { type: "jpeg", quality: 0.98 },
-        pagebreak:   { mode: ["avoid-all", "css", "legacy"] },
-        html2canvas: {
+        // Render invoice to canvas
+        const canvas = await html2canvas(paper, {
           scale: 2,
           useCORS: true,
           backgroundColor: "#ffffff",
-          windowWidth: LETTER_W
-        },
-        jsPDF: { unit: "mm", format: "letter", orientation: "portrait" }
-      };
+          windowWidth: 816
+        });
 
-      try{
-        await html2pdf().set(opt).from(wrapper).save();
+        // Create a 1-page Letter PDF and fit the image inside it
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "letter" });
+
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.98);
+
+        const imgW = canvas.width;
+        const imgH = canvas.height;
+
+        // Fit within page with a small margin
+        const margin = 24; // points (reduce to 12 if you want it bigger)
+        const maxW = pageW - margin * 2;
+        const maxH = pageH - margin * 2;
+
+        const scale = Math.min(maxW / imgW, maxH / imgH);
+        const drawW = imgW * scale;
+        const drawH = imgH * scale;
+
+        const x = (pageW - drawW) / 2;
+        const y = (pageH - drawH) / 2;
+
+        pdf.addImage(imgData, "JPEG", x, y, drawW, drawH);
+
+        const safeInv = (inv.number || "ATM").replace(/[^A-Za-z0-9-_]/g, "");
+        const safeClient = (client.name || "client").replace(/[^A-Za-z0-9-_]/g, "");
+        pdf.save(`invoice_${safeInv}_${safeClient}.pdf`);
       } finally {
         document.body.removeChild(wrapper);
         if (wasHidden) printArea.classList.add("hidden");
@@ -1133,5 +1140,4 @@
   </script>
 </body>
 </html>
-
 
