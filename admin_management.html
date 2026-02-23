@@ -25,25 +25,36 @@
       .print-card { box-shadow:none !important; border:none !important; }
     }
 
-    /* PDF/print: tighter spacing so it fits on one page more often */
+    /* Invoice preview: slightly tighter */
     .inv-tight .mt-8 { margin-top: 1.25rem !important; }
     .inv-tight .mt-6 { margin-top: 1rem !important; }
     .inv-tight .p-6 { padding: 1.25rem !important; }
     .inv-tight .py-3 { padding-top: .55rem !important; padding-bottom: .55rem !important; }
 
-    /* Force a consistent paper size when printing/exporting */
+    /* Force paper size when printing (browser) */
     @page { size: letter; margin: 0.35in; }
 
-    /* Extra-tight PDF mode (applied only to the cloned export) */
+    /* Export-only tight mode */
     .pdf-onepage { font-size: 12px; line-height: 1.25; }
-    .pdf-onepage .text-2xl { font-size: 1.25rem !important; }
-    .pdf-onepage .text-lg  { font-size: 1.05rem !important; }
-    .pdf-onepage .p-6      { padding: 1rem !important; }
-    .pdf-onepage .p-5      { padding: 1rem !important; }
-    .pdf-onepage .p-4      { padding: .85rem !important; }
-    .pdf-onepage .mt-6     { margin-top: .9rem !important; }
-    .pdf-onepage .mt-4     { margin-top: .7rem !important; }
-    .pdf-onepage .rounded-2xl { border-radius: 14px !important; }
+    .pdf-onepage .text-2xl { font-size: 1.15rem !important; }
+    .pdf-onepage .text-lg  { font-size: 1.0rem !important; }
+    .pdf-onepage .p-6      { padding: .9rem !important; }
+    .pdf-onepage .p-5      { padding: .9rem !important; }
+    .pdf-onepage .p-4      { padding: .75rem !important; }
+    .pdf-onepage .mt-6     { margin-top: .75rem !important; }
+    .pdf-onepage .mt-4     { margin-top: .6rem !important; }
+    .pdf-onepage .rounded-2xl { border-radius: 12px !important; }
+
+    /* Ultra-tight export mode (applied when still too tall) */
+    .pdf-ultra { font-size: 11px !important; line-height: 1.18 !important; }
+    .pdf-ultra .text-2xl { font-size: 1.05rem !important; }
+    .pdf-ultra .text-lg  { font-size: .95rem !important; }
+    .pdf-ultra .p-6      { padding: .75rem !important; }
+    .pdf-ultra .p-5      { padding: .75rem !important; }
+    .pdf-ultra .p-4      { padding: .65rem !important; }
+    .pdf-ultra .mt-6     { margin-top: .6rem !important; }
+    .pdf-ultra .mt-4     { margin-top: .5rem !important; }
+    .pdf-ultra .leading-6 { line-height: 1.35 !important; } /* wire block */
   </style>
 </head>
 
@@ -212,7 +223,6 @@
               <div>
                 <div class="text-2xl font-extrabold">INVOICE</div>
                 <div class="text-sm text-slate-600 mt-1">Atmilio</div>
-                <!-- REMOVED address line per request -->
               </div>
             </div>
             <div class="text-right">
@@ -964,7 +974,7 @@
       window.print();
     });
 
-    // --- helper: wait for images inside an element to finish loading ---
+    // --- helpers for export ---
     function waitForImages(rootEl){
       const imgs = Array.from(rootEl.querySelectorAll("img"));
       const pending = imgs
@@ -976,7 +986,13 @@
       return Promise.all(pending);
     }
 
-    // ✅ Guaranteed ONE-PAGE PDF export (fits invoice as an image onto Letter)
+    function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+    // ✅ HARD GUARANTEE one-page PDF:
+    // 1) Clone invoice into a fixed-width "paper"
+    // 2) If it is too tall, apply ultra-tight class + CSS transform shrink
+    // 3) Render to canvas at a SAFE scale (avoid canvas max-height cropping)
+    // 4) Place the canvas image onto a single Letter PDF page
     $("btnSaveInvoice").addEventListener("click", async ()=> {
       const st = load();
       const inv = getSelectedInvoice(st);
@@ -989,26 +1005,35 @@
       const wasHidden = printArea.classList.contains("hidden");
       if (wasHidden) printArea.classList.remove("hidden");
 
-      // Offscreen "paper" clone for export-only styling
+      // Letter in points (jsPDF)
+      const PAGE_W_PT = 612;
+      const PAGE_H_PT = 792;
+      const MARGIN_PT = 18;
+
+      // Letter width @96dpi for layout measuring
+      const PAPER_W_PX = 760; // slightly smaller than 816 to reduce wrapping height
+      const TARGET_H_PX = 980; // target content height budget (helps avoid canvas max height)
+
+      // Offscreen clone
       const wrapper = document.createElement("div");
       wrapper.style.position = "fixed";
       wrapper.style.left = "-10000px";
       wrapper.style.top = "0";
-      wrapper.style.width = "816px";     // ~ Letter width @96dpi
+      wrapper.style.width = PAPER_W_PX + "px";
       wrapper.style.background = "#fff";
       wrapper.style.padding = "0";
       wrapper.style.boxSizing = "border-box";
 
       const paper = document.createElement("div");
-      paper.className = "pdf-onepage"; // tighter PDF typography
+      paper.className = "pdf-onepage";
       paper.style.background = "#fff";
       paper.style.border = "1px solid #e2e8f0";
-      paper.style.borderRadius = "16px";
-      paper.style.padding = "14px";
+      paper.style.borderRadius = "14px";
+      paper.style.padding = "10px";
       paper.style.boxSizing = "border-box";
+      paper.style.width = "100%";
       paper.innerHTML = printArea.innerHTML;
 
-      // Ensure logo points to correct src in the clone
       const tempLogo = paper.querySelector("#invoiceLogo");
       if (tempLogo) tempLogo.setAttribute("src", ATMILIO_LOGO_SRC);
 
@@ -1016,39 +1041,55 @@
       document.body.appendChild(wrapper);
 
       try {
-        // Wait for fonts/images so canvas sizing is stable
         if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
         await waitForImages(paper);
+        await sleep(30); // small settle time for layout
 
-        // Render invoice to canvas
+        // If still tall, switch to ultra-tight
+        const h1 = paper.scrollHeight;
+        if (h1 > TARGET_H_PX) {
+          paper.classList.add("pdf-ultra");
+          await sleep(30);
+        }
+
+        // Apply a CSS shrink BEFORE canvas render if needed (prevents canvas cropping)
+        const h2 = paper.scrollHeight;
+        const shrink = Math.min(1, TARGET_H_PX / h2);
+
+        if (shrink < 1) {
+          paper.style.transformOrigin = "top left";
+          paper.style.transform = `scale(${shrink})`;
+          paper.style.width = `${100 / shrink}%`; // keep full width after scaling
+          await sleep(30);
+        }
+
+        // Render to canvas at a SAFE scale (1.25 avoids huge canvas heights)
         const canvas = await html2canvas(paper, {
-          scale: 2,
+          scale: 1.25,
           useCORS: true,
           backgroundColor: "#ffffff",
-          windowWidth: 816
+          windowWidth: PAPER_W_PX,
+          scrollX: 0,
+          scrollY: 0
         });
 
-        // Create a 1-page Letter PDF and fit the image inside it
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "letter" });
 
-        const pageW = pdf.internal.pageSize.getWidth();
-        const pageH = pdf.internal.pageSize.getHeight();
+        const pageW = PAGE_W_PT;
+        const pageH = PAGE_H_PT;
 
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
-
         const imgW = canvas.width;
         const imgH = canvas.height;
 
-        // Fit within page with a small margin
-        const margin = 24; // points (reduce to 12 if you want it bigger)
-        const maxW = pageW - margin * 2;
-        const maxH = pageH - margin * 2;
+        // Fit image into ONE page
+        const maxW = pageW - MARGIN_PT * 2;
+        const maxH = pageH - MARGIN_PT * 2;
+        const s = Math.min(maxW / imgW, maxH / imgH);
 
-        const scale = Math.min(maxW / imgW, maxH / imgH);
-        const drawW = imgW * scale;
-        const drawH = imgH * scale;
-
+        const drawW = imgW * s;
+        const drawH = imgH * s;
         const x = (pageW - drawW) / 2;
         const y = (pageH - drawH) / 2;
 
