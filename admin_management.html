@@ -25,36 +25,31 @@
       .print-card { box-shadow:none !important; border:none !important; }
     }
 
-    /* Invoice preview: slightly tighter */
-    .inv-tight .mt-8 { margin-top: 1.25rem !important; }
-    .inv-tight .mt-6 { margin-top: 1rem !important; }
-    .inv-tight .p-6 { padding: 1.25rem !important; }
-    .inv-tight .py-3 { padding-top: .55rem !important; padding-bottom: .55rem !important; }
+    /* Invoice preview: tighter spacing */
+    .inv-tight .mt-6 { margin-top: .85rem !important; }
+    .inv-tight .mt-4 { margin-top: .6rem !important; }
+    .inv-tight .p-6 { padding: 1.05rem !important; }
+    .inv-tight .py-3 { padding-top: .45rem !important; padding-bottom: .45rem !important; }
 
-    /* Force paper size when printing (browser) */
+    /* Force paper size for print */
     @page { size: letter; margin: 0.35in; }
 
     /* Export-only tight mode */
-    .pdf-onepage { font-size: 12px; line-height: 1.25; }
-    .pdf-onepage .text-2xl { font-size: 1.15rem !important; }
-    .pdf-onepage .text-lg  { font-size: 1.0rem !important; }
-    .pdf-onepage .p-6      { padding: .9rem !important; }
-    .pdf-onepage .p-5      { padding: .9rem !important; }
-    .pdf-onepage .p-4      { padding: .75rem !important; }
-    .pdf-onepage .mt-6     { margin-top: .75rem !important; }
-    .pdf-onepage .mt-4     { margin-top: .6rem !important; }
+    .pdf-onepage { font-size: 11px; line-height: 1.18; }
+    .pdf-onepage .text-2xl { font-size: 1.05rem !important; }
+    .pdf-onepage .text-lg  { font-size: .95rem !important; }
+    .pdf-onepage .p-6      { padding: .75rem !important; }
+    .pdf-onepage .p-5      { padding: .75rem !important; }
+    .pdf-onepage .p-4      { padding: .65rem !important; }
+    .pdf-onepage .mt-6     { margin-top: .6rem !important; }
+    .pdf-onepage .mt-4     { margin-top: .5rem !important; }
     .pdf-onepage .rounded-2xl { border-radius: 12px !important; }
+    .pdf-onepage .leading-6 { line-height: 1.25 !important; }
+    .pdf-onepage .text-sm { font-size: .84rem !important; }
+    .pdf-onepage .text-xs { font-size: .74rem !important; }
 
-    /* Ultra-tight export mode (applied when still too tall) */
-    .pdf-ultra { font-size: 11px !important; line-height: 1.18 !important; }
-    .pdf-ultra .text-2xl { font-size: 1.05rem !important; }
-    .pdf-ultra .text-lg  { font-size: .95rem !important; }
-    .pdf-ultra .p-6      { padding: .75rem !important; }
-    .pdf-ultra .p-5      { padding: .75rem !important; }
-    .pdf-ultra .p-4      { padding: .65rem !important; }
-    .pdf-ultra .mt-6     { margin-top: .6rem !important; }
-    .pdf-ultra .mt-4     { margin-top: .5rem !important; }
-    .pdf-ultra .leading-6 { line-height: 1.35 !important; } /* wire block */
+    /* prevent weird breaks in some engines (mostly print) */
+    #printArea, #printArea * { break-inside: avoid; page-break-inside: avoid; }
   </style>
 </head>
 
@@ -195,7 +190,7 @@
               Print
             </button>
             <button id="btnSaveInvoice" class="px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50" disabled>
-              Download PDF
+              Download PDF (1 page)
             </button>
           </div>
 
@@ -272,27 +267,32 @@
             <div id="pNotes" class="text-sm text-slate-700 mt-1">—</div>
           </div>
 
+          <!-- ✅ COMPACT Wire Instructions (2-column layout to reduce height) -->
           <div class="mt-6 rounded-2xl border border-slate-200 p-4">
             <div class="text-xs text-slate-500 font-bold">Wire Instructions</div>
-            <div class="mt-2 text-sm text-slate-700 leading-6">
-              <div><span class="font-bold">Domestic Wire Routing Number:</span> <span class="mono">121000248</span></div>
+
+            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm text-slate-700 leading-6">
+              <div><span class="font-bold">Domestic Wire Routing #:</span> <span class="mono">121000248</span></div>
               <div><span class="font-bold">Swift Code:</span> <span class="mono">WFBIUS63</span></div>
 
-              <div class="mt-2"><span class="font-bold">Bank Name:</span> Wells Fargo Bank, N.A.</div>
-              <div>333 Market Street</div>
-              <div>San Francisco, CA 94105</div>
+              <div class="md:col-span-2 mt-1">
+                <span class="font-bold">Bank:</span> Wells Fargo Bank, N.A., 333 Market Street, San Francisco, CA 94105
+              </div>
 
-              <div class="mt-2"><span class="font-bold">Account Name:</span> Atmilio Consulting Company</div>
-              <div><span class="font-bold">Business Address:</span> 7755 JOHN Q HAMMONS DR APT 2413 FRISCO, TX 75034-2226</div>
-              <div><span class="font-bold">Account Number:</span> <span class="mono">7078137382</span></div>
+              <div class="mt-1"><span class="font-bold">Account Name:</span> Atmilio Consulting Company</div>
+              <div class="mt-1"><span class="font-bold">Account #:</span> <span class="mono">7078137382</span></div>
+
+              <div class="md:col-span-2">
+                <span class="font-bold">Business Address:</span> 7755 JOHN Q HAMMONS DR APT 2413 FRISCO, TX 75034-2226
+              </div>
             </div>
           </div>
 
-          <div class="mt-6 text-xs text-slate-500">
+          <div class="mt-4 text-xs text-slate-500">
             <span class="font-bold">Sales tax not applicable to professional consulting services.</span>
           </div>
 
-          <div class="mt-4 text-xs text-slate-500">
+          <div class="mt-2 text-xs text-slate-500">
             Make payments to Atmilio. Thank you.
           </div>
         </div>
@@ -452,9 +452,7 @@
     const LS_KEY = "atmilio_admin_store_v2_terms_saveprint";
     const $ = (id) => document.getElementById(id);
 
-    // Update if your logo lives in /assets or similar.
     const ATMILIO_LOGO_SRC = "Screenshot 2026-02-07 193235.png";
-
     const DEFAULT = { clients: [], invoices: [], selectedClientId: null, selectedInvoiceId: null };
 
     function clone(x){ return JSON.parse(JSON.stringify(x)); }
@@ -974,7 +972,7 @@
       window.print();
     });
 
-    // --- helpers for export ---
+    // --------- ✅ 1-page PDF export (hard guarantee) ---------
     function waitForImages(rootEl){
       const imgs = Array.from(rootEl.querySelectorAll("img"));
       const pending = imgs
@@ -985,14 +983,8 @@
         }));
       return Promise.all(pending);
     }
-
     function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
-    // ✅ HARD GUARANTEE one-page PDF:
-    // 1) Clone invoice into a fixed-width "paper"
-    // 2) If it is too tall, apply ultra-tight class + CSS transform shrink
-    // 3) Render to canvas at a SAFE scale (avoid canvas max-height cropping)
-    // 4) Place the canvas image onto a single Letter PDF page
     $("btnSaveInvoice").addEventListener("click", async ()=> {
       const st = load();
       const inv = getSelectedInvoice(st);
@@ -1005,14 +997,13 @@
       const wasHidden = printArea.classList.contains("hidden");
       if (wasHidden) printArea.classList.remove("hidden");
 
-      // Letter in points (jsPDF)
+      // Use a slightly smaller "paper" width to reduce wrapping height
+      const PAPER_W_PX = 740;
+
+      // Letter in points
       const PAGE_W_PT = 612;
       const PAGE_H_PT = 792;
       const MARGIN_PT = 18;
-
-      // Letter width @96dpi for layout measuring
-      const PAPER_W_PX = 760; // slightly smaller than 816 to reduce wrapping height
-      const TARGET_H_PX = 980; // target content height budget (helps avoid canvas max height)
 
       // Offscreen clone
       const wrapper = document.createElement("div");
@@ -1028,12 +1019,13 @@
       paper.className = "pdf-onepage";
       paper.style.background = "#fff";
       paper.style.border = "1px solid #e2e8f0";
-      paper.style.borderRadius = "14px";
+      paper.style.borderRadius = "12px";
       paper.style.padding = "10px";
       paper.style.boxSizing = "border-box";
       paper.style.width = "100%";
       paper.innerHTML = printArea.innerHTML;
 
+      // Ensure logo
       const tempLogo = paper.querySelector("#invoiceLogo");
       if (tempLogo) tempLogo.setAttribute("src", ATMILIO_LOGO_SRC);
 
@@ -1043,27 +1035,20 @@
       try {
         if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch(e){} }
         await waitForImages(paper);
-        await sleep(30); // small settle time for layout
+        await sleep(25);
 
-        // If still tall, switch to ultra-tight
-        const h1 = paper.scrollHeight;
-        if (h1 > TARGET_H_PX) {
-          paper.classList.add("pdf-ultra");
-          await sleep(30);
-        }
-
-        // Apply a CSS shrink BEFORE canvas render if needed (prevents canvas cropping)
-        const h2 = paper.scrollHeight;
-        const shrink = Math.min(1, TARGET_H_PX / h2);
-
+        // Pre-shrink with CSS transform if needed BEFORE canvas render (prevents any overflow)
+        const targetMaxPxH = 980; // safe height budget
+        const h = paper.scrollHeight;
+        const shrink = Math.min(1, targetMaxPxH / h);
         if (shrink < 1) {
           paper.style.transformOrigin = "top left";
           paper.style.transform = `scale(${shrink})`;
-          paper.style.width = `${100 / shrink}%`; // keep full width after scaling
-          await sleep(30);
+          paper.style.width = `${100 / shrink}%`;
+          await sleep(25);
         }
 
-        // Render to canvas at a SAFE scale (1.25 avoids huge canvas heights)
+        // Render to a safe canvas scale (avoid giant canvases)
         const canvas = await html2canvas(paper, {
           scale: 1.25,
           useCORS: true,
@@ -1076,22 +1061,19 @@
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "letter" });
 
-        const pageW = PAGE_W_PT;
-        const pageH = PAGE_H_PT;
-
         const imgData = canvas.toDataURL("image/jpeg", 0.98);
         const imgW = canvas.width;
         const imgH = canvas.height;
 
         // Fit image into ONE page
-        const maxW = pageW - MARGIN_PT * 2;
-        const maxH = pageH - MARGIN_PT * 2;
+        const maxW = PAGE_W_PT - MARGIN_PT * 2;
+        const maxH = PAGE_H_PT - MARGIN_PT * 2;
         const s = Math.min(maxW / imgW, maxH / imgH);
 
         const drawW = imgW * s;
         const drawH = imgH * s;
-        const x = (pageW - drawW) / 2;
-        const y = (pageH - drawH) / 2;
+        const x = (PAGE_W_PT - drawW) / 2;
+        const y = (PAGE_H_PT - drawH) / 2;
 
         pdf.addImage(imgData, "JPEG", x, y, drawW, drawH);
 
