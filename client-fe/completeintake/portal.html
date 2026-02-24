@@ -306,6 +306,12 @@
     // Portal (Cleaned + Unified) + To-Dos (Right Side)
     // =========================================================
     const LS_KEY = "atmilio_portal_store_clean_v3";
+
+    // ✅ Repo file that you want downloadable in Documents
+    // If the file is in the same folder as portal.html, this is perfect:
+    const REPO_XLSX_NAME = "Initial Competitor Funding Analysis 2.24.26.xlsx";
+    const REPO_XLSX_PATH = REPO_XLSX_NAME; // change to "docs/Initial ... .xlsx" if you move it
+
     const DEFAULT_STORE = {
       client: {
         name: "CompleteIntake",
@@ -528,7 +534,7 @@
         text,
         done: false,
         tag: "Raise",
-        due: "",            // set later if you want
+        due: "",
         createdAt: Date.now(),
         updatedAt: Date.now()
       });
@@ -731,6 +737,12 @@
       }).join("");
     }
 
+    // ✅ Helper: safe URL for repo/static files with spaces
+    function hrefForStaticFile(path){
+      // encodeURI keeps slashes, but encodes spaces and unsafe chars
+      return encodeURI(String(path || ""));
+    }
+
     function renderDocumentsTable(store){
       const q = ($("docSearch")?.value || "").toLowerCase().trim();
       const wrap = $("documentsTable");
@@ -749,6 +761,8 @@
         const sizeLabel = d.sizeLabel || fmtBytes(d.size);
         const canOpen = !!d.url;
 
+        const safeHref = canOpen ? hrefForStaticFile(d.url) : "";
+
         return `
           <div class="grid grid-cols-12 gap-2 px-4 py-3 items-center">
             <div class="col-span-7">
@@ -759,9 +773,23 @@
             <div class="col-span-1 text-sm text-slate-700">${safeText(sizeLabel)}</div>
             <div class="col-span-2 flex justify-end gap-2">
               <button data-del-doc="${idx}" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
-              ${canOpen
-                ? `<a href="${d.url}" target="_blank" rel="noreferrer" class="px-3 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">Open</a>`
-                : `<button class="px-3 py-2 rounded-xl bg-slate-200 text-slate-600 font-bold cursor-not-allowed" disabled>Open</button>`
+
+              ${
+                canOpen
+                  ? `
+                    <a href="${safeHref}" target="_blank" rel="noreferrer"
+                       class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">
+                      Open
+                    </a>
+                    <a href="${safeHref}" download="${safeText(name)}"
+                       class="px-3 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">
+                      Download
+                    </a>
+                  `
+                  : `
+                    <button class="px-3 py-2 rounded-xl bg-slate-200 text-slate-600 font-bold cursor-not-allowed" disabled>Open</button>
+                    <button class="px-3 py-2 rounded-xl bg-slate-200 text-slate-600 font-bold cursor-not-allowed" disabled>Download</button>
+                  `
               }
             </div>
           </div>
@@ -851,7 +879,7 @@
           size: f.size,
           sizeLabel: fmtBytes(f.size),
           addedAt: Date.now(),
-          url: "" // TODO: hook to backend upload to get a real URL
+          url: "" // still demo for uploads; repo-seeded docs have a real url
         });
       }
 
@@ -937,10 +965,39 @@
       alert("Settings placeholder. Next step: add user roles + permissions + integrations.");
     });
 
+    // ✅ Seed the repo XLSX into documents (so it shows + downloads)
+    function ensureRepoDocument(store){
+      store.client.documents = Array.isArray(store.client.documents) ? store.client.documents : [];
+
+      const already = store.client.documents.some(d =>
+        String(d?.url || "").toLowerCase() === String(REPO_XLSX_PATH).toLowerCase() ||
+        String(d?.title || d?.name || "").toLowerCase() === String(REPO_XLSX_NAME).toLowerCase()
+      );
+
+      if(!already){
+        store.client.documents.unshift({
+          name: REPO_XLSX_NAME,
+          title: REPO_XLSX_NAME,
+          type: "Excel",
+          size: null,
+          sizeLabel: "-",
+          addedAt: Date.now(),
+          url: REPO_XLSX_PATH
+        });
+      }
+
+      return store;
+    }
+
     // Boot
     (async function init(){
       setTab("dashboard");
-      const store = await loadRemote();
+      let store = await loadRemote();
+
+      // Ensure repo xlsx is visible as downloadable
+      store = ensureRepoDocument(store);
+      saveStore(store);
+
       if(!(store.client.updates||[]).length){
         store.client.updates = store.client.updates || [];
         store.client.updates.unshift({
@@ -950,6 +1007,7 @@
         });
         saveStore(store);
       }
+
       // Seed a couple todos if empty
       if(!(store.client.todos||[]).length){
         store.client.todos = [
