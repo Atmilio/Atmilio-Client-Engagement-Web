@@ -1,967 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>CompleteIntake Portal | Atmilio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-    .card { background:#fff; border:1px solid rgb(226,232,240); box-shadow:0 10px 24px rgba(15,23,42,0.06); }
-    .chip { font-size:12px; padding:4px 10px; border-radius:999px; }
-    .thin-scroll::-webkit-scrollbar { width:8px; height:8px; }
-    .thin-scroll::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.25); border-radius:999px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompleteIntake Portal | Atmilio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+    </style>
 </head>
-
-<body class="min-h-screen bg-slate-50 text-slate-900">
-  <!-- Header -->
-  <header class="sticky top-0 z-10 bg-white/85 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 2l9 5-9 5-9-5 9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M21 7v10l-9 5-9-5V7" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M12 12v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-purple-100 via-white to-purple-200">
+    <header class="w-full bg-white/90 shadow-md py-6 px-8 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <svg class="w-10 h-10" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+                <title id="logoTitle">Atmilio Logo</title>
+                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
+                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
+                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
+            </svg>
+            <span class="text-2xl font-bold text-purple-700">CompleteIntake Portal</span>
         </div>
-        <div>
-          <div class="text-xs text-slate-500">Atmilio</div>
-          <div class="text-lg font-extrabold leading-tight">Client Portal</div>
+        <div class="flex items-center space-x-4">
+            <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
+            <button onclick="logout()" class="ml-4 px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition">Logout</button>
         </div>
-      </div>
-
-      <div class="hidden md:flex items-center gap-3">
-        <div class="text-right">
-          <div class="text-xs text-slate-500">Client</div>
-          <div id="clientNameTop" class="font-extrabold">CompleteIntake</div>
-        </div>
-        <div class="h-10 w-px bg-slate-200"></div>
-        <div class="text-right">
-          <div class="text-xs text-slate-500">Goal</div>
-          <div id="goalTop" class="font-extrabold">$5,000,000</div>
-        </div>
-      </div>
-
-      <button id="btnSettings" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">
-        Settings
-      </button>
-    </div>
-  </header>
-
-  <!-- Main -->
-  <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- Welcome + KPI row -->
-    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold">
-          Welcome, <span id="clientNameHeader">CompleteIntake</span>
-        </h1>
-        <p class="text-slate-600 mt-1">Upload documents, track meetings, and view updates — all in one place.</p>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full md:w-auto">
-        <div class="card rounded-2xl p-4">
-          <div class="text-xs text-slate-500">Raised</div>
-          <div id="kpiRaised" class="text-lg font-extrabold mt-1">$0</div>
-        </div>
-        <div class="card rounded-2xl p-4">
-          <div class="text-xs text-slate-500">Progress</div>
-          <div id="kpiPct" class="text-lg font-extrabold mt-1">0%</div>
-        </div>
-        <div class="card rounded-2xl p-4 col-span-2 md:col-span-2">
-          <div class="text-xs text-slate-500">Next meeting</div>
-          <div id="kpiNextMeeting" class="text-sm font-extrabold mt-1">None scheduled</div>
-          <div id="kpiNextMeetingWhen" class="text-xs text-slate-500 mt-1"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Progress -->
-    <div class="card rounded-2xl p-5 mt-5">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <div class="text-sm text-slate-500">Capital Raise</div>
-          <div class="text-xl font-extrabold">Progress to <span id="goalTitle">$5,000,000</span></div>
-        </div>
-        <div id="progressChip" class="chip bg-indigo-100 text-indigo-800 font-bold">0%</div>
-      </div>
-
-      <div class="mt-4 w-full bg-slate-100 rounded-full h-4 overflow-hidden">
-        <div id="progressBar" class="h-4 rounded-full bg-indigo-600 transition-all duration-500" style="width:0%"></div>
-      </div>
-
-      <div class="mt-3 flex items-center justify-between text-sm text-slate-700">
-        <span>Raised: <span id="raisedAmount" class="font-bold">$0</span></span>
-        <span>Goal: <span id="goalInline" class="font-bold">$5,000,000</span></span>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="mt-6">
-      <div class="flex flex-wrap gap-2">
-        <button class="tabBtn px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold" data-tab="dashboard">Dashboard</button>
-        <button class="tabBtn px-4 py-2 rounded-xl bg-white border border-slate-200 font-bold hover:bg-slate-50" data-tab="documents">Documents</button>
-        <button class="tabBtn px-4 py-2 rounded-xl bg-white border border-slate-200 font-bold hover:bg-slate-50" data-tab="meetings">Meetings</button>
-        <button class="tabBtn px-4 py-2 rounded-xl bg-white border border-slate-200 font-bold hover:bg-slate-50" data-tab="updates">Updates</button>
-      </div>
-
-      <!-- DASHBOARD -->
-      <section id="tab-dashboard" class="mt-4">
-        <div class="grid lg:grid-cols-3 gap-4">
-          <!-- Left: Meetings -->
-          <div class="card rounded-2xl p-5 lg:col-span-2">
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-lg font-extrabold">Upcoming meetings</div>
-                <div class="text-sm text-slate-600">Your next scheduled calls and internal syncs.</div>
-              </div>
-              <button id="btnAddMeetingTop" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">+ Add</button>
-            </div>
-            <div id="meetingsPreview" class="mt-4 space-y-3 max-h-[320px] overflow-auto thin-scroll pr-1"></div>
-          </div>
-
-          <!-- Right: To-Dos -->
-          <div class="card rounded-2xl p-5">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <div class="text-lg font-extrabold">To-Dos</div>
-                <div class="text-sm text-slate-600">Action items for this raise.</div>
-              </div>
-              <button id="btnAddTodo" class="px-3 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">+ Add</button>
-            </div>
-
-            <div class="mt-3 flex gap-2">
-              <input id="todoInput" type="text" placeholder="Add a to-do…"
-                     class="w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" />
-              <button id="btnQuickAddTodo" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">
-                Add
-              </button>
-            </div>
-
-            <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
-              <span id="todoCount">0 items</span>
-              <button id="btnClearDone" class="font-bold hover:text-slate-700">Clear done</button>
-            </div>
-
-            <div id="todoList" class="mt-3 space-y-2 max-h-[320px] overflow-auto thin-scroll pr-1"></div>
-          </div>
-        </div>
-
-        <!-- Bottom: Activity Feed (full width) -->
-        <div class="card rounded-2xl p-5 mt-4">
-          <div class="text-lg font-extrabold">Recent activity</div>
-          <div class="text-sm text-slate-600">Uploads, updates, and meeting changes.</div>
-          <div id="activityFeed" class="mt-4 space-y-3 max-h-[260px] overflow-auto thin-scroll pr-1"></div>
-        </div>
-      </section>
-
-      <!-- DOCUMENTS -->
-      <section id="tab-documents" class="mt-4 hidden">
-        <div class="card rounded-2xl p-5">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div>
-              <div class="text-lg font-extrabold">Documents</div>
-              <div class="text-sm text-slate-600">Upload pitch decks, models, term sheets, diligence docs.</div>
-            </div>
-
-            <div class="flex gap-2 w-full md:w-auto">
-              <input id="docSearch" type="text" placeholder="Search..."
-                class="w-full md:w-[260px] px-4 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" />
-              <button id="btnUploadDoc" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">Upload</button>
-            </div>
-          </div>
-
-          <div id="dropZone" class="mt-4 p-6 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 transition cursor-pointer text-center">
-            <div class="font-extrabold">Drag & drop files here</div>
-            <div class="text-sm text-slate-600 mt-1">or click Upload</div>
-            <div class="text-xs text-slate-500 mt-2">PPT/PPTX, XLS/XLSX, DOC/DOCX, PDF, JPG/PNG • 25MB max</div>
-            <input id="fileInput" type="file" multiple class="hidden"
-              accept=".ppt,.pptx,.xls,.xlsx,.doc,.docx,.pdf,.png,.jpg,.jpeg" />
-          </div>
-
-          <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <div class="grid grid-cols-12 gap-2 px-4 py-3 text-xs font-bold text-slate-500 border-b border-slate-200">
-              <div class="col-span-7">File</div>
-              <div class="col-span-2">Type</div>
-              <div class="col-span-1">Size</div>
-              <div class="col-span-2 text-right">Actions</div>
-            </div>
-            <div id="documentsTable" class="divide-y divide-slate-200"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- MEETINGS -->
-      <section id="tab-meetings" class="mt-4 hidden">
-        <div class="card rounded-2xl p-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-lg font-extrabold">Meetings</div>
-              <div class="text-sm text-slate-600">Add calls and keep notes in one place.</div>
-            </div>
-            <button id="btnAddMeeting" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">+ New</button>
-          </div>
-
-          <div class="mt-4 grid lg:grid-cols-3 gap-4">
-            <div class="lg:col-span-2 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div class="grid grid-cols-12 gap-2 px-4 py-3 text-xs font-bold text-slate-500 border-b border-slate-200">
-                <div class="col-span-4">When</div>
-                <div class="col-span-4">Title</div>
-                <div class="col-span-2">Attendees</div>
-                <div class="col-span-2 text-right">Status</div>
-              </div>
-              <div id="meetingsTable" class="divide-y divide-slate-200"></div>
-            </div>
-
-            <div class="rounded-2xl border border-slate-200 bg-white p-4">
-              <div class="text-sm font-extrabold">Notes</div>
-              <div class="text-xs text-slate-500">Click a meeting to view notes.</div>
-              <div id="meetingNotes" class="mt-3 text-sm text-slate-700 leading-relaxed">No meeting selected.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- UPDATES -->
-      <section id="tab-updates" class="mt-4 hidden">
-        <div class="card rounded-2xl p-5">
-          <div class="flex items-center justify-between">
-            <div>
-              <div class="text-lg font-extrabold">Updates</div>
-              <div class="text-sm text-slate-600">Milestones, investor status, next steps.</div>
-            </div>
-            <button id="btnAddUpdate" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">+ New</button>
-          </div>
-
-          <div id="updatesList" class="mt-4 space-y-3"></div>
-        </div>
-      </section>
-    </div>
-  </main>
-
-  <!-- Modal: Meeting -->
-  <div id="meetingModal" class="fixed inset-0 bg-black/30 hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xl rounded-2xl border border-slate-200 shadow-xl p-5">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-extrabold">New meeting</div>
-        <button class="closeMeeting px-3 py-1 rounded-xl border border-slate-200 font-bold">✕</button>
-      </div>
-
-      <div class="mt-4 grid md:grid-cols-2 gap-3">
-        <div>
-          <label class="text-xs font-bold text-slate-600">Title</label>
-          <input id="mTitle" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" placeholder="Investor intro call" />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-600">Attendees</label>
-          <input id="mAttendees" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" placeholder="John (VC), CEO, CFO" />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-600">Date</label>
-          <input id="mDate" type="date" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" />
-        </div>
-        <div>
-          <label class="text-xs font-bold text-slate-600">Time</label>
-          <input id="mTime" type="time" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" />
-        </div>
-        <div class="md:col-span-2">
-          <label class="text-xs font-bold text-slate-600">Notes</label>
-          <textarea id="mNotes" rows="3" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200" placeholder="Agenda, follow-ups, context..."></textarea>
-        </div>
-      </div>
-
-      <div class="mt-4 flex justify-end gap-2">
-        <button class="closeMeeting px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Cancel</button>
-        <button id="saveMeeting" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">Save</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal: Update -->
-  <div id="updateModal" class="fixed inset-0 bg-black/30 hidden items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xl rounded-2xl border border-slate-200 shadow-xl p-5">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-extrabold">New update</div>
-        <button class="closeUpdate px-3 py-1 rounded-xl border border-slate-200 font-bold">✕</button>
-      </div>
-
-      <div class="mt-4">
-        <label class="text-xs font-bold text-slate-600">Update</label>
-        <textarea id="uText" rows="4" class="mt-1 w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-200"
-          placeholder="Example: Investor requested deck + model. Follow-up Friday."></textarea>
-      </div>
-
-      <div class="mt-4 flex justify-end gap-2">
-        <button class="closeUpdate px-4 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Cancel</button>
-        <button id="saveUpdate" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700">Post</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // =========================================================
-    // Portal (Cleaned + Unified) + To-Dos (Right Side)
-    // =========================================================
-    const LS_KEY = "atmilio_portal_store_clean_v3";
-    const DEFAULT_STORE = {
-      client: {
-        name: "CompleteIntake",
-        goal: 5000000,
-        raised: 0,
-        documents: [],
-        updates: [],
-        todos: []
-      }
-    };
-
-    const $ = (id) => document.getElementById(id);
-    const TAB_IDS = ["dashboard","documents","meetings","updates"];
-    let _meetingsCache = [];
-
-    function clone(x){ return JSON.parse(JSON.stringify(x)); }
-
-    function loadStore(){
-      const raw = localStorage.getItem(LS_KEY);
-      if(!raw) return clone(DEFAULT_STORE);
-      try { return JSON.parse(raw); } catch { return clone(DEFAULT_STORE); }
-    }
-    function saveStore(store){ localStorage.setItem(LS_KEY, JSON.stringify(store)); }
-
-    function money(n){ return (Number(n)||0).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
-    function fmtBytes(bytes){
-      if (bytes === undefined || bytes === null) return "-";
-      const u=["B","KB","MB","GB"]; let i=0, v=bytes;
-      while(v>=1024 && i<u.length-1){ v/=1024; i++; }
-      return `${v.toFixed(i===0?0:1)} ${u[i]}`;
-    }
-    function safeText(s){ return String(s||"").replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c])); }
-
-    function fileTypeLabel(name){
-      const ext=(String(name||"").split(".").pop()||"").toLowerCase();
-      if(["ppt","pptx"].includes(ext)) return "PowerPoint";
-      if(["xls","xlsx","csv"].includes(ext)) return "Excel";
-      if(["doc","docx"].includes(ext)) return "Word";
-      if(["pdf"].includes(ext)) return "PDF";
-      if(["png","jpg","jpeg"].includes(ext)) return "Image";
-      return ext ? ext.toUpperCase() : "File";
-    }
-
-    function statusChip(dtISO){
-      const now=Date.now();
-      const t=new Date(dtISO).getTime();
-      if(isNaN(t)) return {text:"Unknown", cls:"bg-slate-100 text-slate-700"};
-      if(t<now) return {text:"Completed", cls:"bg-emerald-100 text-emerald-800"};
-      if(t-now <= 72*3600*1000) return {text:"Soon", cls:"bg-amber-100 text-amber-800"};
-      return {text:"Scheduled", cls:"bg-indigo-100 text-indigo-800"};
-    }
-
-    function setTab(tab){
-      TAB_IDS.forEach(t => $("tab-"+t).classList.toggle("hidden", t !== tab));
-      document.querySelectorAll(".tabBtn").forEach(btn => {
-        const active = btn.dataset.tab === tab;
-        btn.className = active
-          ? "tabBtn px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold"
-          : "tabBtn px-4 py-2 rounded-xl bg-white border border-slate-200 font-bold hover:bg-slate-50";
-      });
-    }
-    document.querySelectorAll(".tabBtn").forEach(btn => btn.addEventListener("click", ()=>setTab(btn.dataset.tab)));
-
-    // Load remote portal_data.json if present (merge with local; local wins)
-    async function loadRemote(){
-      const local = loadStore();
-      try{
-        const res = await fetch("portal_data.json", { cache:"no-store" });
-        if(!res.ok) throw new Error("no json");
-        const remote = await res.json();
-
-        const merged = clone(DEFAULT_STORE);
-        if(remote?.client) merged.client = { ...merged.client, ...remote.client };
-        merged.client = { ...merged.client, ...local.client };
-
-        // If remote has todos, merge (local wins)
-        merged.client.todos = Array.isArray(local.client.todos) && local.client.todos.length
-          ? local.client.todos
-          : (Array.isArray(remote?.client?.todos) ? remote.client.todos : (merged.client.todos || []));
-
-        saveStore(merged);
-        return merged;
-      } catch {
-        const merged = clone(DEFAULT_STORE);
-        merged.client = { ...merged.client, ...local.client };
-        saveStore(merged);
-        return merged;
-      }
-    }
-
-    // Meetings API (optional)
-    async function fetchMeetings(){
-      try{
-        const res = await fetch("/api/meetings/list");
-        if(!res.ok) throw new Error("meetings api missing");
-        const data = await res.json();
-        return Array.isArray(data) ? data : [];
-      } catch {
-        return [];
-      }
-    }
-    async function addMeeting(meeting){
-      try{
-        const res = await fetch("/api/meetings/add", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(meeting)
-        });
-        if(!res.ok) throw new Error("add failed");
-        return await res.json();
-      } catch {
-        alert("Failed to add meeting (API not available).");
-        return null;
-      }
-    }
-    async function deleteMeeting(id){
-      try{
-        const res = await fetch(`/api/meetings/delete/${encodeURIComponent(id)}`, { method:"DELETE" });
-        if(!res.ok) throw new Error("delete failed");
-        return true;
-      } catch {
-        alert("Failed to delete meeting (API not available).");
-        return false;
-      }
-    }
-
-    function getNextMeetingFromList(meetings){
-      const ms = (meetings||[])
-        .map(m => ({...m, ts:new Date(m.when).getTime()}))
-        .filter(m => !isNaN(m.ts))
-        .sort((a,b)=>a.ts-b.ts);
-      const now=Date.now();
-      return ms.find(m=>m.ts>=now) || null;
-    }
-
-    // =======================
-    // To-Dos (localStorage)
-    // =======================
-    function ensureTodos(store){
-      store.client.todos = Array.isArray(store.client.todos) ? store.client.todos : [];
-      return store;
-    }
-
-    function renderTodos(store){
-      ensureTodos(store);
-      const list = $("todoList");
-      const todos = store.client.todos.slice().sort((a,b)=>(Number(a.done)||0)-(Number(b.done)||0)); // undone first
-
-      const doneCount = todos.filter(t=>t.done).length;
-      const openCount = todos.length - doneCount;
-      $("todoCount").textContent = `${openCount} open • ${doneCount} done`;
-
-      if(!todos.length){
-        list.innerHTML = `<div class="text-sm text-slate-500">No to-dos yet. Add your next steps.</div>`;
-        return;
-      }
-
-      list.innerHTML = todos.map(t=>{
-        const due = t.due ? new Date(t.due).toLocaleDateString() : "";
-        return `
-          <div class="p-3 rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-start gap-3">
-              <button data-toggle="${t.id}"
-                class="mt-0.5 h-5 w-5 rounded border border-slate-300 flex items-center justify-center ${t.done ? "bg-emerald-600 border-emerald-600" : "bg-white"}">
-                ${t.done ? `<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ""}
-              </button>
-
-              <div class="flex-1 min-w-0">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="font-extrabold ${t.done ? "line-through text-slate-400" : ""} truncate">${safeText(t.text||"To-do")}</div>
-                  <button data-del="${t.id}" class="px-2 py-1 rounded-lg border border-slate-200 font-bold hover:bg-slate-50 text-xs">Delete</button>
-                </div>
-                <div class="mt-1 text-xs text-slate-500 flex items-center justify-between">
-                  <span>${due ? `Due: <span class="font-bold">${safeText(due)}</span>` : "No due date"}</span>
-                  ${t.tag ? `<span class="chip bg-slate-100 text-slate-700 font-bold">${safeText(t.tag)}</span>` : ""}
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      list.querySelectorAll("[data-toggle]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const id = btn.getAttribute("data-toggle");
-          const st = loadStore();
-          ensureTodos(st);
-          const idx = st.client.todos.findIndex(x=>x.id===id);
-          if(idx>=0){
-            st.client.todos[idx].done = !st.client.todos[idx].done;
-            st.client.todos[idx].updatedAt = Date.now();
-          }
-          saveStore(st);
-          renderTodos(st);
-          renderActivity(st, _meetingsCache);
-        });
-      });
-
-      list.querySelectorAll("[data-del]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const id = btn.getAttribute("data-del");
-          const st = loadStore();
-          ensureTodos(st);
-          st.client.todos = st.client.todos.filter(x=>x.id!==id);
-          saveStore(st);
-          renderTodos(st);
-          renderActivity(st, _meetingsCache);
-        });
-      });
-    }
-
-    function addTodoFromInput(){
-      const text = ($("todoInput").value || "").trim();
-      if(!text) return;
-
-      const st = loadStore();
-      ensureTodos(st);
-      st.client.todos.unshift({
-        id: "td_" + Math.random().toString(16).slice(2),
-        text,
-        done: false,
-        tag: "Raise",
-        due: "",            // set later if you want
-        createdAt: Date.now(),
-        updatedAt: Date.now()
-      });
-
-      saveStore(st);
-      $("todoInput").value = "";
-      renderTodos(st);
-      renderActivity(st, _meetingsCache);
-    }
-
-    // =================================
-    // Rendering (whole page)
-    // =================================
-    async function render(){
-      const store = loadStore();
-      const c = store.client;
-
-      $("clientNameTop").textContent = c.name || "Client";
-      $("clientNameHeader").textContent = c.name || "Client";
-
-      const goal = Number(c.goal||0);
-      const raised = Number(c.raised||0);
-      const pct = goal>0 ? Math.max(0, Math.min(100, Math.round((raised/goal)*100))) : 0;
-
-      $("goalTop").textContent = money(goal);
-      $("goalTitle").textContent = money(goal);
-      $("goalInline").textContent = money(goal);
-
-      $("kpiRaised").textContent = money(raised);
-      $("kpiPct").textContent = `${pct}%`;
-      $("progressChip").textContent = `${pct}%`;
-      $("progressBar").style.width = `${pct}%`;
-      $("raisedAmount").textContent = money(raised);
-
-      _meetingsCache = await fetchMeetings();
-      const next = getNextMeetingFromList(_meetingsCache);
-      if(next){
-        $("kpiNextMeeting").textContent = next.title || "Meeting";
-        $("kpiNextMeetingWhen").textContent = new Date(next.when).toLocaleString();
-      } else {
-        $("kpiNextMeeting").textContent = "None scheduled";
-        $("kpiNextMeetingWhen").textContent = "";
-      }
-
-      renderMeetingsPreview(_meetingsCache);
-      renderMeetingsTable(_meetingsCache);
-      renderDocumentsTable(store);
-      renderUpdates(store);
-      renderTodos(store);
-      renderActivity(store, _meetingsCache);
-    }
-
-    function renderMeetingsPreview(meetings){
-      const wrap = $("meetingsPreview");
-      const ms = (meetings||[])
-        .map(m => ({...m, ts:new Date(m.when).getTime()}))
-        .filter(m => !isNaN(m.ts))
-        .sort((a,b)=>a.ts-b.ts);
-
-      const upcoming = ms.filter(m => m.ts >= Date.now()).slice(0,5);
-      if(!upcoming.length){
-        wrap.innerHTML = `<div class="text-sm text-slate-500">No upcoming meetings. Click “Add” to schedule one.</div>`;
-        return;
-      }
-      wrap.innerHTML = upcoming.map(m=>{
-        const s = statusChip(m.when);
-        return `
-          <div class="p-4 rounded-2xl border border-slate-200 bg-white flex items-start justify-between gap-3">
-            <div>
-              <div class="font-extrabold">${safeText(m.title||"Meeting")}</div>
-              <div class="text-sm text-slate-600">${new Date(m.when).toLocaleString()}</div>
-              <div class="text-xs text-slate-500 mt-1">Attendees: ${safeText(m.attendees||"—")}</div>
-            </div>
-            <span class="chip ${s.cls} font-bold">${s.text}</span>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderMeetingsTable(meetings){
-      const wrap = $("meetingsTable");
-      const notes = $("meetingNotes");
-
-      const ms = (meetings||[])
-        .map(m=>({...m, ts:new Date(m.when).getTime()}))
-        .filter(m=>!isNaN(m.ts))
-        .sort((a,b)=>a.ts-b.ts);
-
-      if(!ms.length){
-        wrap.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No meetings yet.</div>`;
-        notes.textContent = "No meeting selected.";
-        return;
-      }
-
-      wrap.innerHTML = ms.map((m, idx)=>{
-        const s = statusChip(m.when);
-        return `
-          <button data-midx="${idx}" class="w-full text-left grid grid-cols-12 gap-2 px-4 py-3 hover:bg-slate-50">
-            <div class="col-span-4">
-              <div class="font-bold">${new Date(m.when).toLocaleString()}</div>
-              <div class="text-xs text-slate-500">ID: ${(m.id||("mtg_"+idx)).slice(0,10)}</div>
-            </div>
-            <div class="col-span-4">
-              <div class="font-extrabold">${safeText(m.title||"Meeting")}</div>
-              <div class="text-xs text-slate-500 truncate">${safeText(m.notes||"")}</div>
-            </div>
-            <div class="col-span-2 text-sm text-slate-700 truncate">${safeText(m.attendees||"—")}</div>
-            <div class="col-span-2 flex justify-end">
-              <span class="chip ${s.cls} font-bold">${s.text}</span>
-            </div>
-          </button>
-        `;
-      }).join("");
-
-      wrap.querySelectorAll("[data-midx]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const idx = Number(btn.getAttribute("data-midx"));
-          const m = ms[idx];
-          notes.innerHTML = `
-            <div class="text-xs text-slate-500">${new Date(m.when).toLocaleString()}</div>
-            <div class="mt-1 text-base font-extrabold">${safeText(m.title||"Meeting")}</div>
-            <div class="mt-2 text-sm"><span class="font-bold">Attendees:</span> ${safeText(m.attendees||"—")}</div>
-            <div class="mt-2 text-sm"><span class="font-bold">Notes:</span><br>${safeText(m.notes||"—").replace(/\n/g,"<br>")}</div>
-            <div class="mt-3">
-              <button id="btnDeleteMeeting" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
-            </div>
-          `;
-          notes.querySelector("#btnDeleteMeeting")?.addEventListener("click", async ()=>{
-            if(!m.id){ alert("This meeting has no id."); return; }
-            if(confirm("Delete this meeting?")){
-              await deleteMeeting(m.id);
-              await render();
+    </header>
+        <script>
+            function logout() {
+                // For demo: redirect to login page. In production, clear session/cookies as needed.
+                window.location.href = '../portal.html';
             }
-          });
-        });
-      });
-    }
-
-    function renderActivity(store, meetings){
-      const feed = $("activityFeed");
-      const items = [];
-
-      (store.client.documents||[]).forEach(d=>{
-        items.push({
-          ts: d.addedAt || 0,
-          kind: "Document",
-          title: d.title || d.name || "Upload",
-          detail: fileTypeLabel(d.title || d.name || "")
-        });
-      });
-
-      (store.client.updates||[]).forEach(u=>{
-        items.push({
-          ts: u.ts || 0,
-          kind: "Update",
-          title: (u.text||"").slice(0,52) + ((u.text||"").length>52 ? "…" : ""),
-          detail: "Client update"
-        });
-      });
-
-      (store.client.todos||[]).forEach(t=>{
-        items.push({
-          ts: t.updatedAt || t.createdAt || 0,
-          kind: "To-Do",
-          title: (t.done ? "Completed: " : "Added: ") + (t.text||"To-do"),
-          detail: t.tag ? `Tag: ${t.tag}` : ""
-        });
-      });
-
-      (meetings||[]).forEach(m=>{
-        const t=new Date(m.when).getTime();
-        items.push({
-          ts: isNaN(t) ? 0 : t,
-          kind: "Meeting",
-          title: m.title || "Meeting scheduled",
-          detail: isNaN(t) ? "" : new Date(m.when).toLocaleString()
-        });
-      });
-
-      items.sort((a,b)=>(b.ts||0)-(a.ts||0));
-      const top = items.slice(0,12);
-
-      if(!top.length){
-        feed.innerHTML = `<div class="text-sm text-slate-500">No activity yet.</div>`;
-        return;
-      }
-
-      feed.innerHTML = top.map(it=>{
-        const when = it.ts ? new Date(it.ts).toLocaleString() : "";
-        return `
-          <div class="p-4 rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-center justify-between">
-              <div class="text-xs text-slate-500">${safeText(it.kind)}</div>
-              <div class="text-xs text-slate-400">${safeText(when)}</div>
+    <main class="flex-1 w-full max-w-4xl mx-auto py-12 px-4 md:px-8">
+        <div class="mb-10">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
+            <p class="text-lg text-gray-600">Track your capital raise progress and access important documents and updates from Atmilio.</p>
+        </div>
+        <div class="mb-10 grid md:grid-cols-2 gap-8">
+            <div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2">Round</h2>
+                <div id="roundInfo" class="text-lg text-gray-800 mb-4">Seed Round</div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2">Contacted Firms</h2>
+                <ul id="contactedFirms" class="mb-4 list-disc list-inside text-gray-700"></ul>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2">Upcoming Meetings</h2>
+                <ul id="upcomingMeetings" class="mb-4 text-gray-700"></ul>
+                <h2 class="text-2xl font-bold text-purple-700 mb-2 mt-8">Meetings Calendar</h2>
+                <div id="calendar" class="bg-white border border-purple-100 rounded-lg p-4 shadow-sm"></div>
             </div>
-            <div class="mt-1 font-extrabold">${safeText(it.title)}</div>
-            <div class="text-xs text-slate-500 mt-1">${safeText(it.detail)}</div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderDocumentsTable(store){
-      const q = ($("docSearch")?.value || "").toLowerCase().trim();
-      const wrap = $("documentsTable");
-      const docs = (store.client.documents||[])
-        .filter(d => !q || String(d.title||d.name||"").toLowerCase().includes(q))
-        .sort((a,b)=>(b.addedAt||0)-(a.addedAt||0));
-
-      if(!docs.length){
-        wrap.innerHTML = `<div class="px-4 py-6 text-sm text-slate-500">No documents yet. Upload a pitch deck, model, or term sheet.</div>`;
-        return;
-      }
-
-      wrap.innerHTML = docs.map((d, idx)=>{
-        const name = d.title || d.name || "File";
-        const type = d.type || fileTypeLabel(name);
-        const sizeLabel = d.sizeLabel || fmtBytes(d.size);
-        const canOpen = !!d.url;
-
-        return `
-          <div class="grid grid-cols-12 gap-2 px-4 py-3 items-center">
-            <div class="col-span-7">
-              <div class="font-extrabold truncate">${safeText(name)}</div>
-              <div class="text-xs text-slate-500">${d.addedAt ? new Date(d.addedAt).toLocaleString() : ""}</div>
+            <div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
+                <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
+                    <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
+                </div>
+                <div class="flex justify-between text-sm text-gray-700 mb-8">
+                    <span>Raised: <span id="raisedAmount">$0</span></span>
+                    <span>Goal: $5,000,000</span>
+                </div>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
+                <form id="uploadForm" class="mb-4 flex flex-col md:flex-row md:space-x-2 items-start md:items-end">
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt" class="mb-2 md:mb-0 border rounded p-2" required>
+                    <input type="text" id="fileTitle" placeholder="Title (e.g. Pitch Deck)" class="mb-2 md:mb-0 border rounded p-2" required>
+                    <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700">Upload</button>
+                </form>
+                <ul id="documentsList" class="space-y-3 mb-8"></ul>
+                <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
+                <ul id="updatesList" class="space-y-3"></ul>
             </div>
-            <div class="col-span-2 text-sm text-slate-700">${safeText(type)}</div>
-            <div class="col-span-1 text-sm text-slate-700">${safeText(sizeLabel)}</div>
-            <div class="col-span-2 flex justify-end gap-2">
-              <button data-del-doc="${idx}" class="px-3 py-2 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
-              ${canOpen
-                ? `<a href="${d.url}" target="_blank" rel="noreferrer" class="px-3 py-2 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800">Open</a>`
-                : `<button class="px-3 py-2 rounded-xl bg-slate-200 text-slate-600 font-bold cursor-not-allowed" disabled>Open</button>`
-              }
-            </div>
-          </div>
-        `;
-      }).join("");
+        </div>
+    </main>
+    <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
+    <script>
+        let portalData;
+        fetch('portal_data.json')
+            .then(res => res.json())
+            .then(data => {
+                portalData = data;
+                const c = data.client;
+                // Round
+                document.getElementById('roundInfo').textContent = c.round || 'N/A';
+                // Contacted Firms
+                document.getElementById('contactedFirms').innerHTML = (c.contacted_firms || []).map(firm => `<li>${firm}</li>`).join('') || '<li class="text-gray-500">None listed.</li>';
+                // Upcoming Meetings
+                document.getElementById('upcomingMeetings').innerHTML = (c.upcoming_meetings || []).map(m => `<li>${m.date} – <span class='font-semibold'>${m.firm}</span> (<span class='text-indigo-700'>${m.individual || ''}</span>)</li>`).join('') || '<li class="text-gray-500">No upcoming meetings.</li>';
+                // Calendar
+                const meetings = c.upcoming_meetings || [];
+                if (meetings.length === 0) {
+                    document.getElementById('calendar').innerHTML = '<div class="text-gray-500">No meetings scheduled.</div>';
+                } else {
+                    let cal = '<table class="w-full text-left"><thead><tr><th class="pb-2">Date</th><th class="pb-2">Firm</th><th class="pb-2">Individual</th></tr></thead><tbody>';
+                    meetings.forEach(m => {
+                        cal += `<tr><td class="py-1 pr-4">${m.date}</td><td class="py-1 pr-4">${m.firm}</td><td class="py-1">${m.individual || ''}</td></tr>`;
+                    });
+                    cal += '</tbody></table>';
+                    document.getElementById('calendar').innerHTML = cal;
+                }
+                // Progress
+                const percent = c.goal > 0 ? Math.round((c.raised / c.goal) * 100) : 0;
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('progressBar').textContent = percent + '%';
+                document.getElementById('raisedAmount').textContent = c.raised.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
+                // Documents
+                renderDocuments();
+                // Updates
+                const updates = (c.updates || []).map(u => `<li class="border border-purple-100 rounded-lg p-3 bg-purple-50/50"><span class="font-semibold text-gray-800">${u.date}</span><br><span class="text-gray-700">${u.text}</span></li>`).join('');
+                document.getElementById('updatesList').innerHTML = updates || '<li class="text-gray-500">No updates yet.</li>';
+            });
 
-      wrap.querySelectorAll("[data-del-doc]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const idx = Number(btn.getAttribute("data-del-doc"));
-          const st = loadStore();
-          st.client.documents = (st.client.documents||[]);
-          st.client.documents.splice(idx, 1);
-          saveStore(st);
-          render();
+        function renderDocuments() {
+            const docs = (portalData.client.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
+            document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('fileInput');
+            const fileTitle = document.getElementById('fileTitle').value.trim();
+            const file = fileInput.files[0];
+            if(file && fileTitle) {
+                // For demo: just add file name (in production, upload to server and store URL)
+                const url = URL.createObjectURL(file);
+                portalData.client.documents = portalData.client.documents || [];
+                portalData.client.documents.push({ url, title: fileTitle + ' (' + file.name + ')' });
+                renderDocuments();
+                fileInput.value = '';
+                document.getElementById('fileTitle').value = '';
+            }
         });
-      });
-    }
-
-    function renderUpdates(store){
-      const list = $("updatesList");
-      const updates = (store.client.updates||[]).slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
-      if(!updates.length){
-        list.innerHTML = `<div class="text-sm text-slate-500">No updates yet.</div>`;
-        return;
-      }
-      list.innerHTML = updates.map(u=>{
-        return `
-          <div class="p-4 rounded-2xl border border-slate-200 bg-white">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <div class="text-xs text-slate-500">${u.ts?new Date(u.ts).toLocaleString():""}</div>
-                <div class="mt-1 text-sm text-slate-800 leading-relaxed">${safeText(u.text||"").replace(/\n/g,"<br>")}</div>
-              </div>
-              <button data-del-update="${u.id}" class="px-3 py-1.5 rounded-xl border border-slate-200 font-bold hover:bg-slate-50">Delete</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      list.querySelectorAll("[data-del-update]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const id = btn.getAttribute("data-del-update");
-          const st = loadStore();
-          st.client.updates = (st.client.updates||[]).filter(u=>u.id!==id);
-          saveStore(st);
-          render();
-        });
-      });
-    }
-
-    // Documents upload (demo: localStorage only)
-    const dropZone = $("dropZone");
-    const fileInput = $("fileInput");
-    const btnUploadDoc = $("btnUploadDoc");
-    const docSearch = $("docSearch");
-
-    function openPicker(){ fileInput.click(); }
-    btnUploadDoc.addEventListener("click", openPicker);
-    dropZone.addEventListener("click", openPicker);
-
-    ["dragenter","dragover"].forEach(evt => dropZone.addEventListener(evt, (e)=>{
-      e.preventDefault(); dropZone.classList.add("bg-slate-100");
-    }));
-    ["dragleave","drop"].forEach(evt => dropZone.addEventListener(evt, (e)=>{
-      e.preventDefault(); dropZone.classList.remove("bg-slate-100");
-    }));
-    dropZone.addEventListener("drop", (e)=>handleFiles(Array.from(e.dataTransfer.files||[])));
-    fileInput.addEventListener("change", ()=>{
-      handleFiles(Array.from(fileInput.files||[]));
-      fileInput.value="";
-    });
-    docSearch?.addEventListener("input", ()=>renderDocumentsTable(loadStore()));
-
-    function handleFiles(files){
-      if(!files.length) return;
-      const st = loadStore();
-      st.client.documents = st.client.documents || [];
-
-      for(const f of files){
-        const max = 25 * 1024 * 1024;
-        if(f.size > max){ alert(`File too large: ${f.name} (max 25MB)`); continue; }
-
-        st.client.documents.unshift({
-          name: f.name,
-          title: f.name,
-          type: fileTypeLabel(f.name),
-          size: f.size,
-          sizeLabel: fmtBytes(f.size),
-          addedAt: Date.now(),
-          url: "" // TODO: hook to backend upload to get a real URL
-        });
-      }
-
-      saveStore(st);
-      render();
-      setTab("documents");
-    }
-
-    // Meeting modal
-    const meetingModal = $("meetingModal");
-    function openMeeting(){ meetingModal.classList.remove("hidden"); meetingModal.classList.add("flex"); }
-    function closeMeeting(){ meetingModal.classList.add("hidden"); meetingModal.classList.remove("flex"); }
-
-    $("btnAddMeeting").addEventListener("click", openMeeting);
-    $("btnAddMeetingTop").addEventListener("click", openMeeting);
-    document.querySelectorAll(".closeMeeting").forEach(b=>b.addEventListener("click", closeMeeting));
-    meetingModal.addEventListener("click",(e)=>{ if(e.target===meetingModal) closeMeeting(); });
-
-    $("saveMeeting").addEventListener("click", async ()=>{
-      const title = $("mTitle").value.trim();
-      const attendees = $("mAttendees").value.trim();
-      const date = $("mDate").value;
-      const time = $("mTime").value;
-      const notes = $("mNotes").value.trim();
-
-      if(!title || !date || !time){ alert("Please provide title, date, and time."); return; }
-      const when = new Date(`${date}T${time}:00`);
-      if(isNaN(when.getTime())){ alert("Invalid date/time."); return; }
-
-      await addMeeting({ title, attendees, when: when.toISOString(), notes });
-
-      $("mTitle").value=""; $("mAttendees").value=""; $("mDate").value=""; $("mTime").value=""; $("mNotes").value="";
-      closeMeeting();
-      await render();
-      setTab("meetings");
-    });
-
-    // Update modal
-    const updateModal = $("updateModal");
-    function openUpdate(){ updateModal.classList.remove("hidden"); updateModal.classList.add("flex"); }
-    function closeUpdate(){ updateModal.classList.add("hidden"); updateModal.classList.remove("flex"); }
-
-    $("btnAddUpdate").addEventListener("click", openUpdate);
-    document.querySelectorAll(".closeUpdate").forEach(b=>b.addEventListener("click", closeUpdate));
-    updateModal.addEventListener("click",(e)=>{ if(e.target===updateModal) closeUpdate(); });
-
-    $("saveUpdate").addEventListener("click", ()=>{
-      const text = $("uText").value.trim();
-      if(!text){ alert("Please enter an update."); return; }
-
-      const st = loadStore();
-      st.client.updates = st.client.updates || [];
-      st.client.updates.unshift({ id:"upd_"+Math.random().toString(16).slice(2), ts: Date.now(), text });
-
-      saveStore(st);
-      $("uText").value="";
-      closeUpdate();
-      render();
-      setTab("updates");
-    });
-
-    // To-Do wiring
-    $("btnAddTodo").addEventListener("click", ()=>{
-      $("todoInput").focus();
-    });
-    $("btnQuickAddTodo").addEventListener("click", addTodoFromInput);
-    $("todoInput").addEventListener("keydown", (e)=>{
-      if(e.key === "Enter"){
-        e.preventDefault();
-        addTodoFromInput();
-      }
-    });
-    $("btnClearDone").addEventListener("click", ()=>{
-      const st = loadStore();
-      ensureTodos(st);
-      st.client.todos = st.client.todos.filter(t=>!t.done);
-      saveStore(st);
-      renderTodos(st);
-      renderActivity(st, _meetingsCache);
-    });
-
-    $("btnSettings").addEventListener("click", ()=>{
-      alert("Settings placeholder. Next step: add user roles + permissions + integrations.");
-    });
-
-    // Boot
-    (async function init(){
-      setTab("dashboard");
-      const store = await loadRemote();
-      if(!(store.client.updates||[]).length){
-        store.client.updates = store.client.updates || [];
-        store.client.updates.unshift({
-          id: "upd_seed",
-          ts: Date.now() - 3600*1000,
-          text: "Portal initialized. Upload your pitch deck + financial model and schedule investor calls here."
-        });
-        saveStore(store);
-      }
-      // Seed a couple todos if empty
-      if(!(store.client.todos||[]).length){
-        store.client.todos = [
-          { id:"td_seed_1", text:"Upload Pitch Deck (latest)", done:false, tag:"Docs", due:"", createdAt:Date.now()-7200000, updatedAt:Date.now()-7200000 },
-          { id:"td_seed_2", text:"Send updated financial model to Atmilio", done:false, tag:"Finance", due:"", createdAt:Date.now()-5400000, updatedAt:Date.now()-5400000 }
-        ];
-        saveStore(store);
-      }
-
-      await render();
-    })();
-  </script>
+    </script>
 </body>
-</html>
 </html>
