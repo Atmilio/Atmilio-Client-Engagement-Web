@@ -28,9 +28,132 @@
       font-size: 0.8rem;
       font-weight: 700;
     }
+    .input {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      font-size: 0.95rem;
+      outline: none;
+      background: #fff;
+    }
+    .input:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+    }
+    .label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 0.4rem;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.85rem;
+      padding: 0.8rem 1rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #7c3aed, #4f46e5);
+      color: white;
+      transition: 0.2s ease;
+    }
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.85rem;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      border: 1px solid #ddd6fe;
+      color: #6d28d9;
+      background: white;
+      transition: 0.2s ease;
+    }
+    .btn-secondary:hover {
+      background: #faf5ff;
+    }
+    .btn-danger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.7rem;
+      padding: 0.55rem 0.75rem;
+      font-weight: 700;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      background: #fff5f5;
+    }
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+    }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    table {
+      min-width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      vertical-align: top;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 text-slate-800">
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 modal-backdrop"></div>
+    <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
+      <div class="w-full max-w-2xl card p-6 md:p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <div class="text-sm uppercase tracking-[0.16em] font-bold text-purple-500">Portal Settings</div>
+            <h2 class="text-2xl font-extrabold text-slate-900">Billing & Fundraising Settings</h2>
+          </div>
+          <button id="closeSettingsBtn" class="text-slate-500 hover:text-slate-800 text-2xl leading-none">&times;</button>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-5">
+          <div>
+            <label class="label" for="settingsMonthlyRetainer">Monthly Retainer</label>
+            <input id="settingsMonthlyRetainer" type="number" class="input" placeholder="4000" />
+          </div>
+          <div>
+            <label class="label" for="settingsOutstandingPayment">Outstanding Payment</label>
+            <input id="settingsOutstandingPayment" type="number" class="input" placeholder="4000" />
+          </div>
+          <div>
+            <label class="label" for="settingsRaisedAmount">Raised Amount</label>
+            <input id="settingsRaisedAmount" type="number" class="input" placeholder="750000" />
+          </div>
+          <div>
+            <label class="label" for="settingsGoalAmount">Goal Amount</label>
+            <input id="settingsGoalAmount" type="number" class="input" placeholder="5000000" />
+          </div>
+          <div class="md:col-span-2">
+            <label class="label" for="settingsBillingStatus">Billing Status</label>
+            <input id="settingsBillingStatus" type="text" class="input" placeholder="1 monthly retainer invoice currently outstanding." />
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mt-6">
+          <button id="saveSettingsBtn" class="btn-primary">Save Settings</button>
+          <button id="cancelSettingsBtn" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <header class="sticky top-0 z-20 border-b border-purple-100 bg-white/85 backdrop-blur">
     <div class="max-w-7xl mx-auto px-4 md:px-8 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div class="flex items-center gap-3">
@@ -38,7 +161,7 @@
           <svg class="w-7 h-7" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
             <title id="logoTitle">Atmilio Logo</title>
             <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="white" stroke-width="2" stroke-linejoin="round" />
-            <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="white" fill-opacity="0.9" />
+            <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="white" fill-opacity="0.92" />
             <circle cx="25" cy="25" r="4" fill="#c4b5fd" />
           </svg>
         </div>
@@ -49,53 +172,51 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <div class="pill bg-purple-100 text-purple-700">
-          Seed Round
-        </div>
-        <div class="pill bg-emerald-100 text-emerald-700" id="goalBadge">
-          Goal: $5,000,000
-        </div>
+        <div class="pill bg-purple-100 text-purple-700">Seed Round</div>
+        <div class="pill bg-emerald-100 text-emerald-700" id="goalBadge">Goal: $5,000,000</div>
+        <button id="openSettingsBtn" class="btn-secondary">
+          Settings
+        </button>
       </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
-    <!-- Welcome -->
+    <!-- Overview -->
     <section class="card p-6 md:p-8 mb-8">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.16em] text-purple-500 mb-2">Client Overview</p>
           <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">
-            Welcome, <span id="clientName">Complete Intake</span>
+            Welcome, Complete Intake
           </h2>
           <p class="text-slate-600 text-lg">
-            CEO: <span class="font-semibold text-slate-800" id="ceoName">Dinesh</span>
+            CEO: <span class="font-semibold text-slate-800">Dinesh</span>
           </p>
           <p class="text-slate-600 mt-2 max-w-2xl">
-            Track fundraising progress, download key materials, review billing, monitor upcoming events, and manage your VC outreach list in one place.
+            Track fundraising progress, update investor contacts, log contacted firms, view billing, review the invoice, and download the latest fundraising presentation.
           </p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-full lg:min-w-[520px]">
           <div class="rounded-2xl bg-purple-50 border border-purple-100 p-4">
             <div class="text-xs font-bold uppercase tracking-wider text-purple-500 mb-1">Monthly Retainer</div>
-            <div id="monthlyRetainer" class="text-2xl font-extrabold text-slate-900">$4,000</div>
+            <div id="monthlyRetainerDisplay" class="text-2xl font-extrabold text-slate-900">$4,000</div>
           </div>
           <div class="rounded-2xl bg-amber-50 border border-amber-100 p-4">
             <div class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-1">Outstanding Payment</div>
-            <div id="outstandingPayment" class="text-2xl font-extrabold text-slate-900">$0</div>
+            <div id="outstandingPaymentDisplay" class="text-2xl font-extrabold text-slate-900">$4,000</div>
           </div>
           <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
             <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1">Raised To Date</div>
-            <div id="raisedAmountTop" class="text-2xl font-extrabold text-slate-900">$0</div>
+            <div id="raisedAmountTop" class="text-2xl font-extrabold text-slate-900">$750,000</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Top dashboard -->
+    <!-- Progress and billing -->
     <section class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-      <!-- Progress -->
       <div class="xl:col-span-2 card p-6 md:p-7">
         <h3 class="section-title">Capital Raise Progress</h3>
         <div class="mb-5">
@@ -113,41 +234,38 @@
         <div class="grid md:grid-cols-3 gap-4">
           <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
             <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Round</div>
-            <div id="roundInfo" class="text-lg font-bold text-slate-900">Seed Round</div>
+            <div class="text-lg font-bold text-slate-900">Seed Round</div>
           </div>
           <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
             <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Raised</div>
-            <div id="raisedAmount" class="text-lg font-bold text-slate-900">$0</div>
+            <div id="raisedAmountDisplay" class="text-lg font-bold text-slate-900">$750,000</div>
           </div>
           <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
             <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Goal</div>
-            <div id="goalAmount" class="text-lg font-bold text-slate-900">$5,000,000</div>
+            <div id="goalAmountDisplay" class="text-lg font-bold text-slate-900">$5,000,000</div>
           </div>
         </div>
-
-        <div id="fulfilledCommitment" class="mt-5 text-green-700 font-bold"></div>
       </div>
 
-      <!-- Billing snapshot -->
       <div class="card p-6 md:p-7">
         <h3 class="section-title">Billing Snapshot</h3>
         <div class="space-y-4">
           <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50">
             <div class="text-sm text-slate-500 mb-1">Current Invoice</div>
-            <div id="currentInvoiceName" class="font-bold text-slate-900 text-lg">No invoice uploaded</div>
-            <div id="currentInvoiceDate" class="text-sm text-slate-500 mt-1"></div>
+            <div class="font-bold text-slate-900 text-lg">Complete Intake - March 2026 Invoice</div>
+            <div class="text-sm text-slate-500 mt-1">Invoice Date: 2026-03-01</div>
             <div class="flex flex-wrap gap-3 mt-4">
-              <a id="viewInvoiceBtn"
-                 href="#"
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 class="inline-flex items-center justify-center rounded-xl bg-purple-600 text-white px-4 py-2 font-semibold hover:bg-purple-700 transition">
+              <a
+                href="documents/complete-intake-march-2026-invoice.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center justify-center rounded-xl bg-purple-600 text-white px-4 py-2 font-semibold hover:bg-purple-700 transition">
                 View Invoice
               </a>
-              <a id="downloadInvoiceBtn"
-                 href="#"
-                 download
-                 class="inline-flex items-center justify-center rounded-xl border border-purple-200 text-purple-700 bg-white px-4 py-2 font-semibold hover:bg-purple-50 transition">
+              <a
+                href="documents/complete-intake-march-2026-invoice.pdf"
+                download
+                class="inline-flex items-center justify-center rounded-xl border border-purple-200 text-purple-700 bg-white px-4 py-2 font-semibold hover:bg-purple-50 transition">
                 Download Invoice
               </a>
             </div>
@@ -155,39 +273,69 @@
 
           <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50">
             <div class="text-sm text-slate-500 mb-1">Outstanding Balance</div>
-            <div id="billingOutstanding" class="text-2xl font-extrabold text-slate-900">$0</div>
-            <div id="billingStatus" class="text-sm mt-2 text-amber-600 font-semibold"></div>
+            <div id="billingOutstandingDisplay" class="text-2xl font-extrabold text-slate-900">$4,000</div>
+            <div id="billingStatusDisplay" class="text-sm mt-2 text-amber-600 font-semibold">
+              1 monthly retainer invoice currently outstanding.
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Main content -->
+    <!-- Documents -->
     <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-      <!-- Documents -->
       <div class="card p-6 md:p-7">
         <h3 class="section-title">Documents & Downloads</h3>
-        <ul id="documentsList" class="space-y-3"></ul>
+        <div class="space-y-3">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-4">
+            <div>
+              <div class="font-bold text-slate-900">Current Pitch Deck (PPT)</div>
+              <div class="text-sm text-slate-500">Download the latest Complete Intake fundraising presentation.</div>
+            </div>
+            <a href="documents/complete-intake-seed-deck.pptx" download class="btn-secondary whitespace-nowrap">
+              Download
+            </a>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-4">
+            <div>
+              <div class="font-bold text-slate-900">Current Invoice (PDF)</div>
+              <div class="text-sm text-slate-500">Most recent Atmilio invoice for monthly retainer.</div>
+            </div>
+            <a href="documents/complete-intake-march-2026-invoice.pdf" download class="btn-secondary whitespace-nowrap">
+              Download
+            </a>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-4">
+            <div>
+              <div class="font-bold text-slate-900">Investor Outreach Tracker</div>
+              <div class="text-sm text-slate-500">Excel tracker for outreach documentation.</div>
+            </div>
+            <a href="documents/investor-outreach-tracker.xlsx" download class="btn-secondary whitespace-nowrap">
+              Download
+            </a>
+          </div>
+        </div>
       </div>
 
-      <!-- Current presentation -->
       <div class="card p-6 md:p-7">
         <h3 class="section-title">Current Presentation</h3>
-        <div id="presentationCard" class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
-          <div id="presentationTitle" class="text-xl font-bold text-slate-900">No presentation uploaded</div>
-          <div id="presentationDescription" class="text-slate-600 mt-2">Upload your latest PPT or PDF deck to make it available here.</div>
+        <div class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+          <div class="text-xl font-bold text-slate-900">Complete Intake Seed Fundraising Deck</div>
+          <div class="text-slate-600 mt-2">Latest investor-facing presentation for outreach and live meetings.</div>
           <div class="flex flex-wrap gap-3 mt-5">
-            <a id="viewPresentationBtn"
-               href="#"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 font-semibold hover:bg-indigo-700 transition">
+            <a
+              href="documents/complete-intake-seed-deck.pptx"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 font-semibold hover:bg-indigo-700 transition">
               View PPT
             </a>
-            <a id="downloadPresentationBtn"
-               href="#"
-               download
-               class="inline-flex items-center justify-center rounded-xl border border-indigo-200 text-indigo-700 bg-white px-4 py-2 font-semibold hover:bg-indigo-50 transition">
+            <a
+              href="documents/complete-intake-seed-deck.pptx"
+              download
+              class="inline-flex items-center justify-center rounded-xl border border-indigo-200 text-indigo-700 bg-white px-4 py-2 font-semibold hover:bg-indigo-50 transition">
               Download PPT
             </a>
           </div>
@@ -195,49 +343,134 @@
       </div>
     </section>
 
-    <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
-      <!-- VC contact list -->
-      <div class="card p-6 md:p-7">
-        <div class="flex items-center justify-between gap-4 mb-4">
-          <h3 class="section-title !mb-0">VC Contact List</h3>
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Investor Outreach</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm">
-            <thead>
-              <tr class="text-left text-slate-500 border-b border-slate-200">
-                <th class="py-3 pr-4 font-semibold">Firm</th>
-                <th class="py-3 pr-4 font-semibold">Contact</th>
-                <th class="py-3 pr-4 font-semibold">Email</th>
-                <th class="py-3 pr-4 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody id="vcContactTableBody"></tbody>
-          </table>
+    <!-- VC Contact List -->
+    <section class="card p-6 md:p-7 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+        <div>
+          <h3 class="section-title !mb-1">VC Contact List</h3>
+          <p class="text-sm text-slate-500">Add and manage investor contacts manually.</p>
         </div>
       </div>
 
-      <!-- Events -->
-      <div class="card p-6 md:p-7">
-        <div class="flex items-center justify-between gap-4 mb-4">
-          <h3 class="section-title !mb-0">Upcoming Events</h3>
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Conference & Travel</span>
+      <form id="vcContactForm" class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        <div>
+          <label class="label" for="vcCompany">Company</label>
+          <input id="vcCompany" class="input" type="text" placeholder="Healthy.Capital" required />
         </div>
-        <div id="upcomingEventsList" class="space-y-4"></div>
+        <div>
+          <label class="label" for="vcFirstName">First Name</label>
+          <input id="vcFirstName" class="input" type="text" placeholder="Jane" required />
+        </div>
+        <div>
+          <label class="label" for="vcLastName">Last Name</label>
+          <input id="vcLastName" class="input" type="text" placeholder="Smith" required />
+        </div>
+        <div>
+          <label class="label" for="vcEmail">Email</label>
+          <input id="vcEmail" class="input" type="email" placeholder="jane@healthy.capital" />
+        </div>
+        <div>
+          <label class="label" for="vcPhone">Phone</label>
+          <input id="vcPhone" class="input" type="text" placeholder="(555) 555-5555" />
+        </div>
+        <div>
+          <label class="label" for="vcContacted">Contacted Y/N</label>
+          <select id="vcContacted" class="input">
+            <option value="N">N</option>
+            <option value="Y">Y</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="vcAddedDate">Contact Added Date</label>
+          <input id="vcAddedDate" class="input" type="date" />
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="btn-primary w-full">Add VC Contact</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table class="text-sm">
+          <thead>
+            <tr class="text-left text-slate-500 border-b border-slate-200">
+              <th class="py-3 pr-4 font-semibold">Company</th>
+              <th class="py-3 pr-4 font-semibold">First Name</th>
+              <th class="py-3 pr-4 font-semibold">Last Name</th>
+              <th class="py-3 pr-4 font-semibold">Email</th>
+              <th class="py-3 pr-4 font-semibold">Phone</th>
+              <th class="py-3 pr-4 font-semibold">Contacted</th>
+              <th class="py-3 pr-4 font-semibold">Added Date</th>
+              <th class="py-3 pr-4 font-semibold">Action</th>
+            </tr>
+          </thead>
+          <tbody id="vcContactTableBody"></tbody>
+        </table>
       </div>
     </section>
 
-    <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-      <!-- Contacted firms -->
-      <div class="card p-6 md:p-7">
-        <h3 class="section-title">Contacted Firms</h3>
-        <ul id="contactedFirms" class="space-y-3"></ul>
+    <!-- Contacted Firms -->
+    <section class="card p-6 md:p-7 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+        <div>
+          <h3 class="section-title !mb-1">Contacted Firms</h3>
+          <p class="text-sm text-slate-500">Track outreach to firms and link to their websites.</p>
+        </div>
       </div>
 
-      <!-- Latest updates -->
-      <div class="card p-6 md:p-7">
-        <h3 class="section-title">Latest Updates</h3>
-        <ul id="updatesList" class="space-y-3"></ul>
+      <form id="contactedFirmForm" class="grid md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
+        <div>
+          <label class="label" for="firmName">Firm Name</label>
+          <input id="firmName" class="input" type="text" placeholder="Gilde Healthcare" required />
+        </div>
+        <div>
+          <label class="label" for="firmContactDate">Contact Date</label>
+          <input id="firmContactDate" class="input" type="date" />
+        </div>
+        <div>
+          <label class="label" for="firmEmail">Email</label>
+          <input id="firmEmail" class="input" type="email" placeholder="contact@firm.com" />
+        </div>
+        <div>
+          <label class="label" for="firmUrl">URL</label>
+          <input id="firmUrl" class="input" type="url" placeholder="https://firmwebsite.com" />
+        </div>
+        <div class="flex items-end">
+          <button type="submit" class="btn-primary w-full">Add Contacted Firm</button>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table class="text-sm">
+          <thead>
+            <tr class="text-left text-slate-500 border-b border-slate-200">
+              <th class="py-3 pr-4 font-semibold">Firm Name</th>
+              <th class="py-3 pr-4 font-semibold">Contact Date</th>
+              <th class="py-3 pr-4 font-semibold">Email</th>
+              <th class="py-3 pr-4 font-semibold">URL</th>
+              <th class="py-3 pr-4 font-semibold">Action</th>
+            </tr>
+          </thead>
+          <tbody id="contactedFirmsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Upcoming events -->
+    <section class="card p-6 md:p-7 mb-8">
+      <h3 class="section-title">Upcoming Events</h3>
+      <div class="space-y-4" id="upcomingEventsList">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+            <div>
+              <div class="text-lg font-bold text-slate-900">Global Investor Forum</div>
+              <div class="text-sm text-slate-500 mt-1">March 25, 2026</div>
+            </div>
+            <div class="pill bg-indigo-100 text-indigo-700">Cost: $450</div>
+          </div>
+          <div class="mt-3 text-slate-700 text-sm leading-6">
+            Morning startup sessions, investor networking lunch, and afternoon 1:1 meetings.
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -249,162 +482,233 @@
   </footer>
 
   <script>
-    const currency = (value) => {
-      const num = Number(value || 0);
-      return num.toLocaleString('en-US', {
+    const STORAGE_KEYS = {
+      settings: 'completeIntakePortal_settings',
+      vcContacts: 'completeIntakePortal_vcContacts',
+      contactedFirms: 'completeIntakePortal_contactedFirms'
+    };
+
+    const defaultSettings = {
+      monthlyRetainer: 4000,
+      outstandingPayment: 4000,
+      raisedAmount: 750000,
+      goalAmount: 5000000,
+      billingStatus: '1 monthly retainer invoice currently outstanding.'
+    };
+
+    const defaultVcContacts = [
+      {
+        company: 'Healthy.Capital',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@healthy.capital',
+        phone: '(555) 222-1111',
+        contacted: 'Y',
+        addedDate: '2026-03-01'
+      }
+    ];
+
+    const defaultContactedFirms = [
+      {
+        firmName: 'Gilde Healthcare',
+        contactDate: '2026-03-02',
+        email: 'contact@gildehealthcare.com',
+        url: 'https://www.gildehealthcare.com'
+      }
+    ];
+
+    function currency(value) {
+      return Number(value || 0).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD',
         maximumFractionDigits: 0
       });
-    };
+    }
 
-    fetch('portal_data.json')
-      .then(res => res.json())
-      .then(data => {
-        const c = data.client || {};
-        const billing = c.billing || {};
-        const currentInvoice = billing.current_invoice || {};
-        const presentation = c.current_presentation || {};
+    function getStoredData(key, fallback) {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
+    }
 
-        // Header / Intro
-        document.getElementById('clientName').textContent = c.name || 'Complete Intake';
-        document.getElementById('ceoName').textContent = c.ceo || 'Dinesh';
-        document.getElementById('roundInfo').textContent = c.round || 'N/A';
+    function setStoredData(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
 
-        const goal = Number(c.goal || 0);
-        const raised = Number(c.raised || 0);
-        const percent = goal > 0 ? Math.round((raised / goal) * 100) : 0;
+    let settings = getStoredData(STORAGE_KEYS.settings, defaultSettings);
+    let vcContacts = getStoredData(STORAGE_KEYS.vcContacts, defaultVcContacts);
+    let contactedFirms = getStoredData(STORAGE_KEYS.contactedFirms, defaultContactedFirms);
 
-        document.getElementById('goalAmount').textContent = currency(goal);
-        document.getElementById('goalBadge').textContent = `Goal: ${currency(goal)}`;
-        document.getElementById('raisedAmount').textContent = currency(raised);
-        document.getElementById('raisedAmountTop').textContent = currency(raised);
+    function renderSettings() {
+      document.getElementById('monthlyRetainerDisplay').textContent = currency(settings.monthlyRetainer);
+      document.getElementById('outstandingPaymentDisplay').textContent = currency(settings.outstandingPayment);
+      document.getElementById('billingOutstandingDisplay').textContent = currency(settings.outstandingPayment);
+      document.getElementById('raisedAmountTop').textContent = currency(settings.raisedAmount);
+      document.getElementById('raisedAmountDisplay').textContent = currency(settings.raisedAmount);
+      document.getElementById('goalAmountDisplay').textContent = currency(settings.goalAmount);
+      document.getElementById('goalBadge').textContent = `Goal: ${currency(settings.goalAmount)}`;
+      document.getElementById('billingStatusDisplay').textContent = settings.billingStatus || '';
 
-        const progressBar = document.getElementById('progressBar');
-        progressBar.style.width = percent + '%';
-        progressBar.textContent = percent + '%';
+      const percent = Number(settings.goalAmount) > 0
+        ? Math.round((Number(settings.raisedAmount) / Number(settings.goalAmount)) * 100)
+        : 0;
 
-        document.getElementById('fulfilledCommitment').textContent =
-          c.fulfilled_commitment ? 'Fulfilled Capital Commitment' : '';
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = `${Math.min(percent, 100)}%`;
+      progressBar.textContent = `${percent}%`;
+    }
 
-        // Billing
-        document.getElementById('monthlyRetainer').textContent = currency(billing.monthly_retainer || 4000);
-        document.getElementById('outstandingPayment').textContent = currency(billing.outstanding_payment || 0);
-        document.getElementById('billingOutstanding').textContent = currency(billing.outstanding_payment || 0);
-        document.getElementById('billingStatus').textContent = billing.status || '';
+    function renderVcContacts() {
+      const tbody = document.getElementById('vcContactTableBody');
 
-        if (currentInvoice.title) {
-          document.getElementById('currentInvoiceName').textContent = currentInvoice.title;
-          document.getElementById('currentInvoiceDate').textContent = currentInvoice.date
-            ? `Invoice Date: ${currentInvoice.date}`
-            : '';
-          document.getElementById('viewInvoiceBtn').href = currentInvoice.url || '#';
-          document.getElementById('downloadInvoiceBtn').href = currentInvoice.url || '#';
-        } else {
-          document.getElementById('viewInvoiceBtn').classList.add('pointer-events-none', 'opacity-50');
-          document.getElementById('downloadInvoiceBtn').classList.add('pointer-events-none', 'opacity-50');
-        }
-
-        // General documents
-        const docsHtml = (c.documents || []).map(doc => `
-          <li class="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-4">
-            <div>
-              <div class="font-bold text-slate-900">${doc.title || 'Untitled Document'}</div>
-              <div class="text-sm text-slate-500">${doc.description || ''}</div>
-            </div>
-            <a href="${doc.url || '#'}"
-               download
-               class="inline-flex items-center justify-center rounded-xl border border-purple-200 text-purple-700 bg-white px-4 py-2 font-semibold hover:bg-purple-50 transition whitespace-nowrap">
-              Download
-            </a>
-          </li>
-        `).join('');
-
-        document.getElementById('documentsList').innerHTML =
-          docsHtml || '<li class="text-slate-500">No documents available.</li>';
-
-        // Current presentation
-        if (presentation.title) {
-          document.getElementById('presentationTitle').textContent = presentation.title;
-          document.getElementById('presentationDescription').textContent =
-            presentation.description || 'Latest fundraising presentation.';
-          document.getElementById('viewPresentationBtn').href = presentation.url || '#';
-          document.getElementById('downloadPresentationBtn').href = presentation.url || '#';
-        } else {
-          document.getElementById('viewPresentationBtn').classList.add('pointer-events-none', 'opacity-50');
-          document.getElementById('downloadPresentationBtn').classList.add('pointer-events-none', 'opacity-50');
-        }
-
-        // VC Contact List
-        const vcContactsHtml = (c.vc_contact_list || []).map(vc => `
-          <tr class="border-b border-slate-100 align-top">
-            <td class="py-3 pr-4 font-semibold text-slate-900">${vc.firm || ''}</td>
-            <td class="py-3 pr-4 text-slate-700">${vc.contact || ''}</td>
-            <td class="py-3 pr-4">
-              ${vc.email ? `<a href="mailto:${vc.email}" class="text-indigo-600 hover:underline">${vc.email}</a>` : '<span class="text-slate-400">—</span>'}
-            </td>
-            <td class="py-3 pr-4">
-              <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold ${
-                (vc.status || '').toLowerCase().includes('meeting') ? 'bg-emerald-100 text-emerald-700' :
-                (vc.status || '').toLowerCase().includes('contacted') ? 'bg-amber-100 text-amber-700' :
-                'bg-slate-100 text-slate-600'
-              }">
-                ${vc.status || 'Not started'}
-              </span>
-            </td>
+      if (!vcContacts.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="py-4 text-slate-500">No VC contacts added yet.</td>
           </tr>
-        `).join('');
+        `;
+        return;
+      }
 
-        document.getElementById('vcContactTableBody').innerHTML =
-          vcContactsHtml || `
-            <tr>
-              <td colspan="4" class="py-4 text-slate-500">No VC contacts added yet.</td>
-            </tr>
-          `;
+      tbody.innerHTML = vcContacts.map((contact, index) => `
+        <tr class="border-b border-slate-100">
+          <td class="py-3 pr-4 font-semibold text-slate-900">${contact.company || ''}</td>
+          <td class="py-3 pr-4 text-slate-700">${contact.firstName || ''}</td>
+          <td class="py-3 pr-4 text-slate-700">${contact.lastName || ''}</td>
+          <td class="py-3 pr-4">
+            ${contact.email ? `<a href="mailto:${contact.email}" class="text-indigo-600 hover:underline">${contact.email}</a>` : '<span class="text-slate-400">—</span>'}
+          </td>
+          <td class="py-3 pr-4 text-slate-700">${contact.phone || '<span class="text-slate-400">—</span>'}</td>
+          <td class="py-3 pr-4">
+            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold ${contact.contacted === 'Y' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
+              ${contact.contacted || 'N'}
+            </span>
+          </td>
+          <td class="py-3 pr-4 text-slate-700">${contact.addedDate || ''}</td>
+          <td class="py-3 pr-4">
+            <button class="btn-danger" onclick="deleteVcContact(${index})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
 
-        // Upcoming Events
-        const eventsHtml = (c.upcoming_events || []).map(event => `
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-              <div>
-                <div class="text-lg font-bold text-slate-900">${event.name || 'Unnamed Event'}</div>
-                <div class="text-sm text-slate-500 mt-1">${event.date || ''}</div>
-              </div>
-              <div class="pill bg-indigo-100 text-indigo-700">
-                Cost: ${currency(event.cost || 0)}
-              </div>
-            </div>
-            <div class="mt-3 text-slate-700 text-sm leading-6">
-              ${event.schedule || 'Schedule not added yet.'}
-            </div>
-          </div>
-        `).join('');
+    function renderContactedFirms() {
+      const tbody = document.getElementById('contactedFirmsTableBody');
 
-        document.getElementById('upcomingEventsList').innerHTML =
-          eventsHtml || '<div class="text-slate-500">No upcoming events listed.</div>';
+      if (!contactedFirms.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-4 text-slate-500">No contacted firms added yet.</td>
+          </tr>
+        `;
+        return;
+      }
 
-        // Contacted firms
-        const contactedFirmsHtml = (c.contacted_firms || []).map(firm => `
-          <li class="rounded-2xl border border-slate-200 bg-slate-50 p-4 font-medium text-slate-800">${firm}</li>
-        `).join('');
+      tbody.innerHTML = contactedFirms.map((firm, index) => `
+        <tr class="border-b border-slate-100">
+          <td class="py-3 pr-4 font-semibold text-slate-900">${firm.firmName || ''}</td>
+          <td class="py-3 pr-4 text-slate-700">${firm.contactDate || ''}</td>
+          <td class="py-3 pr-4">
+            ${firm.email ? `<a href="mailto:${firm.email}" class="text-indigo-600 hover:underline">${firm.email}</a>` : '<span class="text-slate-400">—</span>'}
+          </td>
+          <td class="py-3 pr-4">
+            ${firm.url ? `<a href="${firm.url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline break-all">${firm.url}</a>` : '<span class="text-slate-400">—</span>'}
+          </td>
+          <td class="py-3 pr-4">
+            <button class="btn-danger" onclick="deleteContactedFirm(${index})">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
 
-        document.getElementById('contactedFirms').innerHTML =
-          contactedFirmsHtml || '<li class="text-slate-500">None listed.</li>';
+    function openSettingsModal() {
+      document.getElementById('settingsMonthlyRetainer').value = settings.monthlyRetainer || '';
+      document.getElementById('settingsOutstandingPayment').value = settings.outstandingPayment || '';
+      document.getElementById('settingsRaisedAmount').value = settings.raisedAmount || '';
+      document.getElementById('settingsGoalAmount').value = settings.goalAmount || '';
+      document.getElementById('settingsBillingStatus').value = settings.billingStatus || '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
 
-        // Updates
-        const updatesHtml = (c.updates || []).map(update => `
-          <li class="rounded-2xl border border-purple-100 bg-purple-50/60 p-4">
-            <div class="font-bold text-slate-900 mb-1">${update.date || ''}</div>
-            <div class="text-slate-700">${update.text || ''}</div>
-          </li>
-        `).join('');
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
 
-        document.getElementById('updatesList').innerHTML =
-          updatesHtml || '<li class="text-slate-500">No updates yet.</li>';
-      })
-      .catch(error => {
-        console.error('Error loading portal data:', error);
-      });
+    function deleteVcContact(index) {
+      vcContacts.splice(index, 1);
+      setStoredData(STORAGE_KEYS.vcContacts, vcContacts);
+      renderVcContacts();
+    }
+
+    function deleteContactedFirm(index) {
+      contactedFirms.splice(index, 1);
+      setStoredData(STORAGE_KEYS.contactedFirms, contactedFirms);
+      renderContactedFirms();
+    }
+
+    window.deleteVcContact = deleteVcContact;
+    window.deleteContactedFirm = deleteContactedFirm;
+
+    document.getElementById('openSettingsBtn').addEventListener('click', openSettingsModal);
+    document.getElementById('closeSettingsBtn').addEventListener('click', closeSettingsModal);
+    document.getElementById('cancelSettingsBtn').addEventListener('click', closeSettingsModal);
+
+    document.getElementById('saveSettingsBtn').addEventListener('click', () => {
+      settings = {
+        monthlyRetainer: Number(document.getElementById('settingsMonthlyRetainer').value || 0),
+        outstandingPayment: Number(document.getElementById('settingsOutstandingPayment').value || 0),
+        raisedAmount: Number(document.getElementById('settingsRaisedAmount').value || 0),
+        goalAmount: Number(document.getElementById('settingsGoalAmount').value || 0),
+        billingStatus: document.getElementById('settingsBillingStatus').value.trim()
+      };
+
+      setStoredData(STORAGE_KEYS.settings, settings);
+      renderSettings();
+      closeSettingsModal();
+    });
+
+    document.getElementById('vcContactForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const newContact = {
+        company: document.getElementById('vcCompany').value.trim(),
+        firstName: document.getElementById('vcFirstName').value.trim(),
+        lastName: document.getElementById('vcLastName').value.trim(),
+        email: document.getElementById('vcEmail').value.trim(),
+        phone: document.getElementById('vcPhone').value.trim(),
+        contacted: document.getElementById('vcContacted').value,
+        addedDate: document.getElementById('vcAddedDate').value
+      };
+
+      vcContacts.unshift(newContact);
+      setStoredData(STORAGE_KEYS.vcContacts, vcContacts);
+      renderVcContacts();
+      e.target.reset();
+    });
+
+    document.getElementById('contactedFirmForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const newFirm = {
+        firmName: document.getElementById('firmName').value.trim(),
+        contactDate: document.getElementById('firmContactDate').value,
+        email: document.getElementById('firmEmail').value.trim(),
+        url: document.getElementById('firmUrl').value.trim()
+      };
+
+      contactedFirms.unshift(newFirm);
+      setStoredData(STORAGE_KEYS.contactedFirms, contactedFirms);
+      renderContactedFirms();
+      e.target.reset();
+    });
+
+    renderSettings();
+    renderVcContacts();
+    renderContactedFirms();
   </script>
 </body>
 </html>
