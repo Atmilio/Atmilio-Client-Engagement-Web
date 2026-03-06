@@ -8,18 +8,21 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
+
     .card {
-      background: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.94);
       border: 1px solid rgba(139, 92, 246, 0.10);
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
       border-radius: 1rem;
     }
+
     .section-title {
       font-size: 1.125rem;
       font-weight: 800;
       color: #6d28d9;
       margin-bottom: 0.75rem;
     }
+
     .pill {
       display: inline-flex;
       align-items: center;
@@ -28,6 +31,7 @@
       font-size: 0.8rem;
       font-weight: 700;
     }
+
     .input {
       width: 100%;
       border: 1px solid #d1d5db;
@@ -37,10 +41,12 @@
       outline: none;
       background: #fff;
     }
+
     .input:focus {
       border-color: #8b5cf6;
       box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
     }
+
     .label {
       display: block;
       font-size: 0.85rem;
@@ -48,6 +54,7 @@
       color: #475569;
       margin-bottom: 0.4rem;
     }
+
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -59,10 +66,12 @@
       color: white;
       transition: 0.2s ease;
     }
+
     .btn-primary:hover {
       opacity: 0.95;
       transform: translateY(-1px);
     }
+
     .btn-secondary {
       display: inline-flex;
       align-items: center;
@@ -75,9 +84,11 @@
       background: white;
       transition: 0.2s ease;
     }
+
     .btn-secondary:hover {
       background: #faf5ff;
     }
+
     .btn-danger {
       display: inline-flex;
       align-items: center;
@@ -89,22 +100,115 @@
       color: #b91c1c;
       background: #fff5f5;
     }
+
     .btn-danger:hover {
       background: #fee2e2;
     }
+
     .modal-backdrop {
       background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(4px);
     }
+
     .table-wrap {
       overflow-x: auto;
     }
+
     table {
       min-width: 100%;
       border-collapse: collapse;
     }
+
     th, td {
       vertical-align: top;
+    }
+
+    .metric-card {
+      min-height: 124px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 1rem;
+      padding: 1rem 1.1rem;
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      line-height: 1.15;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      line-height: 1;
+      font-weight: 800;
+      color: #0f172a;
+      margin-top: auto;
+    }
+
+    .metric-card.retainer {
+      background: #f3eef8;
+      border: 1px solid #e8d8f8;
+    }
+
+    .metric-card.retainer .metric-label {
+      color: #8b5cf6;
+    }
+
+    .metric-card.outstanding {
+      background: #fffaf0;
+      border: 1px solid #f4e3af;
+    }
+
+    .metric-card.outstanding .metric-label {
+      color: #f59e0b;
+    }
+
+    .metric-card.raised {
+      background: #f1fbf7;
+      border: 1px solid #b9eed7;
+    }
+
+    .metric-card.raised .metric-label {
+      color: #059669;
+    }
+
+    .progress-card-compact {
+      max-width: 760px;
+    }
+
+    .settings-stat {
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+
+    .settings-stat-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 0.35rem;
+    }
+
+    .settings-stat-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .settings-note {
+      border: 1px solid #e9d5ff;
+      background: #faf5ff;
+      color: #6b21a8;
+      border-radius: 0.9rem;
+      padding: 0.9rem 1rem;
+      font-size: 0.92rem;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -114,7 +218,7 @@
   <div id="settingsModal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 modal-backdrop"></div>
     <div class="relative z-10 min-h-screen flex items-center justify-center p-4">
-      <div class="w-full max-w-2xl card p-6 md:p-8">
+      <div class="w-full max-w-3xl card p-6 md:p-8">
         <div class="flex items-center justify-between mb-6">
           <div>
             <div class="text-sm uppercase tracking-[0.16em] font-bold text-purple-500">Portal Settings</div>
@@ -123,11 +227,28 @@
           <button id="closeSettingsBtn" class="text-slate-500 hover:text-slate-800 text-2xl leading-none">&times;</button>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-5">
-          <div>
-            <label class="label" for="settingsMonthlyRetainer">Monthly Retainer</label>
-            <input id="settingsMonthlyRetainer" type="number" class="input" placeholder="4000" />
+        <div class="grid md:grid-cols-3 gap-4 mb-6">
+          <div class="settings-stat">
+            <div class="settings-stat-label">Monthly Retainer</div>
+            <div id="settingsRetainerDisplay" class="settings-stat-value">$4,000</div>
           </div>
+          <div class="settings-stat">
+            <div class="settings-stat-label">Outstanding Payment</div>
+            <div id="settingsOutstandingDisplay" class="settings-stat-value">$4,000</div>
+          </div>
+          <div class="settings-stat">
+            <div class="settings-stat-label">Billing Status</div>
+            <div id="settingsStatusDisplay" class="text-sm font-semibold text-slate-700 mt-2">
+              1 monthly retainer invoice currently outstanding.
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-note mb-6">
+          Monthly retainer information is view-only from this settings panel.
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-5">
           <div>
             <label class="label" for="settingsOutstandingPayment">Outstanding Payment</label>
             <input id="settingsOutstandingPayment" type="number" class="input" placeholder="4000" />
@@ -140,7 +261,7 @@
             <label class="label" for="settingsGoalAmount">Goal Amount</label>
             <input id="settingsGoalAmount" type="number" class="input" placeholder="5000000" />
           </div>
-          <div class="md:col-span-2">
+          <div>
             <label class="label" for="settingsBillingStatus">Billing Status</label>
             <input id="settingsBillingStatus" type="text" class="input" placeholder="1 monthly retainer invoice currently outstanding." />
           </div>
@@ -184,46 +305,51 @@
   <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
     <!-- Overview -->
     <section class="card p-6 md:p-8 mb-8">
-      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.16em] text-purple-500 mb-2">Client Overview</p>
-          <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">
-            Welcome, Complete Intake
-          </h2>
-          <p class="text-slate-600 text-lg">
-            CEO: <span class="font-semibold text-slate-800">Dinesh</span>
-          </p>
-          <p class="text-slate-600 mt-2 max-w-2xl">
-            Track fundraising progress, update investor contacts, log contacted firms, view billing, review the invoice, and download the latest fundraising presentation.
-          </p>
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.16em] text-purple-500 mb-2">Client Overview</p>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">
+              Welcome, Complete Intake
+            </h2>
+            <p class="text-slate-600 text-lg">
+              CEO: <span class="font-semibold text-slate-800">Dinesh</span>
+            </p>
+            <p class="text-slate-600 mt-2 max-w-2xl">
+              Track fundraising progress, update investor contacts, log contacted firms, view billing, review the invoice, and download the latest fundraising presentation.
+            </p>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-full lg:min-w-[520px]">
-          <div class="rounded-2xl bg-purple-50 border border-purple-100 p-4">
-            <div class="text-xs font-bold uppercase tracking-wider text-purple-500 mb-1">Monthly Retainer</div>
-            <div id="monthlyRetainerDisplay" class="text-2xl font-extrabold text-slate-900">$4,000</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+          <div class="metric-card retainer">
+            <div class="metric-label">Monthly Retainer</div>
+            <div id="monthlyRetainerDisplay" class="metric-value">$4,000</div>
           </div>
-          <div class="rounded-2xl bg-amber-50 border border-amber-100 p-4">
-            <div class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-1">Outstanding Payment</div>
-            <div id="outstandingPaymentDisplay" class="text-2xl font-extrabold text-slate-900">$4,000</div>
+
+          <div class="metric-card outstanding">
+            <div class="metric-label">Outstanding Payment</div>
+            <div id="outstandingPaymentDisplay" class="metric-value">$4,000</div>
           </div>
-          <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
-            <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1">Raised To Date</div>
-            <div id="raisedAmountTop" class="text-2xl font-extrabold text-slate-900">$750,000</div>
+
+          <div class="metric-card raised">
+            <div class="metric-label">Raised To Date</div>
+            <div id="raisedAmountTop" class="metric-value">$750,000</div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- Progress and billing -->
-    <section class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
-      <div class="xl:col-span-2 card p-6 md:p-7">
+    <section class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 items-start">
+      <div class="xl:col-span-2 card p-5 md:p-6 progress-card-compact">
         <h3 class="section-title">Capital Raise Progress</h3>
-        <div class="mb-5">
-          <div class="w-full bg-purple-100 rounded-full h-6 overflow-hidden">
+
+        <div class="mb-4">
+          <div class="w-full bg-purple-100 rounded-full h-5 overflow-hidden">
             <div
               id="progressBar"
-              class="h-6 rounded-full flex items-center justify-end px-3 text-white text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
+              class="h-5 rounded-full flex items-center justify-end px-3 text-white text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
               style="width: 0%;"
             >
               0%
@@ -231,18 +357,18 @@
           </div>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-4">
-          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-            <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Round</div>
-            <div class="text-lg font-bold text-slate-900">Seed Round</div>
+        <div class="grid md:grid-cols-3 gap-3">
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Round</div>
+            <div class="text-base font-bold text-slate-900">Seed Round</div>
           </div>
-          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-            <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Raised</div>
-            <div id="raisedAmountDisplay" class="text-lg font-bold text-slate-900">$750,000</div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Raised</div>
+            <div id="raisedAmountDisplay" class="text-base font-bold text-slate-900">$750,000</div>
           </div>
-          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-            <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Goal</div>
-            <div id="goalAmountDisplay" class="text-lg font-bold text-slate-900">$5,000,000</div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Goal</div>
+            <div id="goalAmountDisplay" class="text-base font-bold text-slate-900">$5,000,000</div>
           </div>
         </div>
       </div>
@@ -553,12 +679,17 @@
       document.getElementById('goalBadge').textContent = `Goal: ${currency(settings.goalAmount)}`;
       document.getElementById('billingStatusDisplay').textContent = settings.billingStatus || '';
 
+      document.getElementById('settingsRetainerDisplay').textContent = currency(settings.monthlyRetainer);
+      document.getElementById('settingsOutstandingDisplay').textContent = currency(settings.outstandingPayment);
+      document.getElementById('settingsStatusDisplay').textContent = settings.billingStatus || '';
+
       const percent = Number(settings.goalAmount) > 0
         ? Math.round((Number(settings.raisedAmount) / Number(settings.goalAmount)) * 100)
         : 0;
 
+      const cappedPercent = Math.min(percent, 100);
       const progressBar = document.getElementById('progressBar');
-      progressBar.style.width = `${Math.min(percent, 100)}%`;
+      progressBar.style.width = `${cappedPercent}%`;
       progressBar.textContent = `${percent}%`;
     }
 
@@ -626,11 +757,15 @@
     }
 
     function openSettingsModal() {
-      document.getElementById('settingsMonthlyRetainer').value = settings.monthlyRetainer || '';
       document.getElementById('settingsOutstandingPayment').value = settings.outstandingPayment || '';
       document.getElementById('settingsRaisedAmount').value = settings.raisedAmount || '';
       document.getElementById('settingsGoalAmount').value = settings.goalAmount || '';
       document.getElementById('settingsBillingStatus').value = settings.billingStatus || '';
+
+      document.getElementById('settingsRetainerDisplay').textContent = currency(settings.monthlyRetainer);
+      document.getElementById('settingsOutstandingDisplay').textContent = currency(settings.outstandingPayment);
+      document.getElementById('settingsStatusDisplay').textContent = settings.billingStatus || '';
+
       document.getElementById('settingsModal').classList.remove('hidden');
     }
 
@@ -659,7 +794,7 @@
 
     document.getElementById('saveSettingsBtn').addEventListener('click', () => {
       settings = {
-        monthlyRetainer: Number(document.getElementById('settingsMonthlyRetainer').value || 0),
+        monthlyRetainer: settings.monthlyRetainer,
         outstandingPayment: Number(document.getElementById('settingsOutstandingPayment').value || 0),
         raisedAmount: Number(document.getElementById('settingsRaisedAmount').value || 0),
         goalAmount: Number(document.getElementById('settingsGoalAmount').value || 0),
