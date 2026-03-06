@@ -1,85 +1,410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CompleteIntake Portal | Atmilio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Complete Intake Portal | Atmilio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(139, 92, 246, 0.10);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border-radius: 1rem;
+    }
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: #6d28d9;
+      margin-bottom: 0.75rem;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col bg-gradient-to-br from-purple-100 via-white to-purple-200">
-    <header class="w-full bg-white/90 shadow-md py-6 px-8 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <svg class="w-10 h-10" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
-                <title id="logoTitle">Atmilio Logo</title>
-                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
-                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
-                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
-            </svg>
-            <span class="text-2xl font-bold text-purple-700">CompleteIntake Portal</span>
+<body class="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 text-slate-800">
+  <header class="sticky top-0 z-20 border-b border-purple-100 bg-white/85 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg">
+          <svg class="w-7 h-7" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+            <title id="logoTitle">Atmilio Logo</title>
+            <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="white" stroke-width="2" stroke-linejoin="round" />
+            <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="white" fill-opacity="0.9" />
+            <circle cx="25" cy="25" r="4" fill="#c4b5fd" />
+          </svg>
         </div>
-        <span class="text-lg font-semibold text-gray-700">Goal: $5,000,000</span>
-    </header>
-    <main class="flex-1 w-full max-w-4xl mx-auto py-12 px-4 md:px-8">
-        <div class="mb-10">
-            <h1 class="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">Welcome, CompleteIntake</h1>
-            <p class="text-lg text-gray-600">Track your capital raise progress and access important documents and updates from Atmilio.</p>
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-purple-500">Atmilio Client Portal</div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900">Complete Intake</h1>
         </div>
-        <div class="mb-10 grid md:grid-cols-2 gap-8">
-            <div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Round</h2>
-                <div id="roundInfo" class="text-lg text-gray-800 mb-4">Seed Round</div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Contacted Firms</h2>
-                <ul id="contactedFirms" class="mb-4 list-disc list-inside text-gray-700"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-2">Upcoming Meetings</h2>
-                <ul id="upcomingMeetings" class="mb-4 text-gray-700"></ul>
-                <div id="fulfilledCommitment" class="mt-4 text-green-700 font-bold text-lg"></div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="pill bg-purple-100 text-purple-700">
+          Seed Round
+        </div>
+        <div class="pill bg-emerald-100 text-emerald-700" id="goalBadge">
+          Goal: $5,000,000
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
+    <!-- Welcome -->
+    <section class="card p-6 md:p-8 mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.16em] text-purple-500 mb-2">Client Overview</p>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">
+            Welcome, <span id="clientName">Complete Intake</span>
+          </h2>
+          <p class="text-slate-600 text-lg">
+            CEO: <span class="font-semibold text-slate-800" id="ceoName">Dinesh</span>
+          </p>
+          <p class="text-slate-600 mt-2 max-w-2xl">
+            Track fundraising progress, download key materials, review billing, monitor upcoming events, and manage your VC outreach list in one place.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 min-w-full lg:min-w-[520px]">
+          <div class="rounded-2xl bg-purple-50 border border-purple-100 p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-purple-500 mb-1">Monthly Retainer</div>
+            <div id="monthlyRetainer" class="text-2xl font-extrabold text-slate-900">$4,000</div>
+          </div>
+          <div class="rounded-2xl bg-amber-50 border border-amber-100 p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-amber-600 mb-1">Outstanding Payment</div>
+            <div id="outstandingPayment" class="text-2xl font-extrabold text-slate-900">$0</div>
+          </div>
+          <div class="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1">Raised To Date</div>
+            <div id="raisedAmountTop" class="text-2xl font-extrabold text-slate-900">$0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top dashboard -->
+    <section class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+      <!-- Progress -->
+      <div class="xl:col-span-2 card p-6 md:p-7">
+        <h3 class="section-title">Capital Raise Progress</h3>
+        <div class="mb-5">
+          <div class="w-full bg-purple-100 rounded-full h-6 overflow-hidden">
+            <div
+              id="progressBar"
+              class="h-6 rounded-full flex items-center justify-end px-3 text-white text-sm font-bold bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
+              style="width: 0%;"
+            >
+              0%
             </div>
-            <div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Capital Raise Progress</h2>
-                <div class="w-full bg-purple-100 rounded-full h-6 mb-2">
-                    <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-indigo-500 h-6 rounded-full flex items-center justify-end text-white font-bold text-sm px-4 transition-all duration-500" style="width: 0%">0%</div>
-                </div>
-                <div class="flex justify-between text-sm text-gray-700 mb-8">
-                    <span>Raised: <span id="raisedAmount">$0</span></span>
-                    <span>Goal: $5,000,000</span>
-                </div>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Documents</h2>
-                <ul id="documentsList" class="space-y-3 mb-8"></ul>
-                <h2 class="text-2xl font-bold text-purple-700 mb-4">Latest Updates</h2>
-                <ul id="updatesList" class="space-y-3"></ul>
-            </div>
+          </div>
         </div>
-    </main>
-    <footer class="w-full bg-white/80 text-center py-6 mt-12 text-gray-500 text-sm border-t border-purple-100">&copy; 2026 Atmilio. All rights reserved.</footer>
-    <script>
-        fetch('portal_data.json')
-            .then(res => res.json())
-            .then(data => {
-                const c = data.client;
-                // Round
-                document.getElementById('roundInfo').textContent = c.round || 'N/A';
-                // Contacted Firms
-                document.getElementById('contactedFirms').innerHTML = (c.contacted_firms || []).map(firm => `<li>${firm}</li>`).join('') || '<li class="text-gray-500">None listed.</li>';
-                // Upcoming Meetings
-                document.getElementById('upcomingMeetings').innerHTML = (c.upcoming_meetings || []).map(m => `<li>${m.date} – ${m.firm}</li>`).join('') || '<li class="text-gray-500">No upcoming meetings.</li>';
-                // Fulfilled Capital Commitment
-                document.getElementById('fulfilledCommitment').textContent = c.fulfilled_commitment ? 'Fulfilled Capital Commitment' : '';
-                // Progress
-                const percent = c.goal > 0 ? Math.round((c.raised / c.goal) * 100) : 0;
-                document.getElementById('progressBar').style.width = percent + '%';
-                document.getElementById('progressBar').textContent = percent + '%';
-                document.getElementById('raisedAmount').textContent = c.raised.toLocaleString('en-US', {style: 'currency', currency: 'USD'});
-                // Documents
-                const docs = (c.documents || []).map(doc => `<li><a href="${doc.url}" class="text-indigo-700 hover:underline font-medium flex items-center" download><svg class='w-5 h-5 mr-2' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path stroke-linecap='round' stroke-linejoin='round' d='M12 4v16m8-8H4'/></svg>${doc.title}</a></li>`).join('');
-                document.getElementById('documentsList').innerHTML = docs || '<li class="text-gray-500">No documents available.</li>';
-                // Updates
-                const updates = (c.updates || []).map(u => `<li class="border border-purple-100 rounded-lg p-3 bg-purple-50/50"><span class="font-semibold text-gray-800">${u.date}</span><br><span class="text-gray-700">${u.text}</span></li>`).join('');
-                document.getElementById('updatesList').innerHTML = updates || '<li class="text-gray-500">No updates yet.</li>';
-            });
-    </script>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Round</div>
+            <div id="roundInfo" class="text-lg font-bold text-slate-900">Seed Round</div>
+          </div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Raised</div>
+            <div id="raisedAmount" class="text-lg font-bold text-slate-900">$0</div>
+          </div>
+          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+            <div class="text-xs uppercase tracking-wider font-bold text-slate-500 mb-1">Goal</div>
+            <div id="goalAmount" class="text-lg font-bold text-slate-900">$5,000,000</div>
+          </div>
+        </div>
+
+        <div id="fulfilledCommitment" class="mt-5 text-green-700 font-bold"></div>
+      </div>
+
+      <!-- Billing snapshot -->
+      <div class="card p-6 md:p-7">
+        <h3 class="section-title">Billing Snapshot</h3>
+        <div class="space-y-4">
+          <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50">
+            <div class="text-sm text-slate-500 mb-1">Current Invoice</div>
+            <div id="currentInvoiceName" class="font-bold text-slate-900 text-lg">No invoice uploaded</div>
+            <div id="currentInvoiceDate" class="text-sm text-slate-500 mt-1"></div>
+            <div class="flex flex-wrap gap-3 mt-4">
+              <a id="viewInvoiceBtn"
+                 href="#"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 class="inline-flex items-center justify-center rounded-xl bg-purple-600 text-white px-4 py-2 font-semibold hover:bg-purple-700 transition">
+                View Invoice
+              </a>
+              <a id="downloadInvoiceBtn"
+                 href="#"
+                 download
+                 class="inline-flex items-center justify-center rounded-xl border border-purple-200 text-purple-700 bg-white px-4 py-2 font-semibold hover:bg-purple-50 transition">
+                Download Invoice
+              </a>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50">
+            <div class="text-sm text-slate-500 mb-1">Outstanding Balance</div>
+            <div id="billingOutstanding" class="text-2xl font-extrabold text-slate-900">$0</div>
+            <div id="billingStatus" class="text-sm mt-2 text-amber-600 font-semibold"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+      <!-- Documents -->
+      <div class="card p-6 md:p-7">
+        <h3 class="section-title">Documents & Downloads</h3>
+        <ul id="documentsList" class="space-y-3"></ul>
+      </div>
+
+      <!-- Current presentation -->
+      <div class="card p-6 md:p-7">
+        <h3 class="section-title">Current Presentation</h3>
+        <div id="presentationCard" class="rounded-2xl border border-slate-200 p-5 bg-slate-50">
+          <div id="presentationTitle" class="text-xl font-bold text-slate-900">No presentation uploaded</div>
+          <div id="presentationDescription" class="text-slate-600 mt-2">Upload your latest PPT or PDF deck to make it available here.</div>
+          <div class="flex flex-wrap gap-3 mt-5">
+            <a id="viewPresentationBtn"
+               href="#"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex items-center justify-center rounded-xl bg-indigo-600 text-white px-4 py-2 font-semibold hover:bg-indigo-700 transition">
+              View PPT
+            </a>
+            <a id="downloadPresentationBtn"
+               href="#"
+               download
+               class="inline-flex items-center justify-center rounded-xl border border-indigo-200 text-indigo-700 bg-white px-4 py-2 font-semibold hover:bg-indigo-50 transition">
+              Download PPT
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
+      <!-- VC contact list -->
+      <div class="card p-6 md:p-7">
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <h3 class="section-title !mb-0">VC Contact List</h3>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Investor Outreach</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left text-slate-500 border-b border-slate-200">
+                <th class="py-3 pr-4 font-semibold">Firm</th>
+                <th class="py-3 pr-4 font-semibold">Contact</th>
+                <th class="py-3 pr-4 font-semibold">Email</th>
+                <th class="py-3 pr-4 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody id="vcContactTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="card p-6 md:p-7">
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <h3 class="section-title !mb-0">Upcoming Events</h3>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Conference & Travel</span>
+        </div>
+        <div id="upcomingEventsList" class="space-y-4"></div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <!-- Contacted firms -->
+      <div class="card p-6 md:p-7">
+        <h3 class="section-title">Contacted Firms</h3>
+        <ul id="contactedFirms" class="space-y-3"></ul>
+      </div>
+
+      <!-- Latest updates -->
+      <div class="card p-6 md:p-7">
+        <h3 class="section-title">Latest Updates</h3>
+        <ul id="updatesList" class="space-y-3"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mt-10 border-t border-purple-100 bg-white/75">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-5 text-sm text-slate-500 text-center">
+      © 2026 Atmilio. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    const currency = (value) => {
+      const num = Number(value || 0);
+      return num.toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      });
+    };
+
+    fetch('portal_data.json')
+      .then(res => res.json())
+      .then(data => {
+        const c = data.client || {};
+        const billing = c.billing || {};
+        const currentInvoice = billing.current_invoice || {};
+        const presentation = c.current_presentation || {};
+
+        // Header / Intro
+        document.getElementById('clientName').textContent = c.name || 'Complete Intake';
+        document.getElementById('ceoName').textContent = c.ceo || 'Dinesh';
+        document.getElementById('roundInfo').textContent = c.round || 'N/A';
+
+        const goal = Number(c.goal || 0);
+        const raised = Number(c.raised || 0);
+        const percent = goal > 0 ? Math.round((raised / goal) * 100) : 0;
+
+        document.getElementById('goalAmount').textContent = currency(goal);
+        document.getElementById('goalBadge').textContent = `Goal: ${currency(goal)}`;
+        document.getElementById('raisedAmount').textContent = currency(raised);
+        document.getElementById('raisedAmountTop').textContent = currency(raised);
+
+        const progressBar = document.getElementById('progressBar');
+        progressBar.style.width = percent + '%';
+        progressBar.textContent = percent + '%';
+
+        document.getElementById('fulfilledCommitment').textContent =
+          c.fulfilled_commitment ? 'Fulfilled Capital Commitment' : '';
+
+        // Billing
+        document.getElementById('monthlyRetainer').textContent = currency(billing.monthly_retainer || 4000);
+        document.getElementById('outstandingPayment').textContent = currency(billing.outstanding_payment || 0);
+        document.getElementById('billingOutstanding').textContent = currency(billing.outstanding_payment || 0);
+        document.getElementById('billingStatus').textContent = billing.status || '';
+
+        if (currentInvoice.title) {
+          document.getElementById('currentInvoiceName').textContent = currentInvoice.title;
+          document.getElementById('currentInvoiceDate').textContent = currentInvoice.date
+            ? `Invoice Date: ${currentInvoice.date}`
+            : '';
+          document.getElementById('viewInvoiceBtn').href = currentInvoice.url || '#';
+          document.getElementById('downloadInvoiceBtn').href = currentInvoice.url || '#';
+        } else {
+          document.getElementById('viewInvoiceBtn').classList.add('pointer-events-none', 'opacity-50');
+          document.getElementById('downloadInvoiceBtn').classList.add('pointer-events-none', 'opacity-50');
+        }
+
+        // General documents
+        const docsHtml = (c.documents || []).map(doc => `
+          <li class="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between gap-4">
+            <div>
+              <div class="font-bold text-slate-900">${doc.title || 'Untitled Document'}</div>
+              <div class="text-sm text-slate-500">${doc.description || ''}</div>
+            </div>
+            <a href="${doc.url || '#'}"
+               download
+               class="inline-flex items-center justify-center rounded-xl border border-purple-200 text-purple-700 bg-white px-4 py-2 font-semibold hover:bg-purple-50 transition whitespace-nowrap">
+              Download
+            </a>
+          </li>
+        `).join('');
+
+        document.getElementById('documentsList').innerHTML =
+          docsHtml || '<li class="text-slate-500">No documents available.</li>';
+
+        // Current presentation
+        if (presentation.title) {
+          document.getElementById('presentationTitle').textContent = presentation.title;
+          document.getElementById('presentationDescription').textContent =
+            presentation.description || 'Latest fundraising presentation.';
+          document.getElementById('viewPresentationBtn').href = presentation.url || '#';
+          document.getElementById('downloadPresentationBtn').href = presentation.url || '#';
+        } else {
+          document.getElementById('viewPresentationBtn').classList.add('pointer-events-none', 'opacity-50');
+          document.getElementById('downloadPresentationBtn').classList.add('pointer-events-none', 'opacity-50');
+        }
+
+        // VC Contact List
+        const vcContactsHtml = (c.vc_contact_list || []).map(vc => `
+          <tr class="border-b border-slate-100 align-top">
+            <td class="py-3 pr-4 font-semibold text-slate-900">${vc.firm || ''}</td>
+            <td class="py-3 pr-4 text-slate-700">${vc.contact || ''}</td>
+            <td class="py-3 pr-4">
+              ${vc.email ? `<a href="mailto:${vc.email}" class="text-indigo-600 hover:underline">${vc.email}</a>` : '<span class="text-slate-400">—</span>'}
+            </td>
+            <td class="py-3 pr-4">
+              <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold ${
+                (vc.status || '').toLowerCase().includes('meeting') ? 'bg-emerald-100 text-emerald-700' :
+                (vc.status || '').toLowerCase().includes('contacted') ? 'bg-amber-100 text-amber-700' :
+                'bg-slate-100 text-slate-600'
+              }">
+                ${vc.status || 'Not started'}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+
+        document.getElementById('vcContactTableBody').innerHTML =
+          vcContactsHtml || `
+            <tr>
+              <td colspan="4" class="py-4 text-slate-500">No VC contacts added yet.</td>
+            </tr>
+          `;
+
+        // Upcoming Events
+        const eventsHtml = (c.upcoming_events || []).map(event => `
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+              <div>
+                <div class="text-lg font-bold text-slate-900">${event.name || 'Unnamed Event'}</div>
+                <div class="text-sm text-slate-500 mt-1">${event.date || ''}</div>
+              </div>
+              <div class="pill bg-indigo-100 text-indigo-700">
+                Cost: ${currency(event.cost || 0)}
+              </div>
+            </div>
+            <div class="mt-3 text-slate-700 text-sm leading-6">
+              ${event.schedule || 'Schedule not added yet.'}
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('upcomingEventsList').innerHTML =
+          eventsHtml || '<div class="text-slate-500">No upcoming events listed.</div>';
+
+        // Contacted firms
+        const contactedFirmsHtml = (c.contacted_firms || []).map(firm => `
+          <li class="rounded-2xl border border-slate-200 bg-slate-50 p-4 font-medium text-slate-800">${firm}</li>
+        `).join('');
+
+        document.getElementById('contactedFirms').innerHTML =
+          contactedFirmsHtml || '<li class="text-slate-500">None listed.</li>';
+
+        // Updates
+        const updatesHtml = (c.updates || []).map(update => `
+          <li class="rounded-2xl border border-purple-100 bg-purple-50/60 p-4">
+            <div class="font-bold text-slate-900 mb-1">${update.date || ''}</div>
+            <div class="text-slate-700">${update.text || ''}</div>
+          </li>
+        `).join('');
+
+        document.getElementById('updatesList').innerHTML =
+          updatesHtml || '<li class="text-slate-500">No updates yet.</li>';
+      })
+      .catch(error => {
+        console.error('Error loading portal data:', error);
+      });
+  </script>
 </body>
 </html>
