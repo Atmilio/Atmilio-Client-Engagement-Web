@@ -32,29 +32,6 @@
       font-weight: 700;
     }
 
-    .input {
-      width: 100%;
-      border: 1px solid #d1d5db;
-      border-radius: 0.85rem;
-      padding: 0.75rem 0.9rem;
-      font-size: 0.95rem;
-      outline: none;
-      background: #fff;
-    }
-
-    .input:focus {
-      border-color: #8b5cf6;
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
-    }
-
-    .label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: #475569;
-      margin-bottom: 0.4rem;
-    }
-
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -89,22 +66,6 @@
       background: #faf5ff;
     }
 
-    .btn-danger {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 0.7rem;
-      padding: 0.55rem 0.75rem;
-      font-weight: 700;
-      border: 1px solid #fecaca;
-      color: #b91c1c;
-      background: #fff5f5;
-    }
-
-    .btn-danger:hover {
-      background: #fee2e2;
-    }
-
     .btn-ghost {
       display: inline-flex;
       align-items: center;
@@ -125,19 +86,6 @@
     .modal-backdrop {
       background: rgba(15, 23, 42, 0.45);
       backdrop-filter: blur(4px);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      min-width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      vertical-align: top;
     }
 
     .metric-card {
@@ -204,7 +152,7 @@
       top: 0;
       right: 0;
       height: 100vh;
-      width: min(94vw, 980px);
+      width: min(92vw, 420px);
       background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,245,255,0.98) 100%);
       box-shadow: -18px 0 40px rgba(15, 23, 42, 0.18);
       transform: translateX(100%);
@@ -218,27 +166,25 @@
       transform: translateX(0);
     }
 
-    .drawer-nav-btn {
+    .drawer-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       width: 100%;
       text-align: left;
       border: 1px solid #e9d5ff;
       background: white;
       color: #5b21b6;
-      border-radius: 0.9rem;
-      padding: 0.9rem 1rem;
+      border-radius: 0.95rem;
+      padding: 1rem 1rem;
       font-weight: 800;
       transition: 0.2s ease;
+      text-decoration: none;
     }
 
-    .drawer-nav-btn:hover {
+    .drawer-link:hover {
       background: #faf5ff;
-    }
-
-    .drawer-nav-btn.active {
-      background: linear-gradient(to right, #7c3aed, #4f46e5);
-      color: white;
-      border-color: transparent;
-      box-shadow: 0 10px 22px rgba(124, 58, 237, 0.20);
+      transform: translateY(-1px);
     }
 
     .hamburger-btn {
@@ -345,180 +291,47 @@
       color: #6b21a8;
       font-weight: 600;
     }
-
-    .drawer-section {
-      display: none;
-    }
-
-    .drawer-section.active {
-      display: block;
-    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 text-slate-800">
 
-  <!-- DRAWER BACKDROP -->
   <div id="drawerBackdrop" class="fixed inset-0 z-50 hidden modal-backdrop"></div>
 
-  <!-- MANAGEMENT DRAWER -->
   <aside id="managementDrawer" class="drawer-panel" aria-hidden="true">
-    <div class="border-b border-purple-100 px-5 md:px-6 py-5 bg-white/85 backdrop-blur">
+    <div class="border-b border-purple-100 px-5 py-5 bg-white/85 backdrop-blur">
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="text-sm uppercase tracking-[0.16em] font-bold text-purple-500">Portal Menu</div>
-          <h2 class="text-2xl font-extrabold text-slate-900">Manage Portal Sections</h2>
-          <p class="text-sm text-slate-500 mt-1">Use the menu below to manage contacts, firms, and events.</p>
+          <h2 class="text-2xl font-extrabold text-slate-900">Navigate Portal</h2>
+          <p class="text-sm text-slate-500 mt-1">Open the section you want to manage.</p>
         </div>
         <button id="closeDrawerBtn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button>
       </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-5">
-        <button class="drawer-nav-btn active" data-drawer-section="vcContactsSection">VC Contact List</button>
-        <button class="drawer-nav-btn" data-drawer-section="firmManagementSection">Firm Management</button>
-        <button class="drawer-nav-btn" data-drawer-section="upcomingEventsSection">Upcoming Events</button>
-      </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-5 md:px-6 py-5">
-      <!-- VC CONTACTS SECTION -->
-      <section id="vcContactsSection" class="drawer-section active">
-        <div class="mb-5">
-          <h3 class="section-title !mb-1">VC Contact List</h3>
-          <p class="text-sm text-slate-500">Add and manage investor contacts manually.</p>
-        </div>
-
-        <form id="vcContactForm" class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-          <div>
-            <label class="label" for="vcCompany">Company</label>
-            <input id="vcCompany" class="input" type="text" placeholder="Healthy.Capital" required />
-          </div>
-          <div>
-            <label class="label" for="vcFirstName">First Name</label>
-            <input id="vcFirstName" class="input" type="text" placeholder="Jane" required />
-          </div>
-          <div>
-            <label class="label" for="vcLastName">Last Name</label>
-            <input id="vcLastName" class="input" type="text" placeholder="Smith" required />
-          </div>
-          <div>
-            <label class="label" for="vcEmail">Email</label>
-            <input id="vcEmail" class="input" type="email" placeholder="jane@healthy.capital" />
-          </div>
-          <div>
-            <label class="label" for="vcPhone">Phone</label>
-            <input id="vcPhone" class="input" type="text" placeholder="(555) 555-5555" />
-          </div>
-          <div>
-            <label class="label" for="vcContacted">Contacted Y/N</label>
-            <select id="vcContacted" class="input">
-              <option value="N">N</option>
-              <option value="Y">Y</option>
-            </select>
-          </div>
-          <div>
-            <label class="label" for="vcAddedDate">Contact Added Date</label>
-            <input id="vcAddedDate" class="input" type="date" />
-          </div>
-          <div class="flex items-end">
-            <button type="submit" class="btn-primary w-full">Add VC Contact</button>
-          </div>
-        </form>
-
-        <div class="table-wrap">
-          <table class="text-sm">
-            <thead>
-              <tr class="text-left text-slate-500 border-b border-slate-200">
-                <th class="py-3 pr-4 font-semibold">Company</th>
-                <th class="py-3 pr-4 font-semibold">First Name</th>
-                <th class="py-3 pr-4 font-semibold">Last Name</th>
-                <th class="py-3 pr-4 font-semibold">Email</th>
-                <th class="py-3 pr-4 font-semibold">Phone</th>
-                <th class="py-3 pr-4 font-semibold">Contacted</th>
-                <th class="py-3 pr-4 font-semibold">Added Date</th>
-                <th class="py-3 pr-4 font-semibold">Action</th>
-              </tr>
-            </thead>
-            <tbody id="vcContactTableBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- FIRM MANAGEMENT SECTION -->
-      <section id="firmManagementSection" class="drawer-section">
-        <div class="mb-5">
-          <h3 class="section-title !mb-1">Firm Management</h3>
-          <p class="text-sm text-slate-500">Track outreach to firms and link to their websites.</p>
-        </div>
-
-        <form id="contactedFirmForm" class="grid md:grid-cols-2 xl:grid-cols-5 gap-4 mb-6">
-          <div>
-            <label class="label" for="firmName">Firm Name</label>
-            <input id="firmName" class="input" type="text" placeholder="Gilde Healthcare" required />
-          </div>
-          <div>
-            <label class="label" for="firmContactDate">Contact Date</label>
-            <input id="firmContactDate" class="input" type="date" />
-          </div>
-          <div>
-            <label class="label" for="firmEmail">Email</label>
-            <input id="firmEmail" class="input" type="email" placeholder="contact@firm.com" />
-          </div>
-          <div>
-            <label class="label" for="firmUrl">URL</label>
-            <input id="firmUrl" class="input" type="url" placeholder="https://firmwebsite.com" />
-          </div>
-          <div class="flex items-end">
-            <button type="submit" class="btn-primary w-full">Add Contacted Firm</button>
-          </div>
-        </form>
-
-        <div class="table-wrap">
-          <table class="text-sm">
-            <thead>
-              <tr class="text-left text-slate-500 border-b border-slate-200">
-                <th class="py-3 pr-4 font-semibold">Firm Name</th>
-                <th class="py-3 pr-4 font-semibold">Contact Date</th>
-                <th class="py-3 pr-4 font-semibold">Email</th>
-                <th class="py-3 pr-4 font-semibold">URL</th>
-                <th class="py-3 pr-4 font-semibold">Action</th>
-              </tr>
-            </thead>
-            <tbody id="contactedFirmsTableBody"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- UPCOMING EVENTS SECTION -->
-      <section id="upcomingEventsSection" class="drawer-section">
-        <div class="mb-5">
-          <h3 class="section-title !mb-1">Upcoming Events</h3>
-          <p class="text-sm text-slate-500">Add and manage events Dinesh will attend. New events will automatically appear on the landing page and calendar.</p>
-        </div>
-
-        <form id="upcomingEventForm" class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-          <div>
-            <label class="label" for="eventName">Event Name</label>
-            <input id="eventName" class="input" type="text" placeholder="Global Investor Forum" required />
-          </div>
-          <div>
-            <label class="label" for="eventDate">Event Date</label>
-            <input id="eventDate" class="input" type="date" required />
-          </div>
-          <div>
-            <label class="label" for="eventCost">Event Cost</label>
-            <input id="eventCost" class="input" type="number" placeholder="450" />
-          </div>
-          <div>
-            <label class="label" for="eventSchedule">Schedule</label>
-            <input id="eventSchedule" class="input" type="text" placeholder="Morning startup sessions, networking lunch..." />
-          </div>
-          <div class="xl:col-span-4 flex justify-end">
-            <button type="submit" class="btn-primary">Add Upcoming Event</button>
-          </div>
-        </form>
-
-        <div id="drawerUpcomingEventsList" class="space-y-4"></div>
-      </section>
+    <div class="flex-1 overflow-y-auto px-5 py-5">
+      <div class="space-y-3">
+        <a href="portal.html" class="drawer-link">
+          <span>Documents</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="vc-contact-list.html" class="drawer-link">
+          <span>VC Contact List</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="firm-management.html" class="drawer-link">
+          <span>Firm Management</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="upcoming-events.html" class="drawer-link">
+          <span>Upcoming Events</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="documents.html" class="drawer-link">
+          <span>Documents</span>
+          <span>&rsaquo;</span>
+        </a>
+      </div>
     </div>
   </aside>
 
@@ -554,7 +367,6 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
-    <!-- Overview -->
     <section class="card p-6 md:p-8 mb-8">
       <div class="flex flex-col gap-6">
         <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
@@ -566,8 +378,8 @@
             <p class="text-slate-600 text-lg">
               CEO: <span class="font-semibold text-slate-800">Dinesh</span>
             </p>
-            <p class="text-slate-600 mt-2 max-w-2xl">
-              Track fundraising progress, review invoice status, access documents, see featured upcoming events, and manage contacts, firms, and event planning from the portal menu.
+            <p class="text-slate-600 mt-2 max-w-3xl">
+              Track fundraising progress, access documents, see featured upcoming events, and navigate to contact, firm, and event management pages from the portal menu.
             </p>
           </div>
         </div>
@@ -591,75 +403,37 @@
       </div>
     </section>
 
-    <!-- Progress + Invoice -->
-    <section class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 items-start">
-      <div class="xl:col-span-2 card p-5 md:p-6">
-        <h3 class="section-title">Capital Raise Progress</h3>
+    <section class="card p-5 md:p-6 mb-8">
+      <h3 class="section-title">Capital Raise Progress</h3>
 
-        <div class="mb-4">
-          <div class="w-full bg-purple-100 rounded-full h-5 overflow-hidden">
-            <div
-              id="progressBar"
-              class="h-5 rounded-full flex items-center justify-end px-3 text-white text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
-              style="width: 0%;"
-            >
-              0%
-            </div>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-3 gap-3">
-          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
-            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Round</div>
-            <div class="text-base font-bold text-slate-900">Seed Round</div>
-          </div>
-          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
-            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Raised</div>
-            <div id="raisedAmountDisplay" class="text-base font-bold text-slate-900">$0</div>
-          </div>
-          <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
-            <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Goal</div>
-            <div id="goalAmountDisplay" class="text-base font-bold text-slate-900">$5,000,000</div>
+      <div class="mb-4">
+        <div class="w-full bg-purple-100 rounded-full h-5 overflow-hidden">
+          <div
+            id="progressBar"
+            class="h-5 rounded-full flex items-center justify-end px-3 text-white text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-500 transition-all duration-500"
+            style="width: 0%;"
+          >
+            0%
           </div>
         </div>
       </div>
 
-      <div class="card p-6 md:p-7">
-        <h3 class="section-title">Current Invoice</h3>
-        <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50">
-          <div class="text-sm text-slate-500 mb-1">Invoice Summary</div>
-          <div class="font-bold text-slate-900 text-lg">Complete Intake - March 2026 Invoice</div>
-          <div class="text-sm text-slate-500 mt-2">Invoice Date: 2026-03-01</div>
-          <div class="text-sm text-slate-500 mt-1">Due Date: 2026-03-25</div>
-          <div class="mt-4 flex items-center justify-between gap-3">
-            <div>
-              <div class="text-sm text-slate-500">Outstanding Balance</div>
-              <div id="billingOutstandingDisplay" class="text-2xl font-extrabold text-slate-900">$4,000</div>
-            </div>
-            <div id="billingStatusDisplay" class="text-sm text-amber-600 font-semibold text-right max-w-[180px]">
-              1 monthly retainer invoice currently outstanding.
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-3 mt-5">
-            <a
-              href="documents/complete-intake-march-2026-invoice.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center justify-center rounded-xl bg-purple-600 text-white px-4 py-2 font-semibold hover:bg-purple-700 transition">
-              View Invoice
-            </a>
-            <a
-              href="documents/complete-intake-march-2026-invoice.pdf"
-              download
-              class="inline-flex items-center justify-center rounded-xl border border-purple-200 text-purple-700 bg-white px-4 py-2 font-semibold hover:bg-purple-50 transition">
-              Download Invoice
-            </a>
-          </div>
+      <div class="grid md:grid-cols-3 gap-3">
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+          <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Round</div>
+          <div class="text-base font-bold text-slate-900">Seed Round</div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+          <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Raised</div>
+          <div id="raisedAmountDisplay" class="text-base font-bold text-slate-900">$0</div>
+        </div>
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3">
+          <div class="text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1">Goal</div>
+          <div id="goalAmountDisplay" class="text-base font-bold text-slate-900">$5,000,000</div>
         </div>
       </div>
     </section>
 
-    <!-- Documents -->
     <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
       <div class="card p-6 md:p-7">
         <h3 class="section-title">Documents & Downloads</h3>
@@ -720,16 +494,10 @@
       </div>
     </section>
 
-    <!-- Featured Upcoming Events + Calendar -->
     <section class="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
       <div class="card p-6 md:p-7">
-        <div class="flex items-center justify-between gap-4 mb-4">
-          <div>
-            <h3 class="section-title !mb-1">Featured Upcoming Events</h3>
-            <p class="text-sm text-slate-500">Events added from the portal menu will appear here automatically.</p>
-          </div>
-          <button id="openEventsFromLandingBtn" class="btn-secondary">Manage Events</button>
-        </div>
+        <h3 class="section-title !mb-1">Featured Upcoming Events</h3>
+        <p class="text-sm text-slate-500 mb-4">Events will appear here from the upcoming events page.</p>
         <div id="featuredUpcomingEventsList" class="space-y-4"></div>
       </div>
 
@@ -770,8 +538,6 @@
   <script>
     const STORAGE_KEYS = {
       settings: 'completeIntakePortal_settings',
-      vcContacts: 'completeIntakePortal_vcContacts',
-      contactedFirms: 'completeIntakePortal_contactedFirms',
       upcomingEvents: 'completeIntakePortal_upcomingEvents'
     };
 
@@ -779,33 +545,10 @@
       monthlyRetainer: 4000,
       outstandingPayment: 4000,
       raisedAmount: 0,
-      goalAmount: 5000000,
-      billingStatus: '1 monthly retainer invoice currently outstanding.'
+      goalAmount: 5000000
     };
 
-    const defaultVcContacts = [
-      {
-        company: 'Healthy.Capital',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane@healthy.capital',
-        phone: '(555) 222-1111',
-        contacted: 'Y',
-        addedDate: '2026-03-01'
-      }
-    ];
-
-    const defaultContactedFirms = [
-      {
-        firmName: 'Gilde Healthcare',
-        contactDate: '2026-03-02',
-        email: 'contact@gildehealthcare.com',
-        url: 'https://www.gildehealthcare.com'
-      }
-    ];
-
     const defaultUpcomingEvents = [];
-
     let calendarViewDate = new Date();
 
     function currency(value) {
@@ -835,10 +578,6 @@
       }
     }
 
-    function setStoredData(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-
     function toDateInputValue(value) {
       if (!value) return '';
       const date = new Date(value);
@@ -855,13 +594,6 @@
         month: 'long',
         day: 'numeric'
       });
-    }
-
-    function normalizeUrl(url) {
-      const trimmed = (url || '').trim();
-      if (!trimmed) return '';
-      if (/^https?:\/\//i.test(trimmed)) return trimmed;
-      return `https://${trimmed}`;
     }
 
     function getSortedUpcomingEvents() {
@@ -883,19 +615,15 @@
     }
 
     let settings = getStoredData(STORAGE_KEYS.settings, defaultSettings);
-    let vcContacts = getStoredData(STORAGE_KEYS.vcContacts, defaultVcContacts);
-    let contactedFirms = getStoredData(STORAGE_KEYS.contactedFirms, defaultContactedFirms);
     let upcomingEvents = getStoredData(STORAGE_KEYS.upcomingEvents, defaultUpcomingEvents);
 
     function renderSettings() {
       document.getElementById('monthlyRetainerDisplay').textContent = currency(settings.monthlyRetainer);
       document.getElementById('outstandingPaymentDisplay').textContent = currency(settings.outstandingPayment);
-      document.getElementById('billingOutstandingDisplay').textContent = currency(settings.outstandingPayment);
       document.getElementById('raisedAmountTop').textContent = currency(settings.raisedAmount);
       document.getElementById('raisedAmountDisplay').textContent = currency(settings.raisedAmount);
       document.getElementById('goalAmountDisplay').textContent = currency(settings.goalAmount);
       document.getElementById('goalBadge').textContent = `Goal: ${currency(settings.goalAmount)}`;
-      document.getElementById('billingStatusDisplay').textContent = settings.billingStatus || '';
 
       const percent = Number(settings.goalAmount) > 0
         ? Math.round((Number(settings.raisedAmount) / Number(settings.goalAmount)) * 100)
@@ -907,98 +635,14 @@
       progressBar.textContent = `${cappedPercent}%`;
     }
 
-    function renderVcContacts() {
-      const tbody = document.getElementById('vcContactTableBody');
-
-      if (!vcContacts.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" class="py-4 text-slate-500">No VC contacts added yet.</td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = vcContacts.map((contact, index) => `
-        <tr class="border-b border-slate-100">
-          <td class="py-3 pr-4 font-semibold text-slate-900">${escapeHtml(contact.company)}</td>
-          <td class="py-3 pr-4 text-slate-700">${escapeHtml(contact.firstName)}</td>
-          <td class="py-3 pr-4 text-slate-700">${escapeHtml(contact.lastName)}</td>
-          <td class="py-3 pr-4">
-            ${contact.email ? `<a href="mailto:${escapeHtml(contact.email)}" class="text-indigo-600 hover:underline">${escapeHtml(contact.email)}</a>` : '<span class="text-slate-400">—</span>'}
-          </td>
-          <td class="py-3 pr-4 text-slate-700">${contact.phone ? escapeHtml(contact.phone) : '<span class="text-slate-400">—</span>'}</td>
-          <td class="py-3 pr-4">
-            <span class="inline-flex rounded-full px-3 py-1 text-xs font-bold ${contact.contacted === 'Y' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
-              ${escapeHtml(contact.contacted || 'N')}
-            </span>
-          </td>
-          <td class="py-3 pr-4 text-slate-700">${contact.addedDate ? escapeHtml(contact.addedDate) : '<span class="text-slate-400">—</span>'}</td>
-          <td class="py-3 pr-4">
-            <button class="btn-danger" onclick="deleteVcContact(${index})">Delete</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    function renderContactedFirms() {
-      const tbody = document.getElementById('contactedFirmsTableBody');
-
-      if (!contactedFirms.length) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="py-4 text-slate-500">No contacted firms added yet.</td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = contactedFirms.map((firm, index) => `
-        <tr class="border-b border-slate-100">
-          <td class="py-3 pr-4 font-semibold text-slate-900">${escapeHtml(firm.firmName)}</td>
-          <td class="py-3 pr-4 text-slate-700">${firm.contactDate ? escapeHtml(firm.contactDate) : '<span class="text-slate-400">—</span>'}</td>
-          <td class="py-3 pr-4">
-            ${firm.email ? `<a href="mailto:${escapeHtml(firm.email)}" class="text-indigo-600 hover:underline">${escapeHtml(firm.email)}</a>` : '<span class="text-slate-400">—</span>'}
-          </td>
-          <td class="py-3 pr-4">
-            ${firm.url ? `<a href="${escapeHtml(normalizeUrl(firm.url))}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline break-all">${escapeHtml(normalizeUrl(firm.url))}</a>` : '<span class="text-slate-400">—</span>'}
-          </td>
-          <td class="py-3 pr-4">
-            <button class="btn-danger" onclick="deleteContactedFirm(${index})">Delete</button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
     function renderUpcomingEvents() {
-      const drawerList = document.getElementById('drawerUpcomingEventsList');
       const featuredList = document.getElementById('featuredUpcomingEventsList');
       const sortedEvents = getSortedUpcomingEvents();
 
       if (!sortedEvents.length) {
-        const emptyMarkup = `<div class="empty-state">No upcoming events added yet. Use the portal menu to add one.</div>`;
-        drawerList.innerHTML = emptyMarkup;
-        featuredList.innerHTML = emptyMarkup;
+        featuredList.innerHTML = `<div class="empty-state">No upcoming events added yet. Add them from the upcoming events page.</div>`;
         return;
       }
-
-      const drawerMarkup = sortedEvents.map((event, index) => `
-        <div class="event-card">
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-            <div>
-              <div class="text-lg font-bold text-slate-900">${escapeHtml(event.name || 'Unnamed Event')}</div>
-              <div class="text-sm text-slate-500 mt-1">${escapeHtml(formatEventDate(event.date))}</div>
-            </div>
-            <div class="flex flex-wrap items-center gap-3">
-              <div class="pill bg-indigo-100 text-indigo-700">Cost: ${currency(event.cost || 0)}</div>
-              <button class="btn-danger" onclick="deleteUpcomingEvent(${index})">Delete</button>
-            </div>
-          </div>
-          <div class="mt-3 text-slate-700 text-sm leading-6">
-            ${escapeHtml(event.schedule || 'No schedule added.')}
-          </div>
-        </div>
-      `).join('');
 
       const featuredMarkup = sortedEvents.slice(0, 4).map((event) => `
         <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -1015,7 +659,6 @@
         </div>
       `).join('');
 
-      drawerList.innerHTML = drawerMarkup;
       featuredList.innerHTML = featuredMarkup;
     }
 
@@ -1064,12 +707,11 @@
       grid.innerHTML = cells.join('');
     }
 
-    function openDrawer(defaultSection = 'vcContactsSection') {
+    function openDrawer() {
       document.getElementById('drawerBackdrop').classList.remove('hidden');
       const drawer = document.getElementById('managementDrawer');
       drawer.classList.add('open');
       drawer.setAttribute('aria-hidden', 'false');
-      switchDrawerSection(defaultSection);
       document.body.classList.add('overflow-hidden');
     }
 
@@ -1081,114 +723,9 @@
       document.body.classList.remove('overflow-hidden');
     }
 
-    function switchDrawerSection(sectionId) {
-      document.querySelectorAll('.drawer-section').forEach(section => {
-        section.classList.toggle('active', section.id === sectionId);
-      });
-
-      document.querySelectorAll('.drawer-nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.drawerSection === sectionId);
-      });
-    }
-
-    function deleteVcContact(index) {
-      if (!confirm('Delete this VC contact?')) return;
-      vcContacts.splice(index, 1);
-      setStoredData(STORAGE_KEYS.vcContacts, vcContacts);
-      renderVcContacts();
-    }
-
-    function deleteContactedFirm(index) {
-      if (!confirm('Delete this contacted firm?')) return;
-      contactedFirms.splice(index, 1);
-      setStoredData(STORAGE_KEYS.contactedFirms, contactedFirms);
-      renderContactedFirms();
-    }
-
-    function deleteUpcomingEvent(index) {
-      if (!confirm('Delete this upcoming event?')) return;
-      const sortedEvents = getSortedUpcomingEvents();
-      const eventToDelete = sortedEvents[index];
-      const actualIndex = upcomingEvents.findIndex(event =>
-        event.name === eventToDelete.name &&
-        event.date === eventToDelete.date &&
-        Number(event.cost || 0) === Number(eventToDelete.cost || 0) &&
-        event.schedule === eventToDelete.schedule
-      );
-
-      if (actualIndex > -1) {
-        upcomingEvents.splice(actualIndex, 1);
-      }
-
-      setStoredData(STORAGE_KEYS.upcomingEvents, upcomingEvents);
-      renderUpcomingEvents();
-      renderCalendar();
-    }
-
-    window.deleteVcContact = deleteVcContact;
-    window.deleteContactedFirm = deleteContactedFirm;
-    window.deleteUpcomingEvent = deleteUpcomingEvent;
-
-    document.getElementById('openDrawerBtn').addEventListener('click', () => openDrawer('vcContactsSection'));
+    document.getElementById('openDrawerBtn').addEventListener('click', openDrawer);
     document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
     document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
-    document.getElementById('openEventsFromLandingBtn').addEventListener('click', () => openDrawer('upcomingEventsSection'));
-
-    document.querySelectorAll('.drawer-nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchDrawerSection(btn.dataset.drawerSection));
-    });
-
-    document.getElementById('vcContactForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const newContact = {
-        company: document.getElementById('vcCompany').value.trim(),
-        firstName: document.getElementById('vcFirstName').value.trim(),
-        lastName: document.getElementById('vcLastName').value.trim(),
-        email: document.getElementById('vcEmail').value.trim(),
-        phone: document.getElementById('vcPhone').value.trim(),
-        contacted: document.getElementById('vcContacted').value,
-        addedDate: document.getElementById('vcAddedDate').value
-      };
-
-      vcContacts.unshift(newContact);
-      setStoredData(STORAGE_KEYS.vcContacts, vcContacts);
-      renderVcContacts();
-      e.target.reset();
-    });
-
-    document.getElementById('contactedFirmForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const newFirm = {
-        firmName: document.getElementById('firmName').value.trim(),
-        contactDate: document.getElementById('firmContactDate').value,
-        email: document.getElementById('firmEmail').value.trim(),
-        url: normalizeUrl(document.getElementById('firmUrl').value.trim())
-      };
-
-      contactedFirms.unshift(newFirm);
-      setStoredData(STORAGE_KEYS.contactedFirms, contactedFirms);
-      renderContactedFirms();
-      e.target.reset();
-    });
-
-    document.getElementById('upcomingEventForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      const newEvent = {
-        name: document.getElementById('eventName').value.trim(),
-        date: document.getElementById('eventDate').value,
-        cost: Number(document.getElementById('eventCost').value || 0),
-        schedule: document.getElementById('eventSchedule').value.trim()
-      };
-
-      upcomingEvents.push(newEvent);
-      setStoredData(STORAGE_KEYS.upcomingEvents, upcomingEvents);
-      renderUpcomingEvents();
-      renderCalendar();
-      e.target.reset();
-    });
 
     document.getElementById('prevMonthBtn').addEventListener('click', () => {
       calendarViewDate = new Date(calendarViewDate.getFullYear(), calendarViewDate.getMonth() - 1, 1);
@@ -1206,14 +743,10 @@
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeDrawer();
-      }
+      if (e.key === 'Escape') closeDrawer();
     });
 
     renderSettings();
-    renderVcContacts();
-    renderContactedFirms();
     renderUpcomingEvents();
     renderCalendar();
   </script>
