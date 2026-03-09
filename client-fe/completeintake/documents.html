@@ -1,1 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documents | Complete Intake Portal | Atmilio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
 
+    .card {
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(139, 92, 246, 0.10);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      border-radius: 1rem;
+    }
+
+    .section-title {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: #6d28d9;
+      margin-bottom: 0.75rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.85rem;
+      padding: 0.8rem 1rem;
+      font-weight: 700;
+      background: linear-gradient(to right, #7c3aed, #4f46e5);
+      color: white;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.85rem;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      border: 1px solid #ddd6fe;
+      color: #6d28d9;
+      background: white;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #faf5ff;
+    }
+
+    .btn-danger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      font-weight: 700;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      background: #fff5f5;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      background: #fee2e2;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
+      padding: 0.7rem 0.9rem;
+      font-weight: 700;
+      border: 1px solid #e5e7eb;
+      color: #475569;
+      background: white;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      background: #f8fafc;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 0.85rem;
+      padding: 0.8rem 0.95rem;
+      font-size: 0.95rem;
+      outline: none;
+      background: #fff;
+    }
+
+    .input:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+    }
+
+    .label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 0.45rem;
+    }
+
+    .dropzone {
+      border: 2px dashed #c4b5fd;
+      background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+      border-radius: 1.1rem;
+      padding: 2rem;
+      text-align: center;
+      transition: 0.2s ease;
+    }
+
+    .dropzone.dragover {
+      border-color: #7c3aed;
+      background: #f5f3ff;
+      transform: scale(1.01);
+    }
+
+    .doc-row {
+      border: 1px solid #e5e7eb;
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 1rem;
+    }
+
+    .doc-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom right, #ede9fe, #ddd6fe);
+      color: #5b21b6;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      border: 1px dashed #d8b4fe;
+      background: #faf5ff;
+      border-radius: 1rem;
+      padding: 1rem;
+      color: #6b21a8;
+      font-weight: 600;
+    }
+
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: min(92vw, 420px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(250,245,255,0.98) 100%);
+      box-shadow: -18px 0 40px rgba(15, 23, 42, 0.18);
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer-panel.open {
+      transform: translateX(0);
+    }
+
+    .drawer-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      text-align: left;
+      border: 1px solid #e9d5ff;
+      background: white;
+      color: #5b21b6;
+      border-radius: 0.95rem;
+      padding: 1rem 1rem;
+      font-weight: 800;
+      transition: 0.2s ease;
+      text-decoration: none;
+    }
+
+    .drawer-link:hover {
+      background: #faf5ff;
+      transform: translateY(-1px);
+    }
+
+    .drawer-link.active {
+      background: linear-gradient(to right, #7c3aed, #4f46e5);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 10px 22px rgba(124, 58, 237, 0.20);
+    }
+
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+    }
+
+    .hamburger-btn {
+      width: 46px;
+      height: 46px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.9rem;
+      border: 1px solid #e9d5ff;
+      background: white;
+      transition: 0.2s ease;
+      cursor: pointer;
+    }
+
+    .hamburger-btn:hover {
+      background: #faf5ff;
+    }
+
+    .hamburger-lines {
+      width: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hamburger-lines span {
+      display: block;
+      height: 2px;
+      border-radius: 999px;
+      background: #6d28d9;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-100 via-white to-indigo-100 text-slate-800">
+
+  <div id="drawerBackdrop" class="fixed inset-0 z-50 hidden modal-backdrop"></div>
+
+  <aside id="managementDrawer" class="drawer-panel" aria-hidden="true">
+    <div class="border-b border-purple-100 px-5 py-5 bg-white/85 backdrop-blur">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="text-sm uppercase tracking-[0.16em] font-bold text-purple-500">Portal Menu</div>
+          <h2 class="text-2xl font-extrabold text-slate-900">Navigate Portal</h2>
+          <p class="text-sm text-slate-500 mt-1">Open the section you want to manage.</p>
+        </div>
+        <button id="closeDrawerBtn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-5 py-5">
+      <div class="space-y-3">
+        <a href="portal.html" class="drawer-link">
+          <span>Home</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="vc-contact-list.html" class="drawer-link">
+          <span>VC Contact List</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="firm-management.html" class="drawer-link">
+          <span>Firm Management</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="upcoming-events.html" class="drawer-link">
+          <span>Upcoming Events</span>
+          <span>&rsaquo;</span>
+        </a>
+        <a href="documents.html" class="drawer-link active">
+          <span>Documents</span>
+          <span>&rsaquo;</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <header class="sticky top-0 z-20 border-b border-purple-100 bg-white/85 backdrop-blur">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg">
+          <svg class="w-7 h-7" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+            <title id="logoTitle">Atmilio Logo</title>
+            <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="white" stroke-width="2" stroke-linejoin="round" />
+            <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="white" fill-opacity="0.92" />
+            <circle cx="25" cy="25" r="4" fill="#c4b5fd" />
+          </svg>
+        </div>
+        <div>
+          <div class="text-xs font-semibold uppercase tracking-[0.18em] text-purple-500">Atmilio Client Portal</div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900">Complete Intake Documents</h1>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="pill bg-purple-100 text-purple-700">Document Center</div>
+        <button id="openDrawerBtn" class="hamburger-btn" aria-label="Open portal menu" title="Open portal menu">
+          <div class="hamburger-lines" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-10">
+    <section class="card p-6 md:p-8 mb-8">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.16em] text-purple-500 mb-2">Documents</p>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-2">Upload and manage files</h2>
+          <p class="text-slate-600 max-w-3xl">
+            Drag and drop files directly into the portal or use the file picker to add them manually. Files added here will remain visible in this browser using local storage.
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <button id="browseFilesBtn" class="btn-primary" type="button">Select Files</button>
+          <button id="clearAllDocsBtn" class="btn-secondary" type="button">Clear All Uploaded Files</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card p-6 md:p-8 mb-8">
+      <div id="dropzone" class="dropzone">
+        <div class="mx-auto max-w-2xl">
+          <div class="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg">
+            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none">
+              <path d="M12 16V5M12 5L8 9M12 5L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 15v3a1 1 0 001 1h12a1 1 0 001-1v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Drag and drop documents here</h3>
+          <p class="text-slate-600 mb-5">
+            Supported by browser storage. This is best for lightweight client files. You can also click below to browse from your computer.
+          </p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <button id="dropzoneBrowseBtn" class="btn-primary" type="button">Choose Files</button>
+            <div class="pill bg-slate-100 text-slate-700">PDF, PPTX, XLSX, DOCX, CSV, TXT, PNG, JPG and more</div>
+          </div>
+        </div>
+      </div>
+      <input id="fileInput" type="file" class="hidden" multiple />
+    </section>
+
+    <section class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+      <div class="xl:col-span-2 card p-6 md:p-7">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
+          <div>
+            <h3 class="section-title !mb-1">Uploaded Documents</h3>
+            <p class="text-sm text-slate-500">Files you add will appear below.</p>
+          </div>
+          <div class="w-full md:w-72">
+            <input id="searchInput" class="input" type="text" placeholder="Search documents..." />
+          </div>
+        </div>
+
+        <div id="documentsList" class="space-y-4"></div>
+      </div>
+
+      <div class="card p-6 md:p-7">
+        <h3 class="section-title">Storage Notes</h3>
+        <div class="space-y-4 text-sm text-slate-600 leading-6">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="font-bold text-slate-900 mb-2">How this works</div>
+            <p>
+              Files added here are stored in your browser's local storage as data URLs so they can remain visible on this page.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="font-bold text-slate-900 mb-2">Best use</div>
+            <p>
+              This works best for smaller business files. Very large files may hit browser storage limits.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="font-bold text-slate-900 mb-2">Recommended next step</div>
+            <p>
+              For production use, the next upgrade would be storing uploads in Firebase Storage or another cloud storage service so files sync across devices and users.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mt-10 border-t border-purple-100 bg-white/75">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-5 text-sm text-slate-500 text-center">
+      © 2026 Atmilio. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    const STORAGE_KEY = 'completeIntakePortal_uploadedDocuments';
+
+    let uploadedDocuments = getStoredDocs();
+    let currentSearch = '';
+
+    function getStoredDocs() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return [];
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return [];
+      }
+    }
+
+    function saveStoredDocs() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(uploadedDocuments));
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatBytes(bytes) {
+      const value = Number(bytes || 0);
+      if (value < 1024) return `${value} B`;
+      if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+      if (value < 1024 * 1024 * 1024) return `${(value / (1024 * 1024)).toFixed(1)} MB`;
+      return `${(value / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+    }
+
+    function getFileTypeLabel(name = '', type = '') {
+      const extension = name.includes('.') ? name.split('.').pop().toUpperCase() : '';
+      if (extension) return extension;
+      if (type) return type.split('/').pop().toUpperCase();
+      return 'FILE';
+    }
+
+    function formatDate(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'Unknown date';
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function renderDocuments() {
+      const list = document.getElementById('documentsList');
+
+      const filtered = uploadedDocuments.filter(doc => {
+        const q = currentSearch.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          (doc.name || '').toLowerCase().includes(q) ||
+          (doc.type || '').toLowerCase().includes(q)
+        );
+      });
+
+      if (!filtered.length) {
+        list.innerHTML = `
+          <div class="empty-state">
+            ${currentSearch ? 'No matching documents found.' : 'No documents uploaded yet. Drag and drop a file above or click Select Files.'}
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = filtered.map((doc, index) => `
+        <div class="doc-row">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div class="flex items-start gap-4 min-w-0">
+              <div class="doc-icon">${escapeHtml(getFileTypeLabel(doc.name, doc.type))}</div>
+              <div class="min-w-0">
+                <div class="text-lg font-bold text-slate-900 break-words">${escapeHtml(doc.name)}</div>
+                <div class="text-sm text-slate-500 mt-1">
+                  ${escapeHtml(doc.type || 'Unknown file type')} • ${escapeHtml(formatBytes(doc.size))} • Added ${escapeHtml(formatDate(doc.addedAt))}
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-3">
+              <a
+                href="${doc.dataUrl}"
+                download="${escapeHtml(doc.name)}"
+                class="btn-primary"
+              >
+                Download
+              </a>
+              <button class="btn-danger" type="button" onclick="deleteDocument(${index})">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function addFiles(files) {
+      const fileArray = Array.from(files || []);
+      if (!fileArray.length) return;
+
+      for (const file of fileArray) {
+        try {
+          const dataUrl = await readFileAsDataUrl(file);
+
+          uploadedDocuments.unshift({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            addedAt: new Date().toISOString(),
+            dataUrl
+          });
+        } catch (error) {
+          alert(`Could not add file: ${file.name}`);
+        }
+      }
+
+      try {
+        saveStoredDocs();
+        renderDocuments();
+      } catch (error) {
+        alert('These files may be too large for browser storage. Try smaller files or fewer files at once.');
+      }
+    }
+
+    function deleteDocument(filteredIndex) {
+      const filtered = uploadedDocuments.filter(doc => {
+        const q = currentSearch.trim().toLowerCase();
+        if (!q) return true;
+        return (
+          (doc.name || '').toLowerCase().includes(q) ||
+          (doc.type || '').toLowerCase().includes(q)
+        );
+      });
+
+      const target = filtered[filteredIndex];
+      if (!target) return;
+      if (!confirm(`Delete "${target.name}"?`)) return;
+
+      const actualIndex = uploadedDocuments.findIndex(doc =>
+        doc.name === target.name &&
+        doc.size === target.size &&
+        doc.addedAt === target.addedAt
+      );
+
+      if (actualIndex > -1) {
+        uploadedDocuments.splice(actualIndex, 1);
+        saveStoredDocs();
+        renderDocuments();
+      }
+    }
+
+    window.deleteDocument = deleteDocument;
+
+    function openDrawer() {
+      document.getElementById('drawerBackdrop').classList.remove('hidden');
+      const drawer = document.getElementById('managementDrawer');
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeDrawer() {
+      document.getElementById('drawerBackdrop').classList.add('hidden');
+      const drawer = document.getElementById('managementDrawer');
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+
+    document.getElementById('openDrawerBtn').addEventListener('click', openDrawer);
+    document.getElementById('closeDrawerBtn').addEventListener('click', closeDrawer);
+    document.getElementById('drawerBackdrop').addEventListener('click', closeDrawer);
+
+    document.getElementById('browseFilesBtn').addEventListener('click', () => fileInput.click());
+    document.getElementById('dropzoneBrowseBtn').addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async (e) => {
+      await addFiles(e.target.files);
+      e.target.value = '';
+    });
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      await addFiles(e.dataTransfer.files);
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      currentSearch = e.target.value || '';
+      renderDocuments();
+    });
+
+    document.getElementById('clearAllDocsBtn').addEventListener('click', () => {
+      if (!uploadedDocuments.length) return;
+      if (!confirm('Delete all uploaded documents from this browser?')) return;
+      uploadedDocuments = [];
+      saveStoredDocs();
+      renderDocuments();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    renderDocuments();
+  </script>
+</body>
+</html>
