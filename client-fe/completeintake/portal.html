@@ -32,6 +32,19 @@
       font-weight: 700;
     }
 
+    .due-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 800;
+      background: #fff7ed;
+      color: #c2410c;
+      border: 1px solid #fdba74;
+      white-space: nowrap;
+    }
+
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -355,6 +368,7 @@
       <div class="flex flex-wrap items-center gap-3">
         <div class="pill bg-purple-100 text-purple-700">Seed Round</div>
         <div class="pill bg-emerald-100 text-emerald-700" id="goalBadge">Goal: $5,000,000</div>
+        <div class="due-pill">Next Payment Due: 3/25/2026</div>
         <button id="openDrawerBtn" class="hamburger-btn" aria-label="Open portal menu" title="Open portal menu">
           <div class="hamburger-lines" aria-hidden="true">
             <span></span>
@@ -395,7 +409,7 @@
             <div id="outstandingPaymentDisplay" class="metric-value">$4,000</div>
           </div>
 
-          <div class="metric-card.raised metric-card raised">
+          <div class="metric-card raised">
             <div class="metric-label">Raised To Date</div>
             <div id="raisedAmountTop" class="metric-value">$0</div>
           </div>
