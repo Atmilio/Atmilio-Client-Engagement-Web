@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Small Business Accounting Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="dashboard.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f7fafc; }
+        .sidebar h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #4c51bf;
+            margin-bottom: 2.2rem;
+        }
+        .atmilio-logo {
+            width: 2.2rem;
+            height: 2.2rem;
+            vertical-align: middle;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #f3e8ff 0%, #e5e7eb 100%);
+            color: #232946;
+        }
+        .sidebar ul li.active, .sidebar ul li:hover {
+            background: #ede9fe;
+            border-left: 4px solid #7c3aed;
+            color: #6d28d9;
+        }
+        .widget {
+            border-left: 6px solid #7c3aed;
+        }
+        .ai-insights {
+            background: #fff7ed;
+            border: 1px solid #fdba74;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.2rem 2rem;
+        }
+        .ai-insights h3 {
+            color: #c2410c;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .ai-insights ul {
+            margin: 0; padding: 0 0 0 1.2rem;
+        }
+        .ai-insights li {
+            color: #c2410c;
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>
+            <svg class="atmilio-logo" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+                <title id="logoTitle">Atmilio Logo</title>
+                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
+                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
+                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
+            </svg>
+            Atmilio Accounting
+        </h2>
+        <ul>
+            <li class="active">Dashboard</li>
+            <li>Invoicing</li>
+            <li>Expenses</li>
+            <li>Reports</li>
+            <li>Banking</li>
+            <li>Payroll</li>
+            <li>Settings</li>
+        </ul>
+    </nav>
+    <main class="main-content">
+        <header>
+            <h1 style="color:#4c51bf;font-weight:800;">Dashboard</h1>
+        </header>
+        <section class="dashboard-widgets">
+            <div class="widget">
+                <h3>Cash Balance</h3>
+                <p>$12,500.00</p>
+            </div>
+            <div class="widget">
+                <h3>Accounts Receivable</h3>
+                <p>$2,300.00</p>
+            </div>
+            <div class="widget">
+                <h3>Accounts Payable</h3>
+                <p>$1,200.00</p>
+            </div>
+            <div class="widget">
+                <h3>Monthly Net Income</h3>
+                <p>+$3,000.00</p>
+            </div>
+            <div class="widget">
+                <h3>Burn Rate</h3>
+                <p>$4,000.00</p>
+            </div>
+            <div class="widget">
+                <h3>Cash Flow (30/90d)</h3>
+                <p>+$2,500.00</p>
+            </div>
+        </section>
+        <section class="dashboard-charts">
+            <div class="chart" id="cashflow-chart">
+                <h4>Cash Flow (Last 6 Months)</h4>
+                <canvas></canvas>
+            </div>
+            <div class="chart" id="expenses-chart">
+                <h4>Expenses Breakdown</h4>
+                <canvas></canvas>
+            </div>
+        </section>
+    </main>
+    <script src="dashboard.js"></script>
+</body>
+</html>

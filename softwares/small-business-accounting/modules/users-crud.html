@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+    <main class="main-content">
+        <header>
+            <h1>User Management</h1>
+            <button class="btn-primary" onclick="document.getElementById('inviteModal').style.display='block'">+ Invite User</button>
+        </header>
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Jane Doe</td><td>jane@company.com</td><td>Admin</td><td><span class="status active">Active</span></td><td><button>Edit</button> <button>Disable</button></td></tr>
+                <tr><td>John Smith</td><td>john@company.com</td><td>Accountant</td><td><span class="status pending">Pending Invite</span></td><td><button>Resend</button> <button>Remove</button></td></tr>
+                <tr><td>Mary Lee</td><td>mary@company.com</td><td>Viewer</td><td><span class="status disabled">Disabled</span></td><td><button>Enable</button></td></tr>
+            </tbody>
+        </table>
+        <!-- Modal for inviting user -->
+        <div id="inviteModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
+            <form style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
+                <h2>Invite User</h2>
+                <label>Name<br><input type="text" required></label><br>
+                <label>Email<br><input type="email" required></label><br>
+                <label>Role<br>
+                    <select>
+                        <option>Admin</option>
+                        <option>Accountant</option>
+                        <option>Viewer</option>
+                    </select>
+                </label><br>
+                <button class="btn-primary" type="submit">Send Invite</button>
+                <button type="button" onclick="document.getElementById('inviteModal').style.display='none'">Cancel</button>
+            </form>
+        </div>
+    </main>
+    <style>
+        .status.active { color:#059669; font-weight:700; }
+        .status.pending { color:#6d28d9; font-weight:700; }
+        .status.disabled { color:#c2410c; font-weight:700; }
+    </style>
+</body>
+</html>

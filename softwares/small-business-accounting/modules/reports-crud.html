@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+    <main class="main-content">
+        <header>
+            <h1>Reports</h1>
+            <div style="margin-top:1rem;">
+                <label>Date Range <input type="date"> to <input type="date"></label>
+                <label style="margin-left:1rem;">Category <select><option>All</option><option>Sales</option><option>Expenses</option></select></label>
+                <label style="margin-left:1rem;">Customer/Vendor <input type="text" placeholder="Search..."></label>
+                <label style="margin-left:1rem;">Status <select><option>All</option><option>Paid</option><option>Pending</option><option>Overdue</option></select></label>
+                <button class="btn-primary" style="margin-left:1rem;">Export PDF</button>
+                <button class="btn-primary" style="margin-left:0.5rem;">Export CSV</button>
+            </div>
+        </header>
+        <section class="dashboard-widgets" style="margin-top:2rem;">
+            <div class="widget"><h3>Profit & Loss</h3><p>+$3,000.00</p></div>
+            <div class="widget"><h3>Cash Flow</h3><p>+$2,500.00</p></div>
+            <div class="widget"><h3>Expenses by Category</h3><p>$1,800.00</p></div>
+            <div class="widget"><h3>Accounts Receivable</h3><p>$2,300.00</p></div>
+            <div class="widget"><h3>Accounts Payable</h3><p>$1,200.00</p></div>
+        </section>
+        <section style="margin-top:2rem;">
+            <h2>Core Reports (Placeholders)</h2>
+            <ul>
+                <li>Profit & Loss</li>
+                <li>Cash Flow</li>
+                <li>Expenses by Category</li>
+                <li>Accounts Receivable</li>
+                <li>Accounts Payable</li>
+            </ul>
+        </section>
+    </main>
+    <style>
+        label { font-weight:600; margin-right:1rem; }
+        input, select { margin-left:0.3rem; border-radius:0.4rem; border:1px solid #e5e7eb; padding:0.3rem 0.7rem; }
+        ul { margin:0.7rem 0 0 1.2rem; }
+    </style>
+</body>
+</html>

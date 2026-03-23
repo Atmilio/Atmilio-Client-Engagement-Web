@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+    <main class="main-content">
+        <header>
+            <h1>Expenses</h1>
+            <button class="btn-primary" onclick="document.getElementById('addModal').style.display='block'">+ New Expense</button>
+        </header>
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Vendor</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Attachment</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>EXP-001</td>
+                    <td>Office Depot</td>
+                    <td>$200.00</td>
+                    <td><span class="status paid">Paid</span></td>
+                    <td>2026-03-01</td>
+                    <td><a href="#">View</a></td>
+                    <td><button>Edit</button> <button>Delete</button></td>
+                </tr>
+                <tr>
+                    <td>EXP-002</td>
+                    <td>Web Hosting</td>
+                    <td>$100.00</td>
+                    <td><span class="status pending">Pending</span></td>
+                    <td>2026-03-10</td>
+                    <td><a href="#">View</a></td>
+                    <td><button>Edit</button> <button>Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- Modal for adding expense -->
+        <div id="addModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
+            <form style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
+                <h2>New Expense</h2>
+                <label>Vendor<br><input type="text" required></label><br>
+                <label>Amount<br><input type="number" required></label><br>
+                <label>Status<br>
+                    <select>
+                        <option>Pending</option>
+                        <option>Paid</option>
+                        <option>Overdue</option>
+                    </select>
+                </label><br>
+                <label>Date<br><input type="date" required></label><br>
+                <label>Attachment<br><input type="file"></label><br>
+                <button class="btn-primary" type="submit">Save</button>
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
+            </form>
+        </div>
+    </main>
+    <style>
+        .crud-table { width:100%; border-collapse:collapse; margin-top:2rem; background:#fff; border-radius:1rem; overflow:hidden; }
+        .crud-table th, .crud-table td { padding:0.8rem 1rem; border-bottom:1px solid #f3e8ff; text-align:left; }
+        .crud-table th { background:#f3e8ff; color:#4c51bf; font-weight:700; }
+        .crud-table tr:last-child td { border-bottom:none; }
+        .status.paid { color:#059669; font-weight:700; }
+        .status.pending { color:#6d28d9; font-weight:700; }
+        .status.overdue { color:#c2410c; font-weight:700; }
+        .btn-primary { background:linear-gradient(to right,#7c3aed,#4c51bf);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:0.7rem;font-weight:700;cursor:pointer;margin-left:1rem; }
+        .btn-primary:hover { opacity:0.9; }
+    </style>
+</body>
+</html>

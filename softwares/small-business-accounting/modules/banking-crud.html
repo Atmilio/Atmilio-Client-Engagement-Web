@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banking</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+    <main class="main-content">
+        <header>
+            <h1>Banking</h1>
+        </header>
+        <section class="dashboard-widgets">
+            <div class="widget"><h3>Checking</h3><p>$8,000.00</p></div>
+            <div class="widget"><h3>Savings</h3><p>$3,500.00</p></div>
+            <div class="widget"><h3>Credit Card</h3><p>-$1,000.00</p></div>
+        </section>
+        <section style="margin-top:2rem;">
+            <h2>Recent Transactions</h2>
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>2026-03-20</td><td>Stripe Payment</td><td>+$1,200.00</td><td><span class="status matched">Matched</span></td><td>Deposit</td></tr>
+                    <tr><td>2026-03-18</td><td>Office Supplies</td><td>-$200.00</td><td><span class="status unmatched">Unmatched</span></td><td>Expense</td></tr>
+                    <tr><td>2026-03-15</td><td>Payroll</td><td>-$1,000.00</td><td><span class="status review">Review Needed</span></td><td>Expense</td></tr>
+                </tbody>
+            </table>
+        </section>
+        <section style="margin-top:2rem;">
+            <h2>Reconciliation <span style="font-size:0.9rem;color:#6d28d9;">(Coming Soon)</span></h2>
+            <div style="background:#faf5ff;border:1px solid #e5e7eb;padding:1.2rem;border-radius:1rem;">Reconciliation UI placeholder for future bank feed integration.</div>
+        </section>
+    </main>
+    <style>
+        .status.matched { color:#059669; font-weight:700; }
+        .status.unmatched { color:#c2410c; font-weight:700; }
+        .status.review { color:#eab308; font-weight:700; }
+    </style>
+</body>
+</html>
