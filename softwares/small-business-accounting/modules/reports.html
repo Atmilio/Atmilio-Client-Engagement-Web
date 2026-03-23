@@ -5,19 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reports Overview</title>
     <link rel="stylesheet" href="../dashboard.css">
-</head>
 <body>
+    <nav class="sidebar">
+        <h2>
+            <svg class="atmilio-logo" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+                <title id="logoTitle">Atmilio Logo</title>
+                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
+                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
+                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
+            </svg>
+            Atmilio Accounting
+        </h2>
+        <ul>
+            <li><a href="../dashboard.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Dashboard</a></li>
+            <li><a href="invoicing.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Invoicing</a></li>
+            <li><a href="expenses.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Expenses</a></li>
+            <li><a href="chart-of-accounts.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Chart of Accounts</a></li>
+            <li><a href="journal-entries.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Journal Entries</a></li>
+            <li><a href="general-ledger.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">General Ledger</a></li>
+            <li class="active"><a href="reports.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Reports</a></li>
+            <li><a href="banking.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Banking</a></li>
+            <li><a href="#" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Payroll</a></li>
+            <li><a href="users.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Settings</a></li>
+        </ul>
+    </nav>
     <main class="main-content">
         <header>
-            <h1>Reports Overview</h1>
+            <h1>Reports</h1>
+            <button class="btn-primary">+ New Report</button>
         </header>
-        <section class="dashboard-widgets">
-            <div class="widget"><h3>P&L This Month</h3><p>+$3,000.00</p></div>
-            <div class="widget"><h3>Export Options</h3><p>PDF, CSV</p></div>
-        </section>
-        <section>
-            <a href="crud.html" class="btn-primary">View All Reports</a>
-        </section>
+        <div class="reports-list">
+            <div class="report-card">Profit & Loss</div>
+            <div class="report-card">Balance Sheet</div>
+            <div class="report-card">Cash Flow Statement</div>
+            <div class="report-card">Trial Balance</div>
+            <div class="report-card">Aged Receivables</div>
+            <div class="report-card">Aged Payables</div>
+        </div>
     </main>
 </body>
-</html>

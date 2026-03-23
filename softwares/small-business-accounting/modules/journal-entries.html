@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal Entries</title>
+    <link rel="stylesheet" href="../dashboard.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <h2>
+            <svg class="atmilio-logo" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
+                <title id="logoTitle">Atmilio Logo</title>
+                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
+                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
+                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
+            </svg>
+            Atmilio Accounting
+        </h2>
+        <ul>
+            <li><a href="../dashboard.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Dashboard</a></li>
+            <li><a href="invoicing.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Invoicing</a></li>
+            <li><a href="expenses.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Expenses</a></li>
+            <li><a href="chart-of-accounts.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Chart of Accounts</a></li>
+            <li class="active"><a href="journal-entries.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Journal Entries</a></li>
+            <li><a href="general-ledger.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">General Ledger</a></li>
+            <li><a href="reports.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Reports</a></li>
+            <li><a href="banking.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Banking</a></li>
+            <li><a href="#" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Payroll</a></li>
+            <li><a href="users.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Settings</a></li>
+        </ul>
+    </nav>
+        <main class="main-content">
+                <header>
+                        <h1>Journal Entries</h1>
+                        <button class="btn-primary" onclick="document.getElementById('addJournalModal').style.display='block'">+ New Entry</button>
+                </header>
+                <table class="crud-table">
+                        <thead>
+                                <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Debit Account</th>
+                                        <th>Debit</th>
+                                        <th>Credit Account</th>
+                                        <th>Credit</th>
+                                </tr>
+                        </thead>
+                        <tbody id="journalTableBody">
+                                <!-- Populated by JS -->
+                        </tbody>
+                </table>
+                <!-- Modal for adding journal entry -->
+                <div id="addJournalModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
+                        <form id="journalEntryForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:500px;margin:5vh auto;">
+                                <h2>New Journal Entry</h2>
+                                <label>Date<br><input type="date" id="jeDate" required></label><br>
+                                <label>Description<br><input type="text" id="jeDesc"></label><br>
+                                <label>Debit Account<br>
+                                        <select id="jeDebitAccount"></select>
+                                </label><br>
+                                <label>Debit Amount<br><input type="number" id="jeDebitAmt" required></label><br>
+                                <label>Credit Account<br>
+                                        <select id="jeCreditAccount"></select>
+                                </label><br>
+                                <label>Credit Amount<br><input type="number" id="jeCreditAmt" required></label><br>
+                                <div id="jeError" style="color:red;"></div>
+                                <button class="btn-primary" type="submit">Save</button>
+                                <button type="button" onclick="document.getElementById('addJournalModal').style.display='none'">Cancel</button>
+                        </form>
+                </div>
+        </main>
+        <script src="accountingEngine.js"></script>
+        <script>
+            function renderJournalEntries() {
+                const tbody = document.getElementById('journalTableBody');
+                tbody.innerHTML = '';
+                window.accountingEngine.transactions.forEach(tx => {
+                    if (!tx.entries || tx.entries.length !== 2) return; // Only show simple journal entries
+                    const debit = tx.entries.find(e => e.debit);
+                    const credit = tx.entries.find(e => e.credit);
+                    const debitAcc = window.accountingEngine.accounts.find(a => a.id === debit.accountId)?.name || '';
+                    const creditAcc = window.accountingEngine.accounts.find(a => a.id === credit.accountId)?.name || '';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${tx.date}</td>
+                        <td>${tx.description}</td>
+                        <td>${debitAcc}</td>
+                        <td>${debit.debit ? '$' + debit.debit.toFixed(2) : ''}</td>
+                        <td>${creditAcc}</td>
+                        <td>${credit.credit ? '$' + credit.credit.toFixed(2) : ''}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            function populateAccountSelects() {
+                const debitSel = document.getElementById('jeDebitAccount');
+                const creditSel = document.getElementById('jeCreditAccount');
+                debitSel.innerHTML = '';
+                creditSel.innerHTML = '';
+                window.accountingEngine.accounts.forEach(acc => {
+                    const opt1 = document.createElement('option');
+                    opt1.value = acc.id;
+                    opt1.textContent = acc.name + ' (' + acc.type.charAt(0).toUpperCase() + acc.type.slice(1) + ')';
+                    debitSel.appendChild(opt1.cloneNode(true));
+                    creditSel.appendChild(opt1);
+                });
+            }
+            document.getElementById('journalEntryForm').onsubmit = function(e) {
+                e.preventDefault();
+                const date = document.getElementById('jeDate').value;
+                const description = document.getElementById('jeDesc').value;
+                const debitAccountId = parseInt(document.getElementById('jeDebitAccount').value);
+                const creditAccountId = parseInt(document.getElementById('jeCreditAccount').value);
+                const debitAmt = parseFloat(document.getElementById('jeDebitAmt').value);
+                const creditAmt = parseFloat(document.getElementById('jeCreditAmt').value);
+                const errorDiv = document.getElementById('jeError');
+                errorDiv.textContent = '';
+                if (debitAmt !== creditAmt) {
+                    errorDiv.textContent = 'Debits and credits must be equal.';
+                    return;
+                }
+                try {
+                    window.accountingEngine.addTransaction({
+                        date,
+                        description,
+                        entries: [
+                            { accountId: debitAccountId, debit: debitAmt },
+                            { accountId: creditAccountId, credit: creditAmt },
+                        ],
+                    });
+                    document.getElementById('addJournalModal').style.display = 'none';
+                    renderJournalEntries();
+                } catch (err) {
+                    errorDiv.textContent = err.message;
+                }
+            };
+            populateAccountSelects();
+            renderJournalEntries();
+        </script>
+</body>
+</html>
