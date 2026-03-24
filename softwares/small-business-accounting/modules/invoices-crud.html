@@ -47,25 +47,62 @@
         </table>
         <!-- Modal for adding invoice -->
         <div id="addModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
-            <form style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
+            <form id="addInvoiceForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
                 <h2>New Invoice</h2>
-                <label>Client<br><input type="text" required></label><br>
-                <label>Amount<br><input type="number" required></label><br>
+                <label>Client<br><input type="text" id="invoiceClient" required></label><br>
+                <label>Amount<br><input type="number" id="invoiceAmount" required></label><br>
                 <label>Status<br>
-                    <select>
+                    <select id="invoiceStatus">
                         <option>Pending</option>
                         <option>Paid</option>
                         <option>Overdue</option>
                     </select>
                 </label><br>
-                <label>Due Date<br><input type="date" required></label><br>
-                <label>Attachment<br><input type="file"></label><br>
+                <label>Due Date<br><input type="date" id="invoiceDueDate" required></label><br>
+                <label>Attachment<br><input type="file" id="invoiceAttachment"></label><br>
                 <button class="btn-primary" type="submit">Save</button>
                 <button type="button" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
             </form>
         </div>
     </main>
     <style>
+        </style>
+        <script src="accountingEngine.js"></script>
+        <script>
+            function renderInvoices() {
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = '';
+                const invoices = window.accountingEngine.invoices || [];
+                if (!invoices.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;">No invoices yet</td></tr>';
+                    return;
+                }
+                invoices.forEach(inv => {
+                    tbody.innerHTML += `<tr>
+                        <td>${inv.number || ''}</td>
+                        <td>${inv.client}</td>
+                        <td>$${parseFloat(inv.amount).toFixed(2)}</td>
+                        <td><span class="status ${inv.status.toLowerCase()}">${inv.status}</span></td>
+                        <td>${inv.dueDate}</td>
+                        <td>${inv.attachment ? '<a href=\"#\">View</a>' : '-'}</td>
+                        <td><button>Edit</button> <button>Delete</button></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('addInvoiceForm').onsubmit = function(e) {
+                e.preventDefault();
+                const client = document.getElementById('invoiceClient').value;
+                const amount = document.getElementById('invoiceAmount').value;
+                const status = document.getElementById('invoiceStatus').value;
+                const dueDate = document.getElementById('invoiceDueDate').value;
+                const attachment = document.getElementById('invoiceAttachment').files[0]?.name || '';
+                window.accountingEngine.addInvoice({ client, amount, status, dueDate, attachment });
+                document.getElementById('addModal').style.display = 'none';
+                renderInvoices();
+                window.dispatchEvent(new Event('accountingDataChanged'));
+            };
+            renderInvoices();
+        </script>
         .crud-table { width:100%; border-collapse:collapse; margin-top:2rem; background:#fff; border-radius:1rem; overflow:hidden; }
         .crud-table th, .crud-table td { padding:0.8rem 1rem; border-bottom:1px solid #f3e8ff; text-align:left; }
         .crud-table th { background:#f3e8ff; color:#4c51bf; font-weight:700; }

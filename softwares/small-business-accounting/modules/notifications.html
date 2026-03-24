@@ -28,11 +28,34 @@
         <header>
             <h1>Notifications</h1>
         </header>
-        <ul class="notifications-list">
-            <li>Invoice #1234 was paid.</li>
-            <li>Bank account linked successfully.</li>
-            <li>New user invited: jane@atmilio.com</li>
-        </ul>
+        <section class="notification-cards" style="margin-top:2rem;display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));">
+            <div class="notification-card" style="background:#f1fbf7;border:1px solid #b9eed7;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>Invoice Paid</strong>
+                <div>Invoice #1234 was paid.</div>
+                <span class="status success">Success</span>
+            </div>
+            <div class="notification-card" style="background:#fff7ed;border:1px solid #fdba74;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>Bank Linked</strong>
+                <div>Bank account linked successfully.</div>
+                <span class="status info">Info</span>
+            </div>
+            <div class="notification-card" style="background:#f3eef8;border:1px solid #e8d8f8;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>User Invited</strong>
+                <div>New user invited: jane@atmilio.com</div>
+                <span class="status pending">Pending</span>
+            </div>
+            <div class="notification-card" style="background:#fffaf0;border:1px solid #f4e3af;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>Payment Failed</strong>
+                <div>Stripe payment for $500.00 failed.</div>
+                <span class="status error">Error</span>
+            </div>
+        </section>
+        <style>
+            .status.success { color: #059669; font-weight: 700; }
+            .status.info { color: #2563eb; font-weight: 700; }
+            .status.pending { color: #f59e0b; font-weight: 700; }
+            .status.error { color: #dc2626; font-weight: 700; }
+        </style>
     </main>
 </body>
             <ul style="list-style:none;padding:0;">

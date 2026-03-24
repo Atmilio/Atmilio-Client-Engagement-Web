@@ -31,109 +31,127 @@
         </ul>
     </nav>
         <main class="main-content">
-                <header>
-                        <h1>Journal Entries</h1>
-                        <button class="btn-primary" onclick="document.getElementById('addJournalModal').style.display='block'">+ New Entry</button>
-                </header>
-                <table class="crud-table">
-                        <thead>
-                                <tr>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>Debit Account</th>
-                                        <th>Debit</th>
-                                        <th>Credit Account</th>
-                                        <th>Credit</th>
-                                </tr>
-                        </thead>
-                        <tbody id="journalTableBody">
-                                <!-- Populated by JS -->
-                        </tbody>
-                </table>
-                <!-- Modal for adding journal entry -->
-                <div id="addJournalModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
-                        <form id="journalEntryForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:500px;margin:5vh auto;">
-                                <h2>New Journal Entry</h2>
-                                <label>Date<br><input type="date" id="jeDate" required></label><br>
-                                <label>Description<br><input type="text" id="jeDesc"></label><br>
-                                <label>Debit Account<br>
-                                        <select id="jeDebitAccount"></select>
-                                </label><br>
-                                <label>Debit Amount<br><input type="number" id="jeDebitAmt" required></label><br>
-                                <label>Credit Account<br>
-                                        <select id="jeCreditAccount"></select>
-                                </label><br>
-                                <label>Credit Amount<br><input type="number" id="jeCreditAmt" required></label><br>
-                                <div id="jeError" style="color:red;"></div>
-                                <button class="btn-primary" type="submit">Save</button>
-                                <button type="button" onclick="document.getElementById('addJournalModal').style.display='none'">Cancel</button>
-                        </form>
-                </div>
+        <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <div>
+                <h1>Journal Entries</h1>
+                <span style="color:#6b46c1;font-size:1rem;">Manual adjustments and double-entry posting</span>
+            </div>
+            <button class="btn-primary" onclick="document.getElementById('addJournalModal').style.display='block'">+ New Entry</button>
+        </header>
+        <div id="emptyState" style="display:none;text-align:center;padding:2rem;">
+            <h2>No journal entries yet</h2>
+            <p>Manual entries are essential for adjustments and corrections. Click below to add your first entry.</p>
+            <button class="btn-primary" onclick="document.getElementById('addJournalModal').style.display='block'">Add Journal Entry</button>
+        </div>
+        <table class="crud-table" id="journalTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Debit Account</th>
+                    <th>Debit</th>
+                    <th>Credit Account</th>
+                    <th>Credit</th>
+                </tr>
+            </thead>
+            <tbody id="journalTableBody">
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+        <!-- Modal for adding journal entry -->
+        <div id="addJournalModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
+            <form id="journalEntryForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:500px;margin:5vh auto;">
+                <h2>New Journal Entry</h2>
+                <label>Date<br><input type="date" id="jeDate" required></label><br>
+                <label>Description<br><input type="text" id="jeDesc"></label><br>
+                <label>Debit Account<br>
+                    <select id="jeDebitAccount"></select>
+                </label><br>
+                <label>Debit Amount<br><input type="number" id="jeDebitAmt" required></label><br>
+                <label>Credit Account<br>
+                    <select id="jeCreditAccount"></select>
+                </label><br>
+                <label>Credit Amount<br><input type="number" id="jeCreditAmt" required></label><br>
+                <div id="jeError" style="color:red;"></div>
+                <button class="btn-primary" type="submit">Save</button>
+                <button type="button" onclick="document.getElementById('addJournalModal').style.display='none'">Cancel</button>
+            </form>
+        </div>
         </main>
         <script src="accountingEngine.js"></script>
         <script>
             function renderJournalEntries() {
                 const tbody = document.getElementById('journalTableBody');
-                tbody.innerHTML = '';
-                window.accountingEngine.transactions.forEach(tx => {
-                    if (!tx.entries || tx.entries.length !== 2) return; // Only show simple journal entries
-                    const debit = tx.entries.find(e => e.debit);
-                    const credit = tx.entries.find(e => e.credit);
-                    const debitAcc = window.accountingEngine.accounts.find(a => a.id === debit.accountId)?.name || '';
-                    const creditAcc = window.accountingEngine.accounts.find(a => a.id === credit.accountId)?.name || '';
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${tx.date}</td>
-                        <td>${tx.description}</td>
-                        <td>${debitAcc}</td>
-                        <td>${debit.debit ? '$' + debit.debit.toFixed(2) : ''}</td>
-                        <td>${creditAcc}</td>
-                        <td>${credit.credit ? '$' + credit.credit.toFixed(2) : ''}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-            function populateAccountSelects() {
-                const debitSel = document.getElementById('jeDebitAccount');
-                const creditSel = document.getElementById('jeCreditAccount');
-                debitSel.innerHTML = '';
-                creditSel.innerHTML = '';
-                window.accountingEngine.accounts.forEach(acc => {
-                    const opt1 = document.createElement('option');
-                    opt1.value = acc.id;
-                    opt1.textContent = acc.name + ' (' + acc.type.charAt(0).toUpperCase() + acc.type.slice(1) + ')';
-                    debitSel.appendChild(opt1.cloneNode(true));
-                    creditSel.appendChild(opt1);
-                });
-            }
-            document.getElementById('journalEntryForm').onsubmit = function(e) {
-                e.preventDefault();
-                const date = document.getElementById('jeDate').value;
-                const description = document.getElementById('jeDesc').value;
-                const debitAccountId = parseInt(document.getElementById('jeDebitAccount').value);
-                const creditAccountId = parseInt(document.getElementById('jeCreditAccount').value);
-                const debitAmt = parseFloat(document.getElementById('jeDebitAmt').value);
-                const creditAmt = parseFloat(document.getElementById('jeCreditAmt').value);
-                const errorDiv = document.getElementById('jeError');
-                errorDiv.textContent = '';
-                if (debitAmt !== creditAmt) {
-                    errorDiv.textContent = 'Debits and credits must be equal.';
-                    return;
-                }
-                try {
-                    window.accountingEngine.addTransaction({
-                        date,
-                        description,
-                        entries: [
-                            { accountId: debitAccountId, debit: debitAmt },
-                            { accountId: creditAccountId, credit: creditAmt },
-                        ],
+                <script>
+                function renderJournalEntries() {
+                    const tbody = document.getElementById('journalTableBody');
+                    const table = document.getElementById('journalTable');
+                    const emptyState = document.getElementById('emptyState');
+                    tbody.innerHTML = '';
+                    const entries = window.accountingEngine.transactions.filter(tx => tx.type === 'journal');
+                    if (!entries.length) {
+                        table.style.display = 'none';
+                        emptyState.style.display = 'block';
+                        return;
+                    }
+                    table.style.display = 'table';
+                    emptyState.style.display = 'none';
+                    entries.forEach(tx => {
+                        if (!tx.entries || tx.entries.length !== 2) return;
+                        const debit = tx.entries.find(e => e.debit);
+                        const credit = tx.entries.find(e => e.credit);
+                        const debitAcc = window.accountingEngine.accounts.find(a => a.id === debit.accountId);
+                        const creditAcc = window.accountingEngine.accounts.find(a => a.id === credit.accountId);
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${tx.date}</td>
+                            <td>${tx.description || ''}</td>
+                            <td>${debitAcc ? debitAcc.name : ''}</td>
+                            <td>${debit.amount ? '$' + debit.amount.toFixed(2) : ''}</td>
+                            <td>${creditAcc ? creditAcc.name : ''}</td>
+                            <td>${credit.amount ? '$' + credit.amount.toFixed(2) : ''}</td>
+                        `;
+                        tbody.appendChild(tr);
                     });
+                }
+                // Populate account selects
+                function populateAccountSelects() {
+                    const debitSel = document.getElementById('jeDebitAccount');
+                    const creditSel = document.getElementById('jeCreditAccount');
+                    debitSel.innerHTML = '';
+                    creditSel.innerHTML = '';
+                    window.accountingEngine.accounts.forEach(acc => {
+                        debitSel.innerHTML += `<option value="${acc.id}">${acc.name}</option>`;
+                        creditSel.innerHTML += `<option value="${acc.id}">${acc.name}</option>`;
+                    });
+                }
+                // Form submission
+                document.getElementById('journalEntryForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    const date = document.getElementById('jeDate').value;
+                    const desc = document.getElementById('jeDesc').value;
+                    const debitId = parseInt(document.getElementById('jeDebitAccount').value);
+                    const creditId = parseInt(document.getElementById('jeCreditAccount').value);
+                    const debitAmt = parseFloat(document.getElementById('jeDebitAmt').value);
+                    const creditAmt = parseFloat(document.getElementById('jeCreditAmt').value);
+                    if (debitAmt !== creditAmt) {
+                        document.getElementById('jeError').textContent = 'Debits and credits must be equal.';
+                        return;
+                    }
+                    window.accountingEngine.addJournalEntry({ date, description: desc, debitAccountId: debitId, creditAccountId: creditId, amount: debitAmt });
                     document.getElementById('addJournalModal').style.display = 'none';
                     renderJournalEntries();
-                } catch (err) {
-                    errorDiv.textContent = err.message;
-                }
+                };
+                // Initial render
+                renderJournalEntries();
+                populateAccountSelects();
+                // Close modal on outside click
+                window.onclick = function(event) {
+                    if (event.target === document.getElementById('addJournalModal')) {
+                        document.getElementById('addJournalModal').style.display = 'none';
+                    }
+                };
+                </script>
             };
             populateAccountSelects();
             renderJournalEntries();

@@ -33,6 +33,7 @@
     <main class="main-content">
         <header>
             <h1>Expenses Overview</h1>
+            <button class="btn-primary" style="float:right;" onclick="alert('Expense creation coming soon!')">+ Add Expense</button>
         </header>
         <section class="dashboard-widgets">
             <div class="widget"><h3>Total Expenses</h3><p>$4,500.00</p></div>
@@ -40,8 +41,45 @@
             <div class="widget"><h3>Upcoming Bills</h3><p>3</p></div>
         </section>
         <section>
-            <a href="crud.html" class="btn-primary">View All Expenses</a>
+            <h2 style="margin-top:2rem;">Recent Expenses</h2>
+            <table class="crud-table" style="margin-top:1rem;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Vendor</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>EXP-001</td>
+                        <td>Office Depot</td>
+                        <td>2026-03-05</td>
+                        <td><span class="status paid">Paid</span></td>
+                        <td>$200.00</td>
+                        <td><button>View</button></td>
+                    </tr>
+                    <tr>
+                        <td>EXP-002</td>
+                        <td>Web Hosting Co</td>
+                        <td>2026-03-02</td>
+                        <td><span class="status pending">Pending</span></td>
+                        <td>$150.00</td>
+                        <td><button>View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top:1rem;">
+                <a href="crud.html" class="btn-secondary">View All Expenses</a>
+            </div>
         </section>
+        <style>
+            .status.paid { color: #059669; font-weight: 700; }
+            .status.pending { color: #f59e0b; font-weight: 700; }
+        </style>
     </main>
 </body>
 </html>

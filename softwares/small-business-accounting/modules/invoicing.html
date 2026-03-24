@@ -33,6 +33,7 @@
     <main class="main-content">
         <header>
             <h1>Invoicing Overview</h1>
+            <button class="btn-primary" style="float:right;" onclick="alert('Invoice creation coming soon!')">+ Create Invoice</button>
         </header>
         <section class="dashboard-widgets">
             <div class="widget"><h3>Total Outstanding</h3><p>$2,300.00</p></div>
@@ -40,8 +41,48 @@
             <div class="widget"><h3>Overdue Invoices</h3><p>2</p></div>
         </section>
         <section>
-            <a href="crud.html" class="btn-primary">View All Invoices</a>
+            <h2 style="margin-top:2rem;">Recent Invoices</h2>
+            <table class="crud-table" style="margin-top:1rem;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Client</th>
+                        <th>Date</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>INV-001</td>
+                        <td>Acme Corp</td>
+                        <td>2026-03-10</td>
+                        <td>2026-03-20</td>
+                        <td><span class="status paid">Paid</span></td>
+                        <td>$1,200.00</td>
+                        <td><button>View</button></td>
+                    </tr>
+                    <tr>
+                        <td>INV-002</td>
+                        <td>Beta LLC</td>
+                        <td>2026-03-01</td>
+                        <td>2026-03-15</td>
+                        <td><span class="status overdue">Overdue</span></td>
+                        <td>$1,100.00</td>
+                        <td><button>View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top:1rem;">
+                <a href="crud.html" class="btn-secondary">View All Invoices</a>
+            </div>
         </section>
+        <style>
+            .status.paid { color: #059669; font-weight: 700; }
+            .status.overdue { color: #dc2626; font-weight: 700; }
+        </style>
     </main>
 </body>
 </html>

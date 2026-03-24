@@ -31,11 +31,24 @@
         </ul>
     </nav>
     <main class="main-content">
-        <header>
-            <h1>Chart of Accounts</h1>
-            <button class="btn-primary" onclick="document.getElementById('addAccountModal').style.display='block'">+ New Account</button>
+        <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <div>
+                <h1>Chart of Accounts</h1>
+                <span style="color:#6b46c1;font-size:1rem;">Foundation for all accounting activity</span>
+            </div>
+            <div>
+                <button class="btn-primary" onclick="document.getElementById('addAccountModal').style.display='block'">+ New Account</button>
+                <button class="btn-secondary" onclick="document.getElementById('guidedSetupModal').style.display='block'">Guided Setup</button>
+            </div>
         </header>
-        <table class="crud-table">
+        <div id="emptyState" style="display:none;text-align:center;padding:2rem;">
+            <h2>No accounts yet</h2>
+            <p>Start by adding your first account or use the guided setup to generate a recommended chart of accounts.</p>
+            <button class="btn-primary" onclick="document.getElementById('addAccountModal').style.display='block'">Add Account</button>
+            <button class="btn-secondary" onclick="document.getElementById('guidedSetupModal').style.display='block'">Guided Setup</button>
+        </div>
+        <div id="accountsHierarchy" style="margin-bottom:2rem;"></div>
+        <table class="crud-table" id="accountsTable" style="display:none;">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -48,13 +61,13 @@
                 <!-- Populated by JS -->
             </tbody>
         </table>
-        <!-- Modal for adding account (not yet functional) -->
+        <!-- Modal for adding account -->
         <div id="addAccountModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
-            <form style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
+            <form id="addAccountForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
                 <h2>New Account</h2>
-                <label>Name<br><input type="text" required></label><br>
+                <label>Name<br><input type="text" id="accountName" required></label><br>
                 <label>Type<br>
-                    <select>
+                    <select id="accountType">
                         <option>Asset</option>
                         <option>Liability</option>
                         <option>Equity</option>
@@ -62,31 +75,120 @@
                         <option>Expense</option>
                     </select>
                 </label><br>
+                <label>Parent Account<br>
+                    <select id="parentAccountSelect"><option value="">None</option></select>
+                </label><br>
                 <button class="btn-primary" type="submit">Save</button>
                 <button type="button" onclick="document.getElementById('addAccountModal').style.display='none'">Cancel</button>
             </form>
         </div>
+        <!-- Guided Setup Modal -->
+        <div id="guidedSetupModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
+            <form id="guidedSetupForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:500px;margin:5vh auto;" onsubmit="return false;">
+                <h2>Guided Chart of Accounts Setup</h2>
+                <p>Answer a few questions and we'll generate a recommended chart of accounts for your business.</p>
+                <label>What type of business do you run?<br>
+                    <select id="businessType">
+                        <option value="service">Service</option>
+                        <option value="product">Product</option>
+                        <option value="other">Other</option>
+                    </select>
+                </label><br>
+                <label>Do you have employees?<br>
+                    <select id="hasEmployees">
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </label><br>
+                <button class="btn-primary" type="submit">Generate Accounts</button>
+                <button type="button" onclick="document.getElementById('guidedSetupModal').style.display='none'">Cancel</button>
+            </form>
+        </div>
     </main>
     <script src="accountingEngine.js"></script>
-    <script>
-      // Render accounts dynamically
-      function renderAccounts() {
-        const tbody = document.getElementById('accountsTableBody');
-        tbody.innerHTML = '';
-        window.accountingEngine.accounts.forEach(acc => {
-          const parent = acc.parentId ? window.accountingEngine.accounts.find(a => a.id === acc.parentId)?.name : '';
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${acc.name}</td>
-            <td>${acc.type.charAt(0).toUpperCase() + acc.type.slice(1)}</td>
-            <td>${parent || '-'}</td>
-            <td><button disabled>Edit</button></td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-      renderAccounts();
-    </script>
+        <script>
+            // Render accounts table and hierarchy
+            function renderAccounts() {
+                const tbody = document.getElementById('accountsTableBody');
+                const table = document.getElementById('accountsTable');
+                const emptyState = document.getElementById('emptyState');
+                const hierarchyDiv = document.getElementById('accountsHierarchy');
+                tbody.innerHTML = '';
+                hierarchyDiv.innerHTML = '';
+                const accounts = window.accountingEngine.accounts;
+                if (!accounts.length) {
+                    table.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                table.style.display = 'table';
+                emptyState.style.display = 'none';
+                // Table rows
+                accounts.forEach(acc => {
+                    const parent = acc.parentId ? accounts.find(a => a.id === acc.parentId)?.name : '';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${acc.name}</td>
+                        <td>${acc.type.charAt(0).toUpperCase() + acc.type.slice(1)}</td>
+                        <td>${parent || '-'}</td>
+                        <td><button class='btn-secondary' disabled>Edit</button></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                // Hierarchy tree
+                function buildTree(parentId = null, level = 0) {
+                    return accounts.filter(a => a.parentId === parentId).map(acc => {
+                        const children = buildTree(acc.id, level + 1);
+                        return `<div style="margin-left:${level * 1.5}rem;">${acc.name} <span style='color:#aaa;font-size:0.9em;'>(${acc.type})</span></div>${children.join('')}`;
+                    });
+                }
+                const tree = buildTree();
+                if (tree.length) {
+                    hierarchyDiv.innerHTML = `<h3>Account Hierarchy</h3>` + tree.join('');
+                }
+            }
+            // Populate parent account select
+            function populateParentAccountSelect() {
+                const select = document.getElementById('parentAccountSelect');
+                select.innerHTML = '<option value="">None</option>';
+                window.accountingEngine.accounts.forEach(acc => {
+                    select.innerHTML += `<option value="${acc.id}">${acc.name}</option>`;
+                });
+            }
+            // Add account form
+            document.getElementById('addAccountForm').onsubmit = function(e) {
+                e.preventDefault();
+                const name = document.getElementById('accountName').value;
+                const type = document.getElementById('accountType').value;
+                const parentId = document.getElementById('parentAccountSelect').value || null;
+                window.accountingEngine.addAccount({ name, type, parentId });
+                document.getElementById('addAccountModal').style.display = 'none';
+                renderAccounts();
+                populateParentAccountSelect();
+            };
+            // Guided setup form
+            document.getElementById('guidedSetupForm').onsubmit = function(e) {
+                e.preventDefault();
+                const businessType = document.getElementById('businessType').value;
+                const hasEmployees = document.getElementById('hasEmployees').value;
+                window.accountingEngine.guidedSetupChartOfAccounts(businessType, hasEmployees);
+                document.getElementById('guidedSetupModal').style.display = 'none';
+                renderAccounts();
+                populateParentAccountSelect();
+            };
+            // Initial render
+            renderAccounts();
+            populateParentAccountSelect();
+            // Close modals on outside click
+            window.onclick = function(event) {
+                if (event.target === document.getElementById('addAccountModal')) {
+                    document.getElementById('addAccountModal').style.display = 'none';
+                }
+                if (event.target === document.getElementById('guidedSetupModal')) {
+                    document.getElementById('guidedSetupModal').style.display = 'none';
+                }
+            };
+        </script>
     <style>
         .status.active { color:#059669; font-weight:700; }
     </style>

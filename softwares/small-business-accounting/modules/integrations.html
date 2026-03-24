@@ -27,13 +27,30 @@
     <main class="main-content">
         <header>
             <h1>Integrations</h1>
-            <button class="btn-primary">+ Add Integration</button>
+            <button class="btn-primary" style="float:right;" onclick="alert('Integration setup coming soon!')">+ Add Integration</button>
         </header>
-        <div class="integrations-list">
-            <div class="integration-card">Plaid</div>
-            <div class="integration-card">Stripe</div>
-            <div class="integration-card">Gusto</div>
-        </div>
+        <section class="integration-cards" style="margin-top:2rem;display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));">
+            <div class="integration-card" style="background:#f1fbf7;border:1px solid #b9eed7;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>Plaid</strong>
+                <div>Status: <span class="status connected">Connected</span></div>
+                <button class="btn-secondary" style="margin-top:0.5rem;">Manage</button>
+            </div>
+            <div class="integration-card" style="background:#f3eef8;border:1px solid #e8d8f8;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>Stripe</strong>
+                <div>Status: <span class="status pending">Pending</span></div>
+                <button class="btn-secondary" style="margin-top:0.5rem;">Connect</button>
+            </div>
+            <div class="integration-card" style="background:#fffaf0;border:1px solid #f4e3af;padding:1.2rem 1.5rem;border-radius:0.8rem;">
+                <strong>Gusto</strong>
+                <div>Status: <span class="status coming">Coming Soon</span></div>
+                <button class="btn-secondary" style="margin-top:0.5rem;" disabled>Coming Soon</button>
+            </div>
+        </section>
+        <style>
+            .status.connected { color: #059669; font-weight: 700; }
+            .status.pending { color: #f59e0b; font-weight: 700; }
+            .status.coming { color: #4c51bf; font-weight: 700; }
+        </style>
     </main>
 </body>
                 <li style="background:#f3eef8;border:1px solid #e8d8f8;padding:1rem 1.5rem;border-radius:0.8rem;margin-bottom:1rem;">

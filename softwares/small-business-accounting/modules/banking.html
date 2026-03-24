@@ -27,12 +27,51 @@
     <main class="main-content">
         <header>
             <h1>Banking</h1>
-            <button class="btn-primary">+ Link Account</button>
+            <button class="btn-primary" style="float:right;" onclick="alert('Bank linking coming soon!')">+ Link Account</button>
         </header>
-        <div class="bank-accounts-list">
-            <div class="bank-account-card">Chase Checking</div>
-            <div class="bank-account-card">Wells Fargo Savings</div>
-        </div>
+        <section class="dashboard-widgets">
+            <div class="widget"><h3>Bank Accounts</h3><p>2</p></div>
+            <div class="widget"><h3>Total Balance</h3><p>$12,500.00</p></div>
+            <div class="widget"><h3>Last Sync</h3><p>Today</p></div>
+        </section>
+        <section>
+            <h2 style="margin-top:2rem;">Recent Transactions</h2>
+            <table class="crud-table" style="margin-top:1rem;">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Account</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-03-22</td>
+                        <td>Office Supplies</td>
+                        <td>Chase Checking</td>
+                        <td>-$200.00</td>
+                        <td><span class="status cleared">Cleared</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-03-20</td>
+                        <td>Client Payment</td>
+                        <td>Wells Fargo Savings</td>
+                        <td>+$1,500.00</td>
+                        <td><span class="status pending">Pending</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top:1rem;">
+                <a href="crud.html" class="btn-secondary">View All Transactions</a>
+                <a href="#" class="btn-secondary" style="margin-left:1rem;">Reconcile (Coming Soon)</a>
+            </div>
+        </section>
+        <style>
+            .status.cleared { color: #059669; font-weight: 700; }
+            .status.pending { color: #f59e0b; font-weight: 700; }
+        </style>
     </main>
 </body>
             <div class="widget"><h3>Bank Accounts</h3><p>3</p></div>

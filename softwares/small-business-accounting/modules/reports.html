@@ -7,40 +7,123 @@
     <link rel="stylesheet" href="../dashboard.css">
 <body>
     <nav class="sidebar">
-        <h2>
-            <svg class="atmilio-logo" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-labelledby="logoTitle" role="img">
-                <title id="logoTitle">Atmilio Logo</title>
-                <path d="M25 5L45 25L25 45L5 25L25 5Z" stroke="#4c51bf" stroke-width="2" stroke-linejoin="round" />
-                <path d="M25 15L35 25L25 35L15 25L25 15Z" fill="#6b46c1" />
-                <circle cx="25" cy="25" r="5" fill="#e9d5ff" />
-            </svg>
-            Atmilio Accounting
-        </h2>
-        <ul>
-            <li><a href="../dashboard.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Dashboard</a></li>
-            <li><a href="invoicing.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Invoicing</a></li>
-            <li><a href="expenses.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Expenses</a></li>
-            <li><a href="chart-of-accounts.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Chart of Accounts</a></li>
-            <li><a href="journal-entries.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Journal Entries</a></li>
-            <li><a href="general-ledger.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">General Ledger</a></li>
-            <li class="active"><a href="reports.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Reports</a></li>
-            <li><a href="banking.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Banking</a></li>
-            <li><a href="#" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Payroll</a></li>
-            <li><a href="users.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Settings</a></li>
-        </ul>
+        <!-- ...existing code... -->
     </nav>
     <main class="main-content">
-        <header>
-            <h1>Reports</h1>
-            <button class="btn-primary">+ New Report</button>
+        <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div>
+                <h1>Reports</h1>
+                <span style="color:#6b46c1;font-size:1rem;">Exportable, filterable, and ready for insights</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <label>Type:
+                    <select id="reportTypeSelect">
+                        <option value="pnl">Profit & Loss</option>
+                        <option value="cashflow">Cash Flow</option>
+                        <option value="expenses">Expenses by Category</option>
+                        <option value="ar">Accounts Receivable</option>
+                        <option value="ap">Accounts Payable</option>
+                    </select>
+                </label>
+                <label>Date:
+                    <input type="date" id="reportFromDate"> to <input type="date" id="reportToDate">
+                </label>
+                <label>Category:
+                    <select id="reportCategorySelect"><option value="">All</option></select>
+                </label>
+                <button class="btn-primary" onclick="renderReport()">Run Report</button>
+                <button class="btn-secondary" onclick="exportReport('csv')">Export CSV</button>
+                <button class="btn-secondary" onclick="exportReport('pdf')">Export PDF</button>
+            </div>
         </header>
-        <div class="reports-list">
-            <div class="report-card">Profit & Loss</div>
-            <div class="report-card">Balance Sheet</div>
-            <div class="report-card">Cash Flow Statement</div>
-            <div class="report-card">Trial Balance</div>
-            <div class="report-card">Aged Receivables</div>
-            <div class="report-card">Aged Payables</div>
+        <div id="emptyState" style="display:none;text-align:center;padding:2rem;">
+            <h2>No report data</h2>
+            <p>Adjust your filters or add transactions to generate a report.</p>
+        </div>
+        <div id="reportTableWrap" style="overflow-x:auto;">
+            <table class="crud-table" id="reportTable" style="display:none;min-width:600px;">
+                <thead id="reportTableHead"></thead>
+                <tbody id="reportTableBody"></tbody>
+            </table>
         </div>
     </main>
+        <script src="accountingEngine.js"></script>
+        <script>
+            function renderReport() {
+                // Dummy implementation for now
+                const table = document.getElementById('reportTable');
+                const head = document.getElementById('reportTableHead');
+                const body = document.getElementById('reportTableBody');
+                const emptyState = document.getElementById('emptyState');
+                // Simulate sample data
+                const type = document.getElementById('reportTypeSelect').value;
+                let rows = [];
+                let columns = [];
+                if (type === 'pnl') {
+                    columns = ['Category', 'Amount'];
+                    rows = [
+                        ['Revenue', '$12,000.00'],
+                        ['Cost of Goods Sold', '$4,000.00'],
+                        ['Gross Profit', '$8,000.00'],
+                        ['Expenses', '$2,500.00'],
+                        ['Net Income', '$5,500.00']
+                    ];
+                } else if (type === 'cashflow') {
+                    columns = ['Month', 'Cash In', 'Cash Out', 'Net Change'];
+                    rows = [
+                        ['Jan', '$10,000', '$7,000', '$3,000'],
+                        ['Feb', '$12,000', '$8,000', '$4,000'],
+                        ['Mar', '$9,000', '$6,500', '$2,500']
+                    ];
+                } else if (type === 'expenses') {
+                    columns = ['Category', 'Amount'];
+                    rows = [
+                        ['Payroll', '$1,200'],
+                        ['Rent', '$800'],
+                        ['Software', '$300'],
+                        ['Utilities', '$200']
+                    ];
+                } else if (type === 'ar') {
+                    columns = ['Customer', 'Outstanding', 'Due Date', 'Status'];
+                    rows = [
+                        ['Acme Corp', '$2,000', '2026-04-01', 'Overdue'],
+                        ['Beta LLC', '$1,500', '2026-04-10', 'Pending']
+                    ];
+                } else if (type === 'ap') {
+                    columns = ['Vendor', 'Outstanding', 'Due Date', 'Status'];
+                    rows = [
+                        ['Office Supplies Inc', '$500', '2026-03-28', 'Due Soon'],
+                        ['Web Hosting Co', '$300', '2026-04-05', 'Pending']
+                    ];
+                }
+                if (!rows.length) {
+                    table.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                table.style.display = 'table';
+                emptyState.style.display = 'none';
+                // Render columns
+                head.innerHTML = '<tr>' + columns.map(col => `<th>${col}</th>`).join('') + '</tr>';
+                // Render rows
+                body.innerHTML = rows.map(row => '<tr>' + row.map(cell => `<td>${cell}</td>`).join('') + '</tr>').join('');
+            }
+            function exportReport(type) {
+                alert('Export as ' + type.toUpperCase() + ' coming soon!');
+            }
+            // Populate category select (dummy)
+            function populateCategorySelect() {
+                const select = document.getElementById('reportCategorySelect');
+                select.innerHTML = '<option value="">All</option>';
+                ['Payroll','Rent','Software','Utilities'].forEach(cat => {
+                    select.innerHTML += `<option value="${cat}">${cat}</option>`;
+                });
+            }
+            populateCategorySelect();
+            renderReport();
+            document.getElementById('reportTypeSelect').onchange = renderReport;
+            document.getElementById('reportFromDate').onchange = renderReport;
+            document.getElementById('reportToDate').onchange = renderReport;
+            document.getElementById('reportCategorySelect').onchange = renderReport;
+        </script>
 </body>

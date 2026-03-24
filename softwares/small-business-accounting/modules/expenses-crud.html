@@ -47,25 +47,62 @@
         </table>
         <!-- Modal for adding expense -->
         <div id="addModal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.2);z-index:100;align-items:center;justify-content:center;">
-            <form style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
+            <form id="addExpenseForm" style="background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:5vh auto;" onsubmit="return false;">
                 <h2>New Expense</h2>
-                <label>Vendor<br><input type="text" required></label><br>
-                <label>Amount<br><input type="number" required></label><br>
+                <label>Vendor<br><input type="text" id="expenseVendor" required></label><br>
+                <label>Amount<br><input type="number" id="expenseAmount" required></label><br>
                 <label>Status<br>
-                    <select>
+                    <select id="expenseStatus">
                         <option>Pending</option>
                         <option>Paid</option>
                         <option>Overdue</option>
                     </select>
                 </label><br>
-                <label>Date<br><input type="date" required></label><br>
-                <label>Attachment<br><input type="file"></label><br>
+                <label>Date<br><input type="date" id="expenseDate" required></label><br>
+                <label>Attachment<br><input type="file" id="expenseAttachment"></label><br>
                 <button class="btn-primary" type="submit">Save</button>
                 <button type="button" onclick="document.getElementById('addModal').style.display='none'">Cancel</button>
             </form>
         </div>
     </main>
     <style>
+        </style>
+        <script src="accountingEngine.js"></script>
+        <script>
+            function renderExpenses() {
+                const tbody = document.querySelector('tbody');
+                tbody.innerHTML = '';
+                const expenses = window.accountingEngine.expenses || [];
+                if (!expenses.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#aaa;">No expenses yet</td></tr>';
+                    return;
+                }
+                expenses.forEach(exp => {
+                    tbody.innerHTML += `<tr>
+                        <td>${exp.number || ''}</td>
+                        <td>${exp.vendor}</td>
+                        <td>$${parseFloat(exp.amount).toFixed(2)}</td>
+                        <td><span class="status ${exp.status.toLowerCase()}">${exp.status}</span></td>
+                        <td>${exp.date}</td>
+                        <td>${exp.attachment ? '<a href=\"#\">View</a>' : '-'}</td>
+                        <td><button>Edit</button> <button>Delete</button></td>
+                    </tr>`;
+                });
+            }
+            document.getElementById('addExpenseForm').onsubmit = function(e) {
+                e.preventDefault();
+                const vendor = document.getElementById('expenseVendor').value;
+                const amount = document.getElementById('expenseAmount').value;
+                const status = document.getElementById('expenseStatus').value;
+                const date = document.getElementById('expenseDate').value;
+                const attachment = document.getElementById('expenseAttachment').files[0]?.name || '';
+                window.accountingEngine.addExpense({ vendor, amount, status, date, attachment });
+                document.getElementById('addModal').style.display = 'none';
+                renderExpenses();
+                window.dispatchEvent(new Event('accountingDataChanged'));
+            };
+            renderExpenses();
+        </script>
         .crud-table { width:100%; border-collapse:collapse; margin-top:2rem; background:#fff; border-radius:1rem; overflow:hidden; }
         .crud-table th, .crud-table td { padding:0.8rem 1rem; border-bottom:1px solid #f3e8ff; text-align:left; }
         .crud-table th { background:#f3e8ff; color:#4c51bf; font-weight:700; }

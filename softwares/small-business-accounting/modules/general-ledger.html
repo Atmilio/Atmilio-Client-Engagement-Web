@@ -31,17 +31,26 @@
         </ul>
     </nav>
     <main class="main-content">
-        <header>
-            <h1>General Ledger</h1>
-            <label>Account:
-                <select id="ledgerAccountSelect"></select>
-            </label>
-            <label>Date:
-                <input type="date" id="ledgerFromDate"> to <input type="date" id="ledgerToDate">
-            </label>
-            <button onclick="renderLedger()">Filter</button>
+        <header style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div>
+                <h1>General Ledger</h1>
+                <span style="color:#6b46c1;font-size:1rem;">All transactions, running balances, and filters</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <label>Account:
+                    <select id="ledgerAccountSelect"></select>
+                </label>
+                <label>Date:
+                    <input type="date" id="ledgerFromDate"> to <input type="date" id="ledgerToDate">
+                </label>
+                <button class="btn-primary" onclick="renderLedger()">Filter</button>
+            </div>
         </header>
-        <table class="crud-table">
+        <div id="emptyState" style="display:none;text-align:center;padding:2rem;">
+            <h2>No ledger entries found</h2>
+            <p>Try adjusting your filters or add transactions to see activity here.</p>
+        </div>
+        <table class="crud-table" id="ledgerTable" style="display:none;">
             <thead>
                 <tr>
                     <th>Date</th>
@@ -57,38 +66,51 @@
         </table>
     </main>
     <script src="accountingEngine.js"></script>
-    <script>
-      function renderLedger() {
-        const accountId = parseInt(document.getElementById('ledgerAccountSelect').value);
-        const fromDate = document.getElementById('ledgerFromDate').value || undefined;
-        const toDate = document.getElementById('ledgerToDate').value || undefined;
-        const ledger = window.accountingEngine.getLedger(accountId, { fromDate, toDate });
-        const tbody = document.getElementById('ledgerTableBody');
-        tbody.innerHTML = '';
-        ledger.forEach(row => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${row.date}</td>
-            <td>${row.description}</td>
-            <td>${row.debit ? '$' + row.debit.toFixed(2) : ''}</td>
-            <td>${row.credit ? '$' + row.credit.toFixed(2) : ''}</td>
-            <td>${row.balance ? '$' + row.balance.toFixed(2) : '$0.00'}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-      function populateAccountSelect() {
-        const select = document.getElementById('ledgerAccountSelect');
-        select.innerHTML = '';
-        window.accountingEngine.accounts.forEach(acc => {
-          const opt = document.createElement('option');
-          opt.value = acc.id;
-          opt.textContent = acc.name + ' (' + acc.type.charAt(0).toUpperCase() + acc.type.slice(1) + ')';
-          select.appendChild(opt);
-        });
-      }
-      populateAccountSelect();
-      renderLedger();
-    </script>
+        <script>
+            function renderLedger() {
+                const accountId = parseInt(document.getElementById('ledgerAccountSelect').value);
+                const fromDate = document.getElementById('ledgerFromDate').value || undefined;
+                const toDate = document.getElementById('ledgerToDate').value || undefined;
+                const ledger = window.accountingEngine.getLedger(accountId, { fromDate, toDate });
+                const tbody = document.getElementById('ledgerTableBody');
+                const table = document.getElementById('ledgerTable');
+                const emptyState = document.getElementById('emptyState');
+                tbody.innerHTML = '';
+                if (!ledger || !ledger.length) {
+                    table.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                table.style.display = 'table';
+                emptyState.style.display = 'none';
+                ledger.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.date}</td>
+                        <td>${row.description}</td>
+                        <td>${row.debit ? '$' + row.debit.toFixed(2) : ''}</td>
+                        <td>${row.credit ? '$' + row.credit.toFixed(2) : ''}</td>
+                        <td>${typeof row.balance === 'number' ? '$' + row.balance.toFixed(2) : '$0.00'}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            function populateAccountSelect() {
+                const select = document.getElementById('ledgerAccountSelect');
+                select.innerHTML = '';
+                window.accountingEngine.accounts.forEach(acc => {
+                    const opt = document.createElement('option');
+                    opt.value = acc.id;
+                    opt.textContent = acc.name + ' (' + acc.type.charAt(0).toUpperCase() + acc.type.slice(1) + ')';
+                    select.appendChild(opt);
+                });
+            }
+            populateAccountSelect();
+            renderLedger();
+            // Optionally, auto-refresh ledger on filter change
+            document.getElementById('ledgerAccountSelect').onchange = renderLedger;
+            document.getElementById('ledgerFromDate').onchange = renderLedger;
+            document.getElementById('ledgerToDate').onchange = renderLedger;
+        </script>
 </body>
 </html>

@@ -111,6 +111,16 @@
                 <p>+$2,500.00</p>
             </div>
         </section>
+        <section class="dashboard-actions" style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:2rem;">
+            <div style="flex:1;min-width:320px;background:#fff;border-radius:1rem;padding:1.5rem 2rem;box-shadow:0 2px 8px #e9d5ff;">
+                <h3 style="color:#7c3aed;">Action Required</h3>
+                <ul id="actionRequiredList" style="margin:0;padding-left:1.2rem;"></ul>
+            </div>
+            <div style="flex:1;min-width:320px;background:#fff;border-radius:1rem;padding:1.5rem 2rem;box-shadow:0 2px 8px #e9d5ff;">
+                <h3 style="color:#4c51bf;">Recent Activity</h3>
+                <ul id="recentActivityList" style="margin:0;padding-left:1.2rem;"></ul>
+            </div>
+        </section>
         <section class="dashboard-charts">
             <div class="chart" id="cashflow-chart">
                 <h4>Cash Flow (Last 6 Months)</h4>
@@ -123,5 +133,58 @@
         </section>
     </main>
     <script src="dashboard.js"></script>
+        <script>
+            // Populate Action Required and Recent Activity from accounting engine
+            function renderActionRequired() {
+                const engine = window.accountingEngine;
+                const list = document.getElementById('actionRequiredList');
+                if (!engine) return;
+                let items = [];
+                if (engine.invoices) {
+                    const overdue = engine.invoices.filter(i => i.status === 'Overdue');
+                    if (overdue.length) items.push(`<li><b>${overdue.length}</b> overdue invoice(s) need attention</li>`);
+                    const pending = engine.invoices.filter(i => i.status === 'Pending');
+                    if (pending.length) items.push(`<li><b>${pending.length}</b> pending invoice(s) to follow up</li>`);
+                }
+                if (engine.expenses) {
+                    const overdue = engine.expenses.filter(e => e.status === 'Overdue');
+                    if (overdue.length) items.push(`<li><b>${overdue.length}</b> overdue bill(s) to pay</li>`);
+                    const pending = engine.expenses.filter(e => e.status === 'Pending');
+                    if (pending.length) items.push(`<li><b>${pending.length}</b> pending bill(s) to review</li>`);
+                }
+                if (engine.accounts) {
+                    const lowCash = engine.accounts.filter(a => a.type === 'Asset' && (a.balance || 0) < 1000);
+                    if (lowCash.length) items.push(`<li>Low cash in <b>${lowCash.map(a => a.name).join(', ')}</b></li>`);
+                }
+                list.innerHTML = items.length ? items.join('') : '<li>No urgent actions 🎉</li>';
+            }
+            function renderRecentActivity() {
+                const engine = window.accountingEngine;
+                const list = document.getElementById('recentActivityList');
+                if (!engine) return;
+                let items = [];
+                if (engine.invoices) {
+                    const sorted = [...engine.invoices].sort((a,b) => new Date(b.dueDate) - new Date(a.dueDate));
+                    sorted.slice(0,3).forEach(i => {
+                        items.push(`<li>Invoice <b>${i.number || ''}</b> for <b>${i.client}</b> (${i.status}) - $${parseFloat(i.amount).toLocaleString(undefined,{minimumFractionDigits:2})}</li>`);
+                    });
+                }
+                if (engine.expenses) {
+                    const sorted = [...engine.expenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+                    sorted.slice(0,3).forEach(e => {
+                        items.push(`<li>Expense <b>${e.number || ''}</b> to <b>${e.vendor}</b> (${e.status}) - $${parseFloat(e.amount).toLocaleString(undefined,{minimumFractionDigits:2})}</li>`);
+                    });
+                }
+                list.innerHTML = items.length ? items.slice(0,5).join('') : '<li>No recent activity</li>';
+            }
+            window.addEventListener('accountingDataChanged', function() {
+                renderActionRequired();
+                renderRecentActivity();
+            });
+            setTimeout(() => {
+                renderActionRequired();
+                renderRecentActivity();
+            }, 700);
+        </script>
 </body>
 </html>
