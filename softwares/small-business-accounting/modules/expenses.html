@@ -33,9 +33,16 @@
     <main class="main-content">
         <header>
             <h1>Expenses Overview</h1>
-            <button class="btn-primary" style="float:right;" onclick="alert('Expense creation coming soon!')">+ Add Expense</button>
+            <button class="btn-primary" style="float:right;" onclick="openReceiptUpload()">+ Add Expense</button>
         </header>
         <section class="dashboard-widgets">
+                    <section style="margin-bottom:2rem;">
+                        <div id="receiptDrop" style="border:2px dashed #7c3aed;padding:2rem;text-align:center;border-radius:1rem;background:#faf5ff;cursor:pointer;">
+                            <strong>Drag & drop receipt images or PDFs here</strong><br>
+                            <span style="color:#6b46c1;">or <button onclick="openCameraUpload(event)" style="background:none;border:none;color:#7c3aed;text-decoration:underline;cursor:pointer;">take a picture</button></span>
+                            <input type="file" id="receiptInput" accept="image/*,application/pdf" multiple style="display:none;">
+                        </div>
+                    </section>
             <div class="widget"><h3>Total Expenses</h3><p>$4,500.00</p></div>
             <div class="widget"><h3>Paid This Month</h3><p>$1,800.00</p></div>
             <div class="widget"><h3>Upcoming Bills</h3><p>3</p></div>
@@ -77,6 +84,69 @@
             </div>
         </section>
         <style>
+                    <script>
+                        // Drag-and-drop and camera upload logic
+                        function openReceiptUpload() {
+                            document.getElementById('receiptInput').click();
+                        }
+                        function openCameraUpload(e) {
+                            e.preventDefault();
+                            const input = document.getElementById('receiptInput');
+                            input.accept = 'image/*';
+                            input.capture = 'environment';
+                            input.click();
+                        }
+                        const drop = document.getElementById('receiptDrop');
+                        const input = document.getElementById('receiptInput');
+                        drop.addEventListener('click', () => input.click());
+                        drop.addEventListener('dragover', e => { e.preventDefault(); drop.style.background = '#e9d5ff'; });
+                        drop.addEventListener('dragleave', e => { e.preventDefault(); drop.style.background = '#faf5ff'; });
+                        drop.addEventListener('drop', e => {
+                            e.preventDefault();
+                            drop.style.background = '#faf5ff';
+                            handleFiles(e.dataTransfer.files);
+                        });
+                        input.addEventListener('change', e => {
+                            handleFiles(e.target.files);
+                        });
+                        function handleFiles(files) {
+                            Array.from(files).forEach(file => {
+                                // Show prompt for categorization/accounting
+                                const reader = new FileReader();
+                                reader.onload = function(ev) {
+                                    const imgPreview = file.type.startsWith('image/') ? `<img src="${ev.target.result}" style="max-width:120px;max-height:120px;display:block;margin-bottom:1rem;"/>` : '';
+                                    const promptDiv = document.createElement('div');
+                                    promptDiv.style = 'background:#fff;padding:2rem;border-radius:1rem;max-width:400px;margin:2rem auto;box-shadow:0 2px 8px #e9d5ff;text-align:center;';
+                                    promptDiv.innerHTML = `
+                                        <h2>Account for Receipt</h2>
+                                        ${imgPreview}
+                                        <p><b>File:</b> ${file.name}</p>
+                                        <label>Vendor<br><input type="text" id="promptVendor" required></label><br>
+                                        <label>Amount<br><input type="number" id="promptAmount" required></label><br>
+                                        <label>Date<br><input type="date" id="promptDate" required></label><br>
+                                        <label>Category<br><input type="text" id="promptCategory"></label><br>
+                                        <button class="btn-primary" onclick="savePromptedExpense(this)">Save Expense</button>
+                                        <button class="btn-secondary" onclick="this.parentElement.remove()">Cancel</button>
+                                    `;
+                                    document.body.appendChild(promptDiv);
+                                    promptDiv.querySelector('.btn-primary').onclick = function() {
+                                        const vendor = promptDiv.querySelector('#promptVendor').value;
+                                        const amount = promptDiv.querySelector('#promptAmount').value;
+                                        const date = promptDiv.querySelector('#promptDate').value;
+                                        const category = promptDiv.querySelector('#promptCategory').value;
+                                        // Save to accounting engine (simulate attachment)
+                                        if (window.accountingEngine && vendor && amount && date) {
+                                            window.accountingEngine.addExpense({ vendor, amount, status: 'Pending', date, attachment: file.name, category });
+                                            window.dispatchEvent(new Event('accountingDataChanged'));
+                                        }
+                                        promptDiv.remove();
+                                    };
+                                };
+                                if (file.type.startsWith('image/')) reader.readAsDataURL(file);
+                                else reader.readAsArrayBuffer(file); // For PDFs, skip preview
+                            });
+                        }
+                    </script>
             .status.paid { color: #059669; font-weight: 700; }
             .status.pending { color: #f59e0b; font-weight: 700; }
         </style>

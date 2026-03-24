@@ -68,17 +68,17 @@
             </svg>
             Atmilio Accounting
         </h2>
-        <ul>
-            <li class="active"><a href="dashboard.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Dashboard</a></li>
-            <li><a href="modules/invoicing.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Invoicing</a></li>
-            <li><a href="modules/expenses.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Expenses</a></li>
-            <li><a href="modules/chart-of-accounts.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Chart of Accounts</a></li>
-            <li><a href="modules/journal-entries.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Journal Entries</a></li>
-            <li><a href="modules/general-ledger.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">General Ledger</a></li>
-            <li><a href="modules/reports.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Reports</a></li>
-            <li><a href="modules/banking.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Banking</a></li>
-            <li><a href="#" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Payroll</a></li>
-            <li><a href="modules/users.html" style="color:inherit;text-decoration:none;display:block;width:100%;height:100%;">Settings</a></li>
+        <ul id="sidebarNav">
+            <li class="active" data-href="dashboard.html">Dashboard</li>
+            <li data-href="modules/invoicing.html">Invoicing</li>
+            <li data-href="modules/expenses.html">Expenses</li>
+            <li data-href="modules/chart-of-accounts.html">Chart of Accounts</li>
+            <li data-href="modules/journal-entries.html">Journal Entries</li>
+            <li data-href="modules/general-ledger.html">General Ledger</li>
+            <li data-href="modules/reports.html">Reports</li>
+            <li data-href="modules/banking.html">Banking</li>
+            <li data-href="#">Payroll</li>
+            <li data-href="modules/users.html">Settings</li>
         </ul>
     </nav>
     <main class="main-content">
@@ -133,6 +133,16 @@
         </section>
     </main>
     <script src="dashboard.js"></script>
+                <script>
+                    // Make entire sidebar <li> clickable
+                    document.querySelectorAll('#sidebarNav li').forEach(li => {
+                        li.style.cursor = 'pointer';
+                        li.onclick = function() {
+                            const href = li.getAttribute('data-href');
+                            if (href && href !== '#') window.location.href = href;
+                        };
+                    });
+                </script>
         <script>
             // Populate Action Required and Recent Activity from accounting engine
             function renderActionRequired() {
