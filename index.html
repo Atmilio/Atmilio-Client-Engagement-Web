@@ -60,8 +60,9 @@
         }
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -99,7 +100,6 @@
             height: 3rem;
         }
 
-        /* New custom styles for enhanced design */
         .bg-custom-gradient {
             background: radial-gradient(at center top, #f3e8ff, #e5e7eb);
         }
@@ -116,6 +116,19 @@
         .card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .chat-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(107, 70, 193, 0.25);
+            border-radius: 9999px;
+        }
+
+        .chat-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
         }
     </style>
 </head>
@@ -172,8 +185,6 @@
             </div>
         </section>
 
-        <!-- Marketing Section: Industry & Size Versatility -->
-        <!-- Marketing Section: Industry & Size Versatility (moved lower, shortened) -->
         <section class="py-6 md:py-10 mt-16 flex justify-center">
             <div class="card p-6 md:p-8 text-center mx-auto w-full max-w-4xl flex items-center justify-center">
                 <h2 class="text-3xl md:text-4xl font-bold text-purple-700 w-full">Flexible Solutions for Every Industry & Size</h2>
@@ -222,25 +233,34 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <a href="business-advisory.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m4 0h-1v-4h-1m-4 0h-1v-4h-1"/></svg>
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m4 0h-1v-4h-1m-4 0h-1v-4h-1" />
+                        </svg>
                         <span>Business Advisory</span>
                     </h3>
                     <p class="text-gray-600">Strategy, operations, and process improvement for business growth and optimization.</p>
                 </a>
+
                 <a href="non-cpa-accounting.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 6h18M3 14h18M3 18h18"/></svg>
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 6h18M3 14h18M3 18h18" />
+                        </svg>
                         <span>Non-CPA Accounting</span>
                     </h3>
                     <p class="text-gray-600">Bookkeeping, financial recordkeeping, and reporting (non-certified).</p>
                 </a>
+
                 <a href="capital-raise-networking.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 0V4m0 16v-4"/></svg>
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 0V4m0 16v-4" />
+                        </svg>
                         <span>Capital Raise Networking Assistance</span>
                     </h3>
                     <p class="text-gray-600">Introductions, platform setup, tracking, and analytics for fundraising (non-advisory).</p>
                 </a>
+
                 <a href="financial-system-integration.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
                         <svg class="w-8 h-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-labelledby="service1Title" role="img">
@@ -253,6 +273,7 @@
                     </h3>
                     <p class="text-gray-600">Robust connections between your financial systems to ensure data consistency and automate workflows.</p>
                 </a>
+
                 <a href="macro-enabled-workbooks.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
                         <svg class="w-8 h-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-labelledby="service2Title" role="img">
@@ -265,6 +286,7 @@
                     </h3>
                     <p class="text-gray-600">Custom Excel workbooks with advanced macros to automate calculations and reporting.</p>
                 </a>
+
                 <a href="financial-model-creation.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
                         <svg class="w-8 h-8 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-labelledby="service3Title" role="img">
@@ -276,16 +298,22 @@
                     </h3>
                     <p class="text-gray-600">Detailed financial models for forecasting, valuation, and analysis, plus ongoing maintenance.</p>
                 </a>
+
                 <a href="client-engagement-platform.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m4 0h-1v-4h-1m-4 0h-1v-4h-1"/></svg>
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m4 0h-1v-4h-1m-4 0h-1v-4h-1" />
+                        </svg>
                         <span>Client Engagement Platform Development</span>
                     </h3>
                     <p class="text-gray-600">Web portals, secure document management, and client communication tools.</p>
                 </a>
+
                 <a href="data-analytics-reporting.html" class="card p-8 block hover:ring-2 hover:ring-purple-400 transition-shadow">
                     <h3 class="text-2xl font-bold mb-4 text-gray-900 flex items-center space-x-2">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m4 0h-1v-4h-1m-4 0h-1v-4h-1"/></svg>
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m4 0h-1v-4h-1m-4 0h-1v-4h-1" />
+                        </svg>
                         <span>Data Analytics & Reporting</span>
                     </h3>
                     <p class="text-gray-600">KPI dashboards, performance tracking, and actionable business insights.</p>
@@ -332,7 +360,7 @@
                 </div>
             </div>
         </section>
-        </main>
+    </main>
 
     <footer class="py-8 px-4 md:px-8 bg-gray-900 text-gray-300 text-center rounded-t-xl">
         <div class="container mx-auto">
@@ -343,11 +371,157 @@
             </p>
         </div>
     </footer>
-        <!-- Floating Blog Link -->
-        <a href="blog.html" title="Read our Blog" class="fixed bottom-6 right-6 z-50 bg-white shadow-lg rounded-full px-6 py-3 text-purple-700 font-semibold border border-purple-200 hover:bg-purple-700 hover:text-white transition-colors duration-200 flex items-center space-x-2">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M17 21V7h-5V3"/></svg>
-            <span>Blog</span>
-        </a>
+
+    <!-- Floating Blog Link -->
+    <a href="blog.html" title="Read our Blog" class="fixed bottom-24 right-6 z-40 bg-white shadow-lg rounded-full px-6 py-3 text-purple-700 font-semibold border border-purple-200 hover:bg-purple-700 hover:text-white transition-colors duration-200 flex items-center space-x-2">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 21V7h-5V3"/>
+        </svg>
+        <span>Blog</span>
+    </a>
+
+    <!-- Prompt-Only Chatbot Panel -->
+    <div id="atmilio-chatbot" class="fixed bottom-24 right-6 z-50 hidden w-[360px] max-w-[calc(100vw-2rem)]">
+        <div class="rounded-2xl border border-purple-200 bg-white shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-700 to-purple-700 text-white px-5 py-4 flex items-center justify-between">
+                <div>
+                    <h3 class="font-bold text-lg">Atmilio Assistant</h3>
+                    <p class="text-sm text-purple-100">Select an option below to get started.</p>
+                </div>
+                <button id="chat-close" class="text-white/90 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+
+            <div id="chat-messages" class="p-4 space-y-3 max-h-[420px] overflow-y-auto bg-gradient-to-b from-white to-purple-50 chat-scrollbar">
+                <div class="flex justify-start">
+                    <div class="bg-purple-100 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm max-w-[85%]">
+                        Welcome to Atmilio. Choose a prompt below and I’ll point you in the right direction.
+                    </div>
+                </div>
+            </div>
+
+            <div id="chat-prompts" class="p-4 border-t bg-white space-y-2">
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="what-we-do">
+                    What can Atmilio help with?
+                </button>
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="bookkeeping">
+                    I need bookkeeping help
+                </button>
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="operations">
+                    I need help with operations
+                </button>
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="fundraising">
+                    I need help with fundraising support
+                </button>
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="analytics">
+                    I need dashboards or reporting
+                </button>
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="portal">
+                    I want a client portal
+                </button>
+                <button class="chat-prompt w-full text-left rounded-xl border border-gray-200 px-4 py-3 hover:border-purple-400 hover:bg-purple-50 transition text-sm font-medium" data-prompt="quote">
+                    I want a quote
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Toggle -->
+    <button id="chat-toggle" class="fixed bottom-6 right-6 z-50 rounded-full bg-gradient-to-r from-indigo-700 to-purple-700 text-white shadow-xl px-5 py-4 font-semibold hover:scale-[1.02] transition flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" />
+        </svg>
+        <span>Chat with Atmilio</span>
+    </button>
+
+    <script>
+        const chatToggle = document.getElementById("chat-toggle");
+        const chatClose = document.getElementById("chat-close");
+        const chatbot = document.getElementById("atmilio-chatbot");
+        const messages = document.getElementById("chat-messages");
+        const promptButtons = document.querySelectorAll(".chat-prompt");
+
+        const responses = {
+            "what-we-do": `
+                Atmilio helps businesses with advisory, non-CPA accounting, fundraising support, financial systems, Excel automation, financial models, client portals, and reporting dashboards.
+                <div class="mt-3">
+                    <a href="#services" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">View Services</a>
+                </div>
+            `,
+            "bookkeeping": `
+                We support bookkeeping, financial recordkeeping, and non-certified reporting workflows for businesses that need cleaner day-to-day financial operations.
+                <div class="mt-3">
+                    <a href="non-cpa-accounting.html" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">Learn More</a>
+                </div>
+            `,
+            "operations": `
+                Atmilio can help improve operations through business advisory, process improvement, workflow design, and financial system integration.
+                <div class="mt-3">
+                    <a href="business-advisory.html" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">Business Advisory</a>
+                </div>
+            `,
+            "fundraising": `
+                We provide capital raise networking assistance, including introductions, tracking support, outreach infrastructure, and fundraising workflow support on a non-advisory basis.
+                <div class="mt-3">
+                    <a href="capital-raise-networking.html" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">Fundraising Support</a>
+                </div>
+            `,
+            "analytics": `
+                We build KPI dashboards, reporting workflows, and performance tracking tools that help businesses make faster and more informed decisions.
+                <div class="mt-3">
+                    <a href="data-analytics-reporting.html" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">Analytics & Reporting</a>
+                </div>
+            `,
+            "portal": `
+                We develop client-facing portals and engagement platforms with secure document management and streamlined communication tools.
+                <div class="mt-3">
+                    <a href="client-engagement-platform.html" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">Client Portal Solutions</a>
+                </div>
+            `,
+            "quote": `
+                Great — the fastest next step is to submit your details through our quote form so we can learn more about your project.
+                <div class="mt-3">
+                    <a href="#contact" class="inline-block rounded-full bg-purple-700 text-white px-4 py-2 text-sm font-semibold hover:bg-purple-800 transition">Go to Get a Quote</a>
+                </div>
+            `
+        };
+
+        function addMessage(content, sender = "bot") {
+            const wrapper = document.createElement("div");
+            wrapper.className = sender === "user" ? "flex justify-end" : "flex justify-start";
+
+            const bubble = document.createElement("div");
+            bubble.className = sender === "user"
+                ? "bg-indigo-700 text-white rounded-2xl rounded-br-sm px-4 py-3 text-sm max-w-[85%]"
+                : "bg-purple-100 text-gray-800 rounded-2xl rounded-tl-sm px-4 py-3 text-sm max-w-[85%]";
+            bubble.innerHTML = content;
+
+            wrapper.appendChild(bubble);
+            messages.appendChild(wrapper);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        chatToggle.addEventListener("click", () => {
+            chatbot.classList.toggle("hidden");
+        });
+
+        chatClose.addEventListener("click", () => {
+            chatbot.classList.add("hidden");
+        });
+
+        promptButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                const key = button.dataset.prompt;
+                const label = button.textContent.trim();
+
+                addMessage(label, "user");
+
+                setTimeout(() => {
+                    addMessage(responses[key], "bot");
+                }, 250);
+            });
+        });
+    </script>
 </body>
 
 </html>
