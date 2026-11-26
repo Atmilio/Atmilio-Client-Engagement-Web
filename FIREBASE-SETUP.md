@@ -2,10 +2,16 @@
 
 The learning site uses the Firebase web SDK with the `atmilio` project. The web configuration identifies the project and is not an administrative credential. Never put service-account keys in the website or repository.
 
-Before enabling accounts for real users:
+## Provisioning status (2026-11-26)
 
-1. In Firebase Authentication, enable the Email/Password provider and add `atmilio.com` and any other actual site origins to Authentication's authorized domains. Use HTTPS for the live site. Add localhost for development if necessary.
-2. Create the default Cloud Firestore database and configure its location. Review the existing project's security rules. Add the `learningProfiles/{userId}` rule from `firestore-learning.rules` to the existing rules, or use that file as the complete ruleset only if no other collections need access. Publish the rules in Firebase. Do not deploy it over existing rules without checking: doing so can block other applications, and other permissive matching rules can still grant access to these documents.
+The `atmilio` project has a default Firestore database in `us-central1` (Standard, free tier at creation). The learning profile and progress rules in `firestore-learning.rules` were compiled and deployed. Email/password Authentication is enabled, email enumeration protection is active, and the server enforces a minimum of eight password characters without forcing existing users to change passwords on sign-in. `atmilio.com` and `localhost` were added to the existing authorized domains.
+
+Live smoke tests created temporary accounts and verified that an unverified user cannot read profile data, a verified user can read and write their own profile and progress, and a different verified user cannot read or modify those records. The test records and accounts were deleted. A real mailbox is still needed to verify signup email delivery, email verification, password reset delivery, and the complete production UI flow.
+
+Before relying on accounts for real users:
+
+1. Review Authentication authorized domains and add any other actual site origins if needed. Use HTTPS for the live site.
+2. Before changing Firestore rules, review the existing project's security rules. Do not deploy the checked-in learning-only rules over unrelated rules without checking: doing so can block other applications, and other permissive matching rules can still grant access to these documents.
 3. Configure Firebase Authentication email templates and sender settings. Test email verification and password reset delivery, including expiration and spam folders. Enable email enumeration protection, an enforced password policy (minimum eight characters or stronger), and appropriate sign-up abuse protections in the Firebase console.
 4. Confirm a verified account can save a profile, another account cannot read or modify it, and unverified users cannot access it. Test the actual published rules with the Firebase Emulator Suite and the live deployment. Firebase setup and deployed rules are required; the checked-in rules file does not enforce anything until published.
 
