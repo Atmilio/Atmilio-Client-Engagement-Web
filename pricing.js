@@ -1,8 +1,8 @@
 (function () {
   const plans = {
-    individual: { name: 'Individual', message: 'For one learner. Pricing and enrollment are not available yet.' },
-    team: { name: 'Team', message: 'For multiple learners. Team features, pricing, and enrollment are not available yet.' },
-    enterprise: { name: 'Enterprise', message: 'For larger programs. Contact us to discuss your needs; terms are not yet available.' }
+    individual: { name: 'Individual', message: '$500 per month for personal AI learning. Enrollment and billing are not available yet.' },
+    team: { name: 'Team', message: '$500 per year per team account, plus $1,000 per user per month. For 11 or more users, every user is $950 per month. Enrollment and billing are not available yet.' },
+    enterprise: { name: 'Enterprise', message: '$1,000 per user per month for corporate accounts. Enrollment and billing are not available yet; contact us to discuss your needs.' }
   };
   const storageKey = 'atmilio-plan-interest-v1';
   const buttons = [...document.querySelectorAll('[data-plan]')];
