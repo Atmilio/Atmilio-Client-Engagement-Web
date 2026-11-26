@@ -7,11 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="ai-education.css"><link rel="stylesheet" href="masterclass.css">
-  <script src="masterclass-content.js" defer></script><script src="masterclass.js" defer></script>
+  <script src="masterclass-content.js" defer></script><script src="quiz-questions.js" defer></script><script src="lesson-quiz.js" defer></script><script src="learning-progress-utils.js" defer></script><script src="course-progress.js" defer></script><script src="lesson-audio.js" defer></script><script src="masterclass.js" defer></script><script type="module" src="learning-progress.js" onerror="window.dispatchEvent(new Event('learning-firebase-unavailable'));window.dispatchEvent(new Event('learning-progress-unavailable'))"></script>
 </head>
 <body>
   <header class="site-header"><div class="header-inner wrap"><a class="brand" href="index.html"><img class="brand-logo" src="atmilio-learning-logo.svg" alt=""><span>atmilio <small>LEARNING</small></span></a><a class="header-action" href="index.html#courses">&larr; Course library</a></div></header>
-  <main class="learning-wrap wrap"><div class="learning-heading"><p class="eyebrow">ATMILIO MASTERCLASS / 10 PARTS</p><h1>AI Mastery<span>.</span></h1><p>From the foundations to the frontier. Start with Part 1 and explore the roadmap ahead.</p></div>
+  <main class="learning-wrap wrap"><div class="learning-heading"><p class="eyebrow">ATMILIO MASTERCLASS / 10 PARTS</p><h1>AI Mastery<span>.</span></h1><p>From the foundations to the frontier. Start with Part 1 and explore the roadmap ahead.</p><div id="lesson-audio" class="lesson-audio"></div><div id="course-progress" class="course-progress" aria-live="polite"></div></div>
     <div class="learning-layout"><aside class="learning-nav" aria-label="Masterclass roadmap"><h2>Course roadmap</h2><div id="roadmap"></div></aside><article id="lesson" class="lesson" aria-live="polite"></article></div>
   </main>
   <footer><div class="wrap footer-inner"><a class="brand footer-brand" href="index.html"><img class="brand-logo" src="atmilio-learning-logo.svg" alt=""><span>atmilio <small>LEARNING</small></span></a><p>Better questions. More possibilities.</p><div><a href="index.html#survey">My learning profile</a></div></div></footer>

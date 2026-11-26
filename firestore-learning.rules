@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /learningProfiles/{userId} {
+      allow read, delete: if request.auth != null
+                          && request.auth.uid == userId
+                          && request.auth.token.email_verified == true;
+      allow create, update: if request.auth != null
+                            && request.auth.uid == userId
+                            && request.auth.token.email_verified == true
+                            && request.resource.data.keys().hasOnly(['profile'])
+                            && request.resource.data.profile is map;
+    }
+    match /learningProgress/{userId}/courses/{courseId} {
+      allow read, delete: if request.auth != null
+                          && request.auth.uid == userId
+                          && request.auth.token.email_verified == true;
+      allow create, update: if request.auth != null
+                            && request.auth.uid == userId
+                            && request.auth.token.email_verified == true
+                            && request.resource.data.keys().hasOnly(['completed', 'updatedAt'])
+                            && request.resource.data.keys().hasAll(['completed', 'updatedAt'])
+                            && request.resource.data.completed is list
+                            && request.resource.data.completed.size() <= 100
+                            && request.resource.data.updatedAt is string;
+    }
+  }
+}

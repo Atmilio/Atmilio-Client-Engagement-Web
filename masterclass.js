@@ -3,7 +3,6 @@ const lessonContainer = document.querySelector('#lesson');
 let selectedPart = 0;
 let selectedLesson = 0;
 let learner = null;
-try { learner = JSON.parse(localStorage.getItem('atmilio-learning-profile-v1')); } catch (error) { learner = null; }
 function safeText(value) {
   const element = document.createElement('span');
   element.textContent = typeof value === 'string' ? value : '';
@@ -33,11 +32,17 @@ function renderRoadmap() {
 function renderLesson() {
   const part = masterclass[selectedPart];
   if (!part.lessons) {
+    window.lessonAudio.hide();
+    window.courseProgress.hide();
     lessonContainer.innerHTML = `<p class="eyebrow">PART ${selectedPart + 1} / ROADMAP</p><h2>${part.title}</h2><p>This part is planned. Full lessons, exercises, and sources are still in development.</p><h3>Topics in this part</h3><ul class="topic-outline">${part.topics.map(topic => `<li>${topic}</li>`).join('')}</ul><div class="lesson-controls"><button type="button" data-part="0">Start Part 1 &rarr;</button></div>`;
     return;
   }
   const current = part.lessons[selectedLesson];
-  lessonContainer.innerHTML = `<p class="eyebrow">PART 1 / LESSON ${selectedLesson + 1} OF ${part.lessons.length}</p><h2>${current.title}</h2><div class="lesson-tabs" aria-label="Part 1 lessons">${part.lessons.map((item, index) => `<button type="button" data-lesson="${index}" class="${selectedLesson === index ? 'active' : ''}" ${selectedLesson === index ? 'aria-current="step"' : ''}>${index + 1}. ${item.title}</button>`).join('')}</div>${current.sections.map(([heading, text]) => `<section><h3>${heading}</h3><p>${text}</p></section>`).join('')}<div class="practice"><h3>Put it into practice</h3><p>${current.exercise}</p><p>${workplaceExercise()}</p><p class="lesson-note">Examples are illustrative, not claims about a company's systems or approval policies. Never enter confidential information into an unapproved tool.</p></div><details><summary>Knowledge check: ${current.question}</summary><p>${current.answer}</p></details><div class="lesson-controls"><button type="button" data-lesson="${selectedLesson - 1}" ${selectedLesson === 0 ? 'disabled' : ''}>&larr; Previous lesson</button><button type="button" data-lesson="${selectedLesson + 1}" ${selectedLesson === part.lessons.length - 1 ? 'disabled' : ''}>Next lesson &rarr;</button></div><div class="sources"><h3>Further reading</h3><ul><li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener noreferrer">The Transformer: Attention Is All You Need</a></li><li><a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener noreferrer">Explore tokenization with the OpenAI tokenizer</a></li><li><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol documentation</a></li><li><a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noopener noreferrer">NIST AI Risk Management Framework</a></li></ul></div>`;
+  window.courseProgress.show(`masterclass-part-${selectedPart + 1}`, part.lessons.map((item, index) => `lesson-${index + 1}`), `lesson-${selectedLesson + 1}`);
+  lessonContainer.innerHTML = `<p class="eyebrow">PART 1 / LESSON ${selectedLesson + 1} OF ${part.lessons.length}</p><h2>${current.title}</h2><div class="lesson-tabs" aria-label="Part 1 lessons">${part.lessons.map((item, index) => `<button type="button" data-lesson="${index}" class="${selectedLesson === index ? 'active' : ''}" ${selectedLesson === index ? 'aria-current="step"' : ''}>${index + 1}. ${item.title}</button>`).join('')}</div>${current.sections.map(([heading, text]) => `<section><h3>${heading}</h3><p>${text}</p></section>`).join('')}<div class="practice"><h3>Put it into practice</h3><p>${current.exercise}</p><p>${workplaceExercise()}</p><p class="lesson-note">Examples are illustrative, not claims about a company's systems or approval policies. Never enter confidential information into an unapproved tool.</p></div><div id="lesson-quiz-container"></div><div class="lesson-controls"><button type="button" data-lesson="${selectedLesson - 1}" ${selectedLesson === 0 ? 'disabled' : ''}>&larr; Previous lesson</button><button type="button" data-lesson="${selectedLesson + 1}" ${selectedLesson === part.lessons.length - 1 ? 'disabled' : ''}>Next lesson &rarr;</button></div><div class="sources"><h3>Further reading</h3><ul><li><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener noreferrer">The Transformer: Attention Is All You Need</a></li><li><a href="https://platform.openai.com/tokenizer" target="_blank" rel="noopener noreferrer">Explore tokenization with the OpenAI tokenizer</a></li><li><a href="https://modelcontextprotocol.io/" target="_blank" rel="noopener noreferrer">Model Context Protocol documentation</a></li><li><a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noopener noreferrer">NIST AI Risk Management Framework</a></li></ul></div>`;
+  const practiceText = [...lessonContainer.querySelectorAll('.practice p')].map(paragraph => paragraph.textContent);
+  window.lessonAudio.show(`masterclass-${selectedPart + 1}-lesson-${selectedLesson + 1}`, [current.title, ...current.sections.flat(), 'Put it into practice.', ...practiceText, 'Knowledge check.', current.question]);
+  window.lessonQuiz.render(document.querySelector('#lesson-quiz-container'), `masterclass-${selectedPart + 1}-lesson-${selectedLesson + 1}`, current.question, current.answer);
 }
 document.addEventListener('click', event => {
   const partButton = event.target.closest('[data-part]');
@@ -47,3 +52,14 @@ document.addEventListener('click', event => {
 });
 renderRoadmap();
 renderLesson();
+function handleLearningAccount(state) {
+  learner = null;
+  if (state.status === 'ready') learner = state.profile;
+  else if (state.status === 'guest') {
+    try { learner = JSON.parse(localStorage.getItem('atmilio-learning-profile-v1')); } catch (error) { learner = null; }
+  }
+  renderLesson();
+}
+window.addEventListener('learning-account-state', event => handleLearningAccount(event.detail));
+window.addEventListener('learning-firebase-unavailable', () => handleLearningAccount({ status: 'guest' }));
+if (window.firebaseLearning) handleLearningAccount(window.firebaseLearning.currentState());
